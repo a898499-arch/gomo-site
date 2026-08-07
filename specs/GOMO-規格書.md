@@ -45,7 +45,7 @@
 
 | Token | 值 | 用途 |
 |---|---|---|
-| `--bg` | `#FDFBF6` | 全站底色（暖白） |
+| `--bg` | `#FCFBF8` | 全站底色（暖白） |
 | `--accent` | `#C0281C` | 主紅——板凳、logo 描邊、強調字、連結 |
 | `--accent-cta` | `#C8402F` | CTA 紅（Let's Talk!、CV Download）略亮 |
 | `--ink` | `#1A1A1A` | 主文字 |
@@ -763,7 +763,7 @@ Hero 結束後，畫面不是切換，而是一台攝影機持續往前推軌：
 |---|---|
 | `Let's Talk! ↗` | `mailto:a898499@gmail.com?subject=Let's%20talk` |
 | Home / Works / Contact | 內部路由 `/`、`/work`、`/contact` |
-| **Playground** | 施工中。渲染為 **40% 不透明度**、`cursor: not-allowed`、**不可點擊**。hover 時顯示小 tooltip `Coming soon`。保留在 DOM 中讓版面定案，標記 `aria-disabled="true"`，**鍵盤 Tab 要跳過** |
+| **Playground** | 施工中，但**視覺樣式與 Home/Works/Contact 完全相同**（不做灰階、不降低不透明度——Figma node `3:163` 四個連結共用同一組樣式，沒有視覺區分）。不可點擊純粹是功能限制：`pointer-events: none`、`aria-disabled="true"`、`tabindex="-1"` 讓**鍵盤 Tab 跳過**。無 tooltip（Figma 沒有畫出對應樣式） |
 | LinkedIn | `https://www.linkedin.com/in/lin-wei-ting-h-8a9732343`，`target="_blank"` + `rel="noopener noreferrer"` |
 | CV Download | `<a href="/cv/Maida-Hu-CV.pdf" download="Maida-Hu-CV-2026.pdf">`。檔案放在 `/public/cv/`，`download` 屬性才會生效（僅同源有效） |
 | CONTACTS 的 email | 也是 `mailto:` 連結。顯示套 `text-transform: capitalize` 取得 editorial 感，但**實際 href 必須小寫**：`mailto:a898499@gmail.com` |
@@ -805,7 +805,7 @@ footer 越過視窗高度 80% 時觸發一次（IntersectionObserver，`once: tr
 
 **Back-to-top 圓圈** — 描邊略微加粗，背景填入 accent 紅，箭頭轉白並上移 4px，圓圈放大到 1.06。400ms ease-out。點擊時箭頭往上射出圓圈，另一個從下方進入。
 
-**Playground（停用）** — 無底線動畫。只有 `Coming soon` tooltip 在 150ms 延遲後淡入其上方。
+**Playground（停用）** — `pointer-events: none` 讓滑鼠完全無法觸發 hover（含底線擦除動畫），視覺樣式與其餘連結相同，只是停留在預設狀態，不會有任何互動反應。
 
 **所有 hover 狀態必須在滑鼠移開時以相同時長乾淨反向。**
 
