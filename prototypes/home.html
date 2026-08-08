@@ -365,7 +365,13 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: transparent;
+    /* 2026-08-08 feedback: nav's z-index (1000) was already higher than every real content element
+       on the page (next-highest is dialogue at 25) — the bug wasn't stacking order, it was this
+       being transparent, so whatever scrolled underneath (e.g. the Gallery title, right when it
+       happens to land under the fixed nav bar) visually blended with the nav's own text instead of
+       being occluded. Solid --bg makes the nav fully opaque wherever it's shown; looks identical to
+       the old transparent version over Hero (same color), fixes it everywhere else. */
+    background: var(--bg);
     z-index: 1000;
     transform: translateY(0);
   }
@@ -627,11 +633,19 @@
     /* top set as a plain (non-transform) offset deliberately — Stage B animates this element's
        GSAP `y`/`opacity`/`scale` for the p=0->0.30 exit, and GSAP's `y` REPLACES the full
        translateY on every call rather than adding to one already baked into a CSS transform, so
-       the base position has to live outside `transform` or the first Stage-B frame would snap. */
+       the base position has to live outside `transform` or the first Stage-B frame would snap.
+       2026-08-08 feedback: left confirmed against 40px/1440 (unchanged); width recomputed to keep
+       an 80px gap to dance woman_2's left edge (x=500.80): (500.80-80-40)/1440 = 26.4444%, wider
+       than the old Figma-node-width-derived 25.2778% — font-size untouched, only the wrap width
+       changes, which means the narrower column now wraps each sentence across 3-4 lines instead of
+       one (intentional per feedback: "讓文字換行位置改變"), and the block is far taller than the
+       old 2-line estimate as a result. top is set from the ACTUAL rendered block height (measured
+       at the 1440-reference width: 375.5px, not a line-height*2 guess) so its center lands exactly
+       on the small-state video frame's vertical center (478.50px): 31.6667% - (503.15-478.50)/900. */
     position: absolute;
     left: 2.7778%;
-    top: 31.6667%;
-    width: 25.2778%; /* Figma w=364 / 1440 */
+    top: 28.9282%;
+    width: 26.4444%;
     z-index: 4;
     font-family: 'Poppins', sans-serif;
     font-weight: 700;
@@ -688,7 +702,7 @@
     margin: 0 0 48px;
     padding: 0 clamp(24px, 4vw, 40px);
     font-family: 'Poppins', sans-serif;
-    font-weight: 500;
+    font-weight: 600; /* 2026-08-08 feedback: SemiBold, not 700/800 — was 500 */
     font-size: clamp(22px, 2.78vw, 40px);
     text-transform: uppercase;
     letter-spacing: -0.005em;
@@ -708,7 +722,7 @@
   .gallery-rail {
     display: flex;
     align-items: center;
-    gap: 1.9542vw; /* same gap between the real track and its clone, for a seamless loop */
+    gap: 24px; /* 2026-08-08 feedback: fixed px, not vw — same gap between the real track and its clones */
     width: max-content;
     cursor: grab;
     will-change: transform; /* effectively always in motion pre-interaction (drift) or during drag/inertia */
@@ -718,7 +732,7 @@
   .gallery-track {
     display: flex;
     align-items: center;
-    gap: 1.9542vw;
+    gap: 24px; /* 2026-08-08 feedback: fixed px, not vw */
   }
 
   .gallery-card {
@@ -1889,17 +1903,33 @@
 
     let offsetX = 0; // rail translateX in px — starts showing prevClone, visually identical to the real track
 
-    /* ---------- Layer 1: environment auto-drift — stops once, never resumes (§6.3 修訂三) ---------- */
-    const DRIFT_PX_PER_MS = -22 / 1000; // within the spec's 18-25px/s range, leftward
-    const DRIFT_FADE_MS = 600;
-    let hasInteracted = false;
-    let driftFadeStart = null;
-    function stopDriftForever() {
-      if (hasInteracted) return;
-      hasInteracted = true;
-      driftFadeStart = performance.now();
+    /* ---------- Layer 1: environment auto-drift (§6.3 修訂三, revised 2026-08-08) ----------
+       Pauses ONLY during an active drag or touch-swipe gesture (or a trackpad/wheel horizontal
+       gesture — treated the same as a drag, since it's the same "user is directly steering the
+       rail" category; the user's two listed triggers didn't mention wheel explicitly, flagging this
+       as my own extension rather than a measured requirement), resuming 800ms after release. Hover
+       alone does NOT pause it — this supersedes the earlier "stop once, never resume on any
+       interaction" version. driftSpeedFactor eases toward driftTarget (0 paused / 1 running) every
+       frame instead of tracking discrete fade start-times, which naturally gives both the pause and
+       the resume a soft ease without two separate code paths. */
+    const DRIFT_PX_PER_MS = -50 / 1000; // 2026-08-08: raised from 18-25px/s to ~50px/s — clearly moving, still unhurried
+    const DRIFT_RESUME_DELAY_MS = 800;
+    const DRIFT_EASE_RATE = 0.08; // driftSpeedFactor lerp rate per ~16ms frame
+    let driftSpeedFactor = 1;
+    let driftTarget = 1;
+    let driftResumeTimer = null;
+
+    function pauseDrift() {
+      if (driftResumeTimer) { clearTimeout(driftResumeTimer); driftResumeTimer = null; }
+      driftTarget = 0;
     }
-    viewport.addEventListener('mouseenter', stopDriftForever); // "游標進入" alone counts, per 修訂三
+    function scheduleDriftResume() {
+      if (driftResumeTimer) clearTimeout(driftResumeTimer);
+      driftResumeTimer = setTimeout(function () {
+        driftResumeTimer = null;
+        driftTarget = 1;
+      }, DRIFT_RESUME_DELAY_MS);
+    }
 
     /* ---------- Layer 2: user-driven horizontal movement (§6.3 修訂一) ----------
        Vertical-vs-horizontal intent is decided from the first few px of movement: if the vertical
@@ -1931,7 +1961,7 @@
         dragDeciding = false;
         if (Math.abs(dy) > Math.abs(dx)) { pointerActive = false; return; } // vertical intent: hands off
         dragConfirmed = true;
-        stopDriftForever();
+        pauseDrift();
         rail.classList.add('is-dragging');
         if (viewport.setPointerCapture && e.pointerId != null) {
           try { viewport.setPointerCapture(e.pointerId); } catch (err) {}
@@ -1948,17 +1978,23 @@
     }, { passive: false });
 
     function endDrag() {
-      if (dragConfirmed) rail.classList.remove('is-dragging');
+      if (dragConfirmed) {
+        rail.classList.remove('is-dragging');
+        scheduleDriftResume(); // §6.3 修訂三: drift resumes 800ms after release, not permanently off
+      }
       pointerActive = false; dragDeciding = false; dragConfirmed = false;
     }
     window.addEventListener('pointerup', endDrag);
     window.addEventListener('pointercancel', endDrag);
 
-    /* trackpad/mouse horizontal wheel gesture — same direction test as drag */
+    /* trackpad/mouse horizontal wheel gesture — same direction test as drag. Wheel fires repeatedly
+       through a single physical gesture, so each event both pauses drift and re-schedules the
+       800ms resume timer — drift only comes back 800ms after the LAST wheel tick, not the first. */
     viewport.addEventListener('wheel', function (e) {
       if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return; // vertical-dominant: let the page scroll
       e.preventDefault();
-      stopDriftForever();
+      pauseDrift();
+      scheduleDriftResume();
       velocity = 0;
       offsetX = wrap(offsetX - e.deltaX);
     }, { passive: false });
@@ -1970,12 +2006,13 @@
        precedes it in the rail (prevClone included), so this directly targets the real element. */
     realCards.forEach(function (card) {
       card.addEventListener('focus', function () {
-        stopDriftForever();
+        pauseDrift(); // don't fight the centering tween; resumes 800ms after it lands
         const target = (viewport.clientWidth - card.offsetWidth) / 2 - card.offsetLeft;
         const proxy = { v: offsetX };
         gsap.to(proxy, {
           v: target, duration: 0.6, ease: mainEase,
-          onUpdate: function () { offsetX = proxy.v; }
+          onUpdate: function () { offsetX = proxy.v; },
+          onComplete: scheduleDriftResume
         });
       });
     });
@@ -2006,12 +2043,13 @@
       } else if (Math.abs(velocity) > 0.005) {
         offsetX = wrap(offsetX + velocity * dt);
         velocity *= Math.pow(INERTIA_DECAY, dt / 16);
-      } else if (driftFadeStart !== null) {
-        const t = Math.min(1, (now - driftFadeStart) / DRIFT_FADE_MS);
-        offsetX = wrap(offsetX + DRIFT_PX_PER_MS * (1 - t) * dt);
-        if (t >= 1) driftFadeStart = null; // fully stopped — never resumes
-      } else if (!hasInteracted) {
-        offsetX = wrap(offsetX + DRIFT_PX_PER_MS * dt);
+      } else {
+        // §6.3 修訂三: drift factor eases toward driftTarget (0 while paused, 1 once the resume
+        // timer fires) every frame — same mechanism handles both the pause-out and the resume-in.
+        driftSpeedFactor += (driftTarget - driftSpeedFactor) * DRIFT_EASE_RATE;
+        if (Math.abs(driftSpeedFactor) > 0.0005 || driftTarget > 0) {
+          offsetX = wrap(offsetX + DRIFT_PX_PER_MS * driftSpeedFactor * dt);
+        }
       }
 
       rail.style.transform = 'translateX(' + offsetX.toFixed(2) + 'px)';
