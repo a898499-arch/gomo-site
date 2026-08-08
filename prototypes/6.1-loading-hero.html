@@ -275,7 +275,13 @@
      the screenshot pixel measurement (232 vs 236 — within measurement noise) — final value
      confirmed/adjusted via the screenshot-comparison loop, not applied on faith. */
   .dialogue-left  { left: 16.25%; top: 466px; width: 170px; transform-origin: 80% 100%; }
-  .dialogue-right { left: 70.56%; top: 468px; width: 190px; }
+  /* width corrected from the SVG-bbox-derived 190px to 202px: at Figma's own font-size (25px) the
+     rendered text "Grab a seat!" measures ~154px wide (matches message text_1's own w=154 metadata),
+     and 154 + 24px padding each side = 202px — 190px cannot fit the padding without overflow. This
+     confirms message_1's boolean-operation SVG bbox under-reports width by ~12px, the same category
+     of metadata unreliability already found on message_2's x/y (see below) — not a font-size issue
+     (font-size/weight/line-height/letter-spacing were verified to already match Figma exactly). */
+  .dialogue-right { left: 70.56%; top: 468px; width: 202px; }
 
   .dialogue svg { display: block; width: 100%; height: auto; }
   /* both bubbles reuse message_1's artwork (the confirmed-correct shape); the left one is a
@@ -286,19 +292,24 @@
   .dialogue-left svg { transform: scaleX(-1); }
 
   .dialogue-text-wrap {
-    /* centered within the oval body only, excluding the tail (~11% of total height per message_1's
-       h=106.15 vs its text's implied oval-only extent) so the tail's asymmetric shape never pulls
-       the text off-center; exact box confirmed/adjusted via the screenshot-comparison loop */
     position: absolute;
-    left: 8%;
-    right: 8%;
-    top: 4%;
-    height: 82%;
+    left: 0;
+    right: 0;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    justify-content: center; /* Figma padding-left == padding-right on both bubbles (24/24, 26/26),
+                                 so plain centering satisfies it exactly regardless of text width */
     text-align: center;
   }
+  /* top = the text node's own Figma y minus its bubble container's Figma y — i.e. the text's exact
+     measured position relative to the bubble, not a re-derivation through the oval/padding numbers
+     (oval-top isn't exactly container-top: cross-checking against the given padding-top values
+     shows the true oval-top sits ~4-7px below the SVG's own bbox top, is not identical between the
+     two bubbles, and folding that through the padding math to re-find this same top value is
+     circular — using the text's own y directly is the more reliable path to the same answer).
+     right: message text_1 (node 3:280) y=503, dialogue-right container y=468 -> 503-468=35
+     left:  message text_2 (node 3:279) y=497, dialogue-left  container y=466 -> 497-466=31 */
+  .dialogue-right .dialogue-text-wrap { top: 35px; }
+  .dialogue-left  .dialogue-text-wrap { top: 31px; }
 
   .dialogue-text {
     font-family: 'Poppins', sans-serif;
