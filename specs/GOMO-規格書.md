@@ -541,12 +541,11 @@ Hero 結束後，畫面不是切換，而是一台攝影機持續往前推軌：
 
 **p = 0.70 → 1.0：All Work 內容浮現**
 
+沒有另外一組作品 grid——滿版的影片本身（輪播播放中的作品）就是「All Works」的內容展示，浮現的只有疊加在影片上的 UI：
+
 - 影片上疊一層由下往上的漸層遮罩，`opacity 0 → 0.7`，確保文字可讀
 - 區塊標題 `ALL WORKS ↗`（accent 紅、底線、右上箭頭）從 `translateY(80px), opacity 0` 浮現到定位
-- 作品 grid 從畫面下緣推入：每個 item `translateY(60px → 0)`、`opacity 0 → 1`，stagger 60–80ms
 - 出現 scroll cue（細線 + `Scroll to explore`）
-
-> ⚠️ 待補：此處的作品 grid 顯示幾件？依 UI 稿為兩張大圖並排。請確認是固定的精選兩件，還是 `works.json` 的前兩筆。
 
 ### 五、中央影片的輪播
 

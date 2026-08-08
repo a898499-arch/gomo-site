@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>§6.1 Loading → Hero — Prototype</title>
+<title>GOMO — Home Prototype</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,900;1,300;1,400&display=swap&subset=latin,latin-ext" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
 <style>
   :root {
@@ -78,15 +79,19 @@
   }
 
   /* ---------- loading UI (logo + counter), centered over the stage ---------- */
+  /* Figma loading2 (node 19:44, 1440x900 frame): small logo y=375 h=124; "10%" text y=509 h=59 ->
+     gap between them is 10px (not the 12px this used to have), and the whole logo+gap+counter
+     block is NOT frame-centered — its own center sits 21.52px below the frame's true midpoint
+     (matches the bench pair, which is also bottom-anchored below center, not centered on it). */
   .loading-ui {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, calc(-50% + 21.52px));
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     z-index: 20;
     pointer-events: none;
   }
@@ -112,12 +117,12 @@
     opacity: 0;
     transform: translateY(8px);
   }
-  .loading-counter .counter-num {
-    display: inline-block;
-    min-width: 3ch;
-    text-align: right;
-  }
-  .loading-counter .counter-pct { display: inline-block; }
+  /* counter-num deliberately has no min-width/text-align:right: a fixed-width right-aligned box
+     left blank space that shifted the *visible* "10%" ink off the box's own center as digit count
+     changed (1 vs 2 vs 3 digits) — the opposite of the "one centered unit" requirement. Letting it
+     auto-size and re-centering the whole group via the parent flex on every change is what actually
+     keeps the visible text on the shared center line, regardless of digit count. tabular-nums still
+     applies (on .loading-counter, inherited) so digit-to-digit width stays stable during counting. */
 
   /* ---------- dev-only: simulate slow asset load — remove when integrating into real pages ---------- */
   .dev-slow-toggle {
@@ -165,14 +170,21 @@
   .bench-right { left: 56.85%; top: 542px; }
   .bench-left  { left: 25.2%; top: 526px; }
 
-  /* Loading layout position: dead-centered as a pair with a narrow gap for the logo */
+  /* Loading layout position: nearly touching, ~18px gap (the logo parts them apart later).
+     Figma loading1 (node 19:8, 1440x900 frame): small stool_2/left x=595 y=404 w=120.957 h=119.482;
+     small stool_1/right x=734 y=411.375 w=110.631 h=112.844. Frame-center=720. The two benches are
+     bottom-aligned (bottoms land at 523.48/524.22, ~0.7px apart — a shared "ground line"), not
+     center-aligned, so top is set directly per side rather than via a shared translateY(-50%).
+     left:  720 - (595+120.957)          = -4.04   -> right edge sits 4.04px left of center
+     right: 734 - 720                    = +14.00  -> left edge sits 14px right of center
+     left top:  (404+119.482 - 450) - 119.482 = -46.00   (450 = frame half-height, i.e. the "50%" line)
+     right top: (411.375+112.844 - 450) - 112.844 = -38.63 */
   .loading-slot {
     position: absolute;
-    top: 50%;
     z-index: 10;
   }
-  .loading-slot-left  { left: calc(50% - 130px); width: 120.96px; height: 119.48px; transform: translate(-100%, -50%); }
-  .loading-slot-right { left: calc(50% + 130px); width: 110.63px; height: 112.84px; transform: translateY(-50%); }
+  .loading-slot-left  { left: calc(50% - 4.04px); top: calc(50% - 46px); width: 120.96px; height: 119.48px; transform: translateX(-100%); }
+  .loading-slot-right { left: calc(50% + 14px); top: calc(50% - 38.63px); width: 110.63px; height: 112.84px; }
 
   /* ---------- Hero content ---------- */
   .hero-content {
@@ -476,6 +488,211 @@
   /* ==================== PAGE BODY (placeholder) ==================== */
   #page-content {
     padding-top: 116px; /* clears the fixed nav so filler content doesn't start underneath it */
+  }
+
+  /* ==================== SECTION 2 — PRACTICE → ALL WORK (§6.2) ==================== */
+
+  .ptw-outer {
+    position: relative;
+    height: 420vh;
+  }
+
+  .ptw-stage {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+    /* lerped from --bg to --ptw-allwork-bg across p=0->0.30 (see JS). No distinct "All Work 底色"
+       is specified anywhere in the spec or Figma — the Figma frame shows the same cream throughout
+       this whole section, so --ptw-allwork-bg defaults to --bg (the lerp is a no-op) until told
+       otherwise; kept as a real custom-property lerp (not skipped) so AC#7 (no color "step") holds
+       structurally even if the token changes later. */
+    background: var(--ptw-bg-current, var(--bg));
+  }
+
+  .ptw-visual {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: scale(0.94) translateY(20px);
+  }
+
+  /* ---------- collage (figures only; the video frame is a separate full-stage sibling, see below) ---------- */
+  .ptw-collage {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: min(88vw, 1520px);
+    aspect-ratio: 951.13 / 794.02;
+    transform: translate(-50%, -50%);
+  }
+
+  .ptw-fig {
+    position: absolute;
+    display: block;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    animation: ptw-idle-a 6s ease-in-out infinite;
+    animation-play-state: paused;
+  }
+  .ptw-fig img { display: block; width: 100%; height: 100%; object-fit: contain; }
+  .ptw-collage.is-idle .ptw-fig { animation-play-state: running; }
+
+  /* back layer: dance woman_3, dance woman_3-1, grass, flower_red — confirmed/assigned behind the
+     video frame (§6.2 三層). Figma-measured left/top/width/height (% of the collage box above). */
+  .ptw-fig-dw3   { left: 17.048%; top: 0%;      width: 28.389%; height: 39.345%; z-index: 1; animation-duration: 6.4s; animation-delay: -0.6s; }
+  .ptw-fig-dw31  { left: 56.472%; top: 3.140%;  width: 24.253%; height: 33.070%; z-index: 1; animation-duration: 5.2s; animation-delay: -2.1s; }
+  .ptw-fig-grass { left: 45.651%; top: 11.918%; width: 16.236%; height: 14.840%; z-index: 1; animation-duration: 7s;   animation-delay: -3.4s; }
+  .ptw-fig-red   { left: 12.743%; top: 25.460%; width: 5.813%;  height: 5.419%;  z-index: 1; animation-duration: 4.6s; animation-delay: -1.2s; }
+
+  /* front layer: everything else, in front of the video frame */
+  .ptw-fig-dw1   { left: 29.755%; top: 69.651%; width: 36.727%; height: 30.349%; z-index: 3; animation-duration: 6.8s; animation-delay: -4.4s; }
+  .ptw-fig-dw2   { left: 0%;      top: 32.382%; width: 18.572%; height: 44.268%; z-index: 3; animation-duration: 5.6s; animation-delay: -0.2s; }
+  .ptw-fig-dw5   { left: 68.819%; top: 41.853%; width: 20.133%; height: 40.193%; z-index: 3; animation-duration: 6.1s; animation-delay: -3.9s; }
+  .ptw-fig-orange{ left: 78.139%; top: 27.223%; width: 6.470%;  height: 7.336%;  z-index: 3; animation-duration: 4.9s; animation-delay: -1.8s; }
+  .ptw-fig-pink  { left: 12.848%; top: 73.696%; width: 7.385%;  height: 9.422%;  z-index: 3; animation-duration: 5.4s; animation-delay: -2.7s; }
+  .ptw-fig-yellow{ left: 62.578%; top: 70.799%; width: 4.521%;  height: 5.667%;  z-index: 3; animation-duration: 4.3s; animation-delay: -0.9s; }
+  .ptw-fig-leaf  { left: 89.111%; top: 66.773%; width: 10.889%; height: 14.467%; z-index: 3; animation-duration: 6.6s; animation-delay: -5.1s; }
+
+  /* A3 idle breathing — CSS keyframes only, no JS/rAF. Amplitude deliberately tiny. */
+  @keyframes ptw-idle-a {
+    0%, 100% { translate: 0 0; rotate: 0deg; }
+    50%      { translate: 0 -3px; rotate: 0.8deg; }
+  }
+
+  /* ---------- video frame (mid layer) — always 100% of the stage; the "small" collage-phase size
+     is achieved purely via clip-path, so the element never resizes/remounts (§6.2 二、四) ---------- */
+  .ptw-frame {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    clip-path: inset(32% 30% 32% 30% round 20px);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+  }
+
+  .ptw-frame-inner {
+    position: absolute;
+    inset: 0;
+    transform: scale(1.12);
+  }
+
+  .ptw-carousel {
+    position: absolute;
+    inset: 0;
+  }
+
+  .ptw-slide {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 600ms linear;
+  }
+  .ptw-slide.is-current { opacity: 1; }
+
+  .ptw-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0) 55%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* ---------- title (A2 mask-reveal; exits p=0->0.30) ---------- */
+  .ptw-title {
+    /* top set as a plain (non-transform) offset deliberately — Stage B animates this element's
+       GSAP `y`/`opacity`/`scale` for the p=0->0.30 exit, and GSAP's `y` REPLACES the full
+       translateY on every call rather than adding to one already baked into a CSS transform, so
+       the base position has to live outside `transform` or the first Stage-B frame would snap. */
+    position: absolute;
+    left: clamp(24px, 4vw, 40px);
+    top: 15%;
+    max-width: 480px;
+    z-index: 4;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: clamp(22px, 2.6vw, 37px);
+    line-height: 1.45;
+    letter-spacing: -0.025em;
+    text-transform: capitalize; /* Figma: node 21:180 is raw lowercase text styled `capitalize` */
+    color: var(--ink);
+  }
+  .ptw-title em { font-style: normal; color: var(--accent); }
+  .ptw-title .reveal-mask { margin: 0; }
+
+  /* ---------- All Work reveal (p=0.70->1.0) — heading + scroll cue over the full-bleed frame ---------- */
+  .ptw-allworks {
+    position: absolute;
+    left: clamp(24px, 4vw, 40px);
+    bottom: 64px;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .ptw-allworks-heading {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: clamp(20px, 2.2vw, 28px);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 6px;
+    opacity: 0;
+    transform: translateY(80px);
+  }
+
+  .ptw-scrollcue {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    color: #fff;
+    opacity: 0;
+  }
+  .ptw-scrollcue-line { width: 32px; height: 1px; background: currentColor; }
+
+  /* ---------- RWD (§6.2 七) ---------- */
+  @media (max-width: 900px) {
+    .ptw-outer { height: 360vh; }
+    .ptw-frame { clip-path: inset(32% 22.5% 32% 22.5% round 20px); }
+    /* tablet: three most prominent figures + their layer-mates' color blocks stay, rest hide */
+    .ptw-fig-dw2, .ptw-fig-dw3, .ptw-fig-grass, .ptw-fig-red { display: none; }
+  }
+
+  @media (max-width: 600px) {
+    .ptw-outer { height: 260vh; }
+    .ptw-frame { clip-path: inset(32% 10% 32% 10% round 16px); }
+    /* mobile: only two figures, moved above/below the frame rather than around it (§6.2 七) */
+    .ptw-fig-dw5, .ptw-fig-orange, .ptw-fig-pink, .ptw-fig-yellow, .ptw-fig-leaf { display: none; }
+    .ptw-fig-dw31 { left: 30%; top: -18%; width: 40%; height: auto; }
+    .ptw-fig-dw1  { left: 30%; top: auto; bottom: -20%; width: 40%; height: auto; }
+    .ptw-fig { animation: none !important; } /* idle drift off on mobile — power (§6.2 七) */
+    .ptw-title { max-width: 78vw; }
+  }
+
+  /* ---------- reduced motion (§6.2 八) ---------- */
+  @media (prefers-reduced-motion: reduce) {
+    .ptw-visual { opacity: 1; transform: none; }
+    .ptw-fig { animation: none !important; }
+    .ptw-frame { clip-path: inset(18% 22% 18% 22% round 20px); } /* fixed mid-size, no scroll growth */
+    .ptw-frame-inner { transform: none; }
+    .ptw-title .reveal-inner { transform: none !important; }
+    .ptw-title { position: static; transform: none; margin: 0 auto 32px; }
+    .ptw-gradient { opacity: 0.7; }
+    .ptw-allworks-heading, .ptw-scrollcue { opacity: 1; transform: none; }
+    .ptw-slide { transition: opacity 300ms linear; }
   }
 
   /* ==================== FOOTER ==================== */
@@ -930,25 +1147,49 @@
   </div>
 
   <main id="page-content">
-    <section class="filler">
-      <h1>Scroll down ↓</h1>
-      <p>Behavior A (Home): within 100px of the top the nav always shows. Past that, it takes 8px of consistent scroll in one direction before it hides or reappears — small jitters are ignored.</p>
-    </section>
-    <section class="filler image-block">
-      <h1>A large image/color section</h1>
-      <p>Stand-in for the Gallery section. If you scroll up here to summon the nav while it overlaps this block, that's expected for now — per the brief, this is deferred until it's tested for real.</p>
-    </section>
-    <section class="filler">
-      <h1>Keep scrolling</h1>
-      <p>Switch to "Other page (static)" with the button in the bottom-left corner to compare — the nav should stay pinned and visible regardless of scroll direction.</p>
-    </section>
-    <section class="filler image-block">
-      <h1>Another block</h1>
-      <p>Try scrolling up and down repeatedly in short bursts to check the 8px hysteresis isn't twitchy.</p>
-    </section>
-    <section class="filler">
-      <h1>End of page content</h1>
-      <p>This is where a real page (About Me, work index, etc.) would go. The footer entrance animation triggers once it crosses ~80% of the viewport height.</p>
+    <section class="ptw-outer" id="practice-to-work">
+      <div class="ptw-stage" id="ptw-stage">
+        <div class="ptw-visual" id="ptw-visual">
+
+          <div class="ptw-collage" id="ptw-collage">
+            <div class="ptw-fig ptw-fig-dw3" data-fig="dw3"><img src="../assets/svg/dance%20woman_3.png" alt="" aria-hidden="true"></div>
+            <div class="ptw-fig ptw-fig-dw31" data-fig="dw31"><img src="../assets/svg/dance%20woman_3-1.png" alt="" aria-hidden="true"></div>
+            <div class="ptw-fig ptw-fig-grass" data-fig="grass"><img src="../assets/svg/grass.png" alt="" aria-hidden="true"></div>
+            <div class="ptw-fig ptw-fig-red" data-fig="red"><img src="../assets/svg/flower_red.png" alt="" aria-hidden="true"></div>
+            <div class="ptw-fig ptw-fig-dw1" data-fig="dw1"><img src="../assets/svg/dance%20woman_1.png" alt="" aria-hidden="true"></div>
+            <div class="ptw-fig ptw-fig-dw2" data-fig="dw2"><img src="../assets/svg/dance%20woman_2.png" alt="" aria-hidden="true"></div>
+            <div class="ptw-fig ptw-fig-dw5" data-fig="dw5"><img src="../assets/svg/dance%20woman_5.png" alt="" aria-hidden="true"></div>
+            <div class="ptw-fig ptw-fig-orange" data-fig="orange"><img src="../assets/svg/flower_orange.png" alt="" aria-hidden="true"></div>
+            <div class="ptw-fig ptw-fig-pink" data-fig="pink"><img src="../assets/svg/flower_pink.png" alt="" aria-hidden="true"></div>
+            <div class="ptw-fig ptw-fig-yellow" data-fig="yellow"><img src="../assets/svg/flower_yellow.png" alt="" aria-hidden="true"></div>
+            <div class="ptw-fig ptw-fig-leaf" data-fig="leaf"><img src="../assets/svg/leave_blue.png" alt="" aria-hidden="true"></div>
+          </div>
+
+          <h2 class="ptw-title" id="ptw-title">
+            <span class="reveal-mask"><span class="reveal-inner">I design across <em>health</em> and the <em>environment</em>,</span></span>
+            <span class="reveal-mask"><span class="reveal-inner">taking products from sketch to prototype, physical and digital alike.</span></span>
+          </h2>
+
+          <div class="ptw-frame" id="ptw-frame">
+            <div class="ptw-frame-inner" id="ptw-frame-inner">
+              <div class="ptw-carousel" id="ptw-carousel">
+                <!-- current/next only — never more than two mounted at once (§6.2 五). Sources filled
+                     in by JS from PTW_SLIDES (assets/img/*, falls back to the Figma cover placeholder
+                     when that list is empty, so the crossfade logic runs correctly either way). -->
+                <img class="ptw-slide is-current" id="ptw-slide-a" src="" alt="" aria-hidden="true">
+                <img class="ptw-slide" id="ptw-slide-b" src="" alt="" aria-hidden="true">
+              </div>
+              <div class="ptw-gradient" id="ptw-gradient"></div>
+            </div>
+          </div>
+
+          <div class="ptw-allworks" id="ptw-allworks">
+            <h3 class="ptw-allworks-heading" id="ptw-allworks-heading">All Works ↗</h3>
+            <div class="ptw-scrollcue" id="ptw-scrollcue"><span class="ptw-scrollcue-line" aria-hidden="true"></span>Scroll to explore</div>
+          </div>
+
+        </div>
+      </div>
     </section>
   </main>
 
@@ -1105,6 +1346,190 @@
     requestAnimationFrame(raf);
   }
   requestAnimationFrame(raf);
+
+  /* ==================== SECTION 2 — PRACTICE → ALL WORK (§6.2) ==================== */
+  gsap.registerPlugin(ScrollTrigger);
+  lenis.on('scroll', ScrollTrigger.update); // §3.2: ScrollTrigger must ride the shared Lenis instance
+
+  (function () {
+    const ptwSection = document.getElementById('practice-to-work');
+    const ptwStage = document.getElementById('ptw-stage');
+    const ptwVisual = document.getElementById('ptw-visual');
+    const ptwCollage = document.getElementById('ptw-collage');
+    const ptwTitle = document.getElementById('ptw-title');
+    const ptwTitleLines = ptwTitle.querySelectorAll('.reveal-inner');
+    const ptwFrame = document.getElementById('ptw-frame');
+    const ptwFrameInner = document.getElementById('ptw-frame-inner');
+    const ptwGradient = document.getElementById('ptw-gradient');
+    const ptwHeading = document.getElementById('ptw-allworks-heading');
+    const ptwScrollcue = document.getElementById('ptw-scrollcue');
+    const ptwSlideA = document.getElementById('ptw-slide-a');
+    const ptwSlideB = document.getElementById('ptw-slide-b');
+
+    /* Figma-measured direction-from-video-frame-center (ux,uy, unit vector) + distance (px, at the
+       1440-wide reference), per element — see the layer table confirmed 2026-08-08. Radiate distance
+       in Stage B is proportional to this `dist`, exactly like elements already far from center in
+       Figma (§6.2 四: "本來就靠邊的跑最遠"). */
+    const PTW_FIGS = [
+      { el: document.querySelector('[data-fig="dw3"]'),    ux: -0.591, uy: -0.807, dist: 273.3, layer: 'back' },
+      { el: document.querySelector('[data-fig="dw31"]'),   ux: 0.660,  uy: -0.751, dist: 293.5, layer: 'back' },
+      { el: document.querySelector('[data-fig="grass"]'),  ux: 0.230,  uy: -0.973, dist: 229.3, layer: 'back' },
+      { el: document.querySelector('[data-fig="red"]'),    ux: -0.897, uy: -0.443, dist: 345.5, layer: 'back' },
+      { el: document.querySelector('[data-fig="dw1"]'),    ux: -0.003, uy: 1.000,  dist: 296.9, layer: 'front' },
+      { el: document.querySelector('[data-fig="dw2"]'),    ux: -0.989, uy: 0.150,  dist: 374.5, layer: 'front' },
+      { el: document.querySelector('[data-fig="dw5"]'),    ux: 0.930,  uy: 0.367,  dist: 313.6, layer: 'front' },
+      { el: document.querySelector('[data-fig="orange"]'), ux: 0.923,  uy: -0.385, dist: 341.6, layer: 'front' },
+      { el: document.querySelector('[data-fig="pink"]'),   ux: -0.775, uy: 0.632,  dist: 388.9, layer: 'front' },
+      { el: document.querySelector('[data-fig="yellow"]'), ux: 0.605,  uy: 0.796,  dist: 261.3, layer: 'front' },
+      { el: document.querySelector('[data-fig="leaf"]'),   ux: 0.902,  uy: 0.432,  dist: 488.6, layer: 'front' }
+    ];
+    const PTW_MAX_DIST = Math.max.apply(null, PTW_FIGS.map(function (f) { return f.dist; }));
+    const PTW_TRAVEL_PX = 260; // travel budget for the single farthest element at t1=1, before the layer multiplier
+
+    /* ---------- Stage A: entrance, plays once, time-driven — not scroll-scrubbed (§6.2 三) ---------- */
+    let stageAPlayed = false;
+    function playStageA() {
+      if (stageAPlayed) return;
+      stageAPlayed = true;
+      const tl = gsap.timeline();
+      tl.to(ptwVisual, { opacity: 1, scale: 1, y: 0, duration: 0.9, ease: mainEase }, 0);
+      tl.to(ptwTitleLines[0], { y: '0%', duration: 0.75, ease: mainEase }, 0.6);
+      tl.to(ptwTitleLines[1], { y: '0%', duration: 0.75, ease: mainEase }, 0.6 + 0.13);
+      tl.call(function () { ptwCollage.classList.add('is-idle'); }, null, 1.5);
+    }
+
+    if (reduceMotion) {
+      gsap.set(ptwVisual, { opacity: 1, scale: 1, y: 0 });
+      gsap.set(ptwTitleLines, { y: '0%' });
+    } else {
+      ScrollTrigger.create({ trigger: ptwSection, start: 'top 70%', once: true, onEnter: playStageA });
+    }
+
+    /* ---------- Stage B: scroll timeline driven by progress p, with an extra manual lerp for
+       inertial weight on top of ScrollTrigger's own scrub:1 (§6.2 二、六) ---------- */
+    if (!reduceMotion) {
+      let rawP = 0;
+      let smoothP = 0;
+
+      ScrollTrigger.create({
+        trigger: ptwSection,
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: 1,
+        onUpdate: function (self) { rawP = self.progress; }
+      });
+
+      function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+      function remap(p, a, b) { return clamp01((p - a) / (b - a)); }
+
+      let frameGrowing = false;
+
+      function applyStageB(p) {
+        /* p 0 -> 0.30: collage radiates outward + fades, title exits, bg lerps */
+        const t1 = remap(p, 0, 0.30);
+        for (let i = 0; i < PTW_FIGS.length; i++) {
+          const f = PTW_FIGS[i];
+          const isFront = f.layer === 'front';
+          const travelMul = isFront ? 1.3 : 0.7;   // front layer travels farther...
+          const fadeEnd = isFront ? 0.65 : 1.0;      // ...and finishes fading out earlier
+          const dist = PTW_TRAVEL_PX * (f.dist / PTW_MAX_DIST) * travelMul;
+          const tx = f.ux * dist * t1;
+          const ty = f.uy * dist * t1;
+          const scale = 1 + 0.15 * t1;
+          const opacity = 1 - clamp01(t1 / fadeEnd);
+          f.el.style.transform = 'translate(' + tx.toFixed(2) + 'px,' + ty.toFixed(2) + 'px) scale(' + scale.toFixed(4) + ')';
+          f.el.style.opacity = opacity;
+        }
+
+        gsap.set(ptwTitle, {
+          y: -140 * t1,
+          opacity: 1 - t1 / 0.933, // fully gone by t1≈0.933 (p≈0.28), per spec's "p=0.28 前完全消失"
+          scale: 1 - 0.05 * t1
+        });
+
+        /* p 0.08 -> 0.85: video frame grows via clip-path + inner counter-scale (§6.2 四) */
+        const t2 = remap(p, 0.08, 0.85);
+        const insetV = 32 - 32 * t2;
+        const insetH = 30 - 30 * t2;
+        const radius = 20 - 20 * t2;
+        ptwFrame.style.clipPath = 'inset(' + insetV.toFixed(3) + '% ' + insetH.toFixed(3) + '% ' + insetV.toFixed(3) + '% ' + insetH.toFixed(3) + '% round ' + radius.toFixed(2) + 'px)';
+        /* box-shadow is outside the transform/opacity/clip-path allowlist (§6.2 九) — kept anyway
+           because the spec explicitly asks for it ("陰影：...→完全消失"); it's a paint, not a
+           layout, so it doesn't break compositing elsewhere, but flag for the Chrome Performance
+           check in Acceptance Criteria #10 if it turns out too costly on mid-tier laptops. */
+        ptwFrame.style.boxShadow = '0 ' + (24 * (1 - t2)).toFixed(1) + 'px ' + (60 * (1 - t2)).toFixed(1) + 'px rgba(0,0,0,' + (0.18 * (1 - t2)).toFixed(3) + ')';
+        ptwFrameInner.style.transform = 'scale(' + (1.12 - 0.12 * t2).toFixed(4) + ')';
+
+        const isGrowing = t2 > 0 && t2 < 1;
+        if (isGrowing !== frameGrowing) {
+          frameGrowing = isGrowing;
+          ptwFrame.style.willChange = isGrowing ? 'clip-path' : '';
+          ptwFrameInner.style.willChange = isGrowing ? 'transform' : '';
+        }
+
+        /* p 0.70 -> 1.0: All Work reveal — heading + scroll cue over the now-full-bleed frame */
+        const t3 = remap(p, 0.70, 1.0);
+        ptwGradient.style.opacity = 0.7 * t3;
+        gsap.set(ptwHeading, { opacity: t3, y: 80 * (1 - t3) });
+        ptwScrollcue.style.opacity = t3;
+      }
+
+      function ptwLoop() {
+        smoothP += (rawP - smoothP) * 0.1; // factor within the spec's 0.08-0.12 range
+        applyStageB(smoothP);
+        requestAnimationFrame(ptwLoop);
+      }
+      requestAnimationFrame(ptwLoop);
+    }
+
+    /* ---------- central carousel: current+next only, 5s hold / 600ms crossfade (§6.2 五) ----------
+       Drop real photos into assets/img/ named work-1/work-2/work-3.{jpg,png} — whichever of those
+       exist get picked up automatically (1 to 3 of them, missing ones are skipped silently). With
+       none present, it falls back to the Figma cover placeholder and still runs the real crossfade
+       logic against that single image (fades to itself every 5s) so the mechanism is verifiably
+       correct before real photos or video are wired in. */
+    const PTW_PLACEHOLDER = '../assets/img/placeholder-work-1.png';
+    const PTW_CANDIDATES = ['work-1.jpg', 'work-2.jpg', 'work-3.jpg', 'work-1.png', 'work-2.png', 'work-3.png'];
+
+    function probeImage(src) {
+      return new Promise(function (resolve) {
+        const img = new Image();
+        img.onload = function () { resolve(src); };
+        img.onerror = function () { resolve(null); };
+        img.src = src;
+      });
+    }
+
+    Promise.all(PTW_CANDIDATES.map(function (name) { return probeImage('../assets/img/' + name); }))
+      .then(function (results) {
+        const found = results.filter(Boolean);
+        startCarousel(found.length ? found : [PTW_PLACEHOLDER]);
+        ScrollTrigger.refresh();
+      });
+
+    function startCarousel(slides) {
+      let index = 0;
+      let currentEl = ptwSlideA;
+      let nextEl = ptwSlideB;
+      currentEl.src = slides[0];
+
+      const preload = new Image();
+      preload.src = slides[1 % slides.length];
+
+      function advance() {
+        index = (index + 1) % slides.length;
+        nextEl.src = slides[index];
+        nextEl.classList.add('is-current');
+        currentEl.classList.remove('is-current');
+        const swap = currentEl; currentEl = nextEl; nextEl = swap;
+
+        const upcoming = new Image();
+        upcoming.src = slides[(index + 1) % slides.length];
+      }
+
+      setInterval(advance, 5000);
+    }
+  })();
 
   /* ==================== NAV ==================== */
   const nav = document.getElementById('site-nav');
@@ -1728,8 +2153,25 @@
      Useful for reviewing the Hero layout without waiting for (or fighting) the loading sequence.
      Not part of the spec — remove when integrating into real pages. ---------- */
   const skipAnim = new URLSearchParams(location.search).get('skipAnim') === '1';
+  /* dev-only: freeze on the Phase 1.1 ("benches together, not parted yet") or Phase 1.2 ("logo +
+     benches parted") loading state, for side-by-side comparison against the Figma loading1/loading2
+     reference frames. Not part of the spec — remove when integrating into real pages. */
+  const debugPhase = new URLSearchParams(location.search).get('debugPhase');
 
-  if (skipAnim) {
+  if (debugPhase === '1.1') {
+    document.documentElement.style.overflow = '';
+    gsap.set(loadingLogo, { opacity: 0 });
+    gsap.set(loadingCounterEl, { opacity: 0 });
+    gsap.set(benchLeft, { x: loadingXformLeft.x, y: loadingXformLeft.y, scale: loadingXformLeft.scale, opacity: 1 });
+    gsap.set(benchRight, { x: loadingXformRight.x, y: loadingXformRight.y, scale: loadingXformRight.scale, opacity: 1 });
+  } else if (debugPhase === '1.2') {
+    document.documentElement.style.overflow = '';
+    gsap.set(loadingLogo, { opacity: 1, scale: 1 });
+    gsap.set(loadingCounterEl, { opacity: 1, y: 0 });
+    counterNum.textContent = '10';
+    gsap.set(benchLeft, { x: loadingXformLeft.x - 97, y: loadingXformLeft.y, scale: loadingXformLeft.scale, opacity: 1 });
+    gsap.set(benchRight, { x: loadingXformRight.x + 97, y: loadingXformRight.y, scale: loadingXformRight.scale, opacity: 1 });
+  } else if (skipAnim) {
     document.documentElement.style.overflow = '';
     gsap.set(loadingUI, { opacity: 0 });
     gsap.set([benchLeft, benchRight], { x: 0, y: 0, scale: 1, opacity: 1 });
