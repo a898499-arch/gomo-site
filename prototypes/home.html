@@ -492,9 +492,14 @@
 
   /* ==================== SECTION 2 — PRACTICE → ALL WORK (§6.2) ==================== */
 
+  /* height = growth distance + hold distance + 100vh (the sticky viewport itself, per the
+     containerHeight = pinnedDistance + 100vh identity already established for this section).
+     Growth distance (320vh) is UNCHANGED from before — the hold segment is purely additive, see
+     the JS growth/hold breakdown comment near the ScrollTrigger setup for the full old-p/new-p
+     conversion table. */
   .ptw-outer {
     position: relative;
-    height: 420vh;
+    height: 570vh; /* 320vh growth (unchanged pacing) + 150vh hold + 100vh viewport */
   }
 
   .ptw-stage {
@@ -565,22 +570,31 @@
     50%      { translate: 0 -6px; rotate: 1.5deg; }
   }
 
-  /* ---------- video frame (mid layer) — always 100% of .ptw-viewport; both the small collage-phase
-     size and the large ALL WORKS size are just clip-path insets of that same fixed 1440x900 box, so
-     the element never resizes/remounts (§6.2 二、四). Both states are locked to 16:9 (the real video's
-     ratio) so growth never distorts or re-crops mid-scroll:
-       small: left/width unchanged from Figma (46.6667%/39.9194%), height re-derived from 16:9 and
-              re-centered on the original box's own vertical center (not Figma's own height/top,
-              which was a hand-placed non-16:9 rect)
-       large: 40px margins left/right (2.7778%/94.4444%), height from 16:9, centered in the viewport
-     Both Figma background rects ("Rectangle 80"/"Rectangle 60") export as a plain <rect> with no rx
-     — corner radius is 0 at both ends, confirmed from the raw SVG, not guessed. */
+  /* ---------- video frame (mid layer). §6.2 四 growth never resizes/remounts the element — but a
+     clip-path-on-a-full-size-box approach (the previous implementation) turned out to be wrong: the
+     box that object-fit:cover measures for its crop is the element's own LAYOUT size, which
+     clip-path never changes (clip-path only masks paint, it doesn't resize anything) — so cover was
+     always cropping against the ambient 1440x900 (16:10) box regardless of the clip-path window,
+     which is a DIFFERENT ratio than the intended 16:9 window and cut content unpredictably (e.g.
+     the left edge of the placeholder slide). Fixed by giving the innermost media box a real 16:9
+     layout size and moving/scaling *that* box with `transform` to match the current window — cover
+     then crops against the actual visible shape, and clip-path isn't needed at all (corner-radius is
+     confirmed 0 at both Figma ends anyway, so there's nothing else clip-path was doing for us). */
   .ptw-frame {
     position: absolute;
     inset: 0;
     z-index: 2;
-    clip-path: inset(35.2029% 13.4139% 28.8697% 46.6667%);
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+    overflow: hidden;
+  }
+
+  .ptw-frame-media {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    transform-origin: 0 0; /* JS positions/scales this from its own top-left corner, see applyStageB */
+    overflow: hidden;
   }
 
   .ptw-frame-inner {
@@ -632,13 +646,13 @@
 
   /* ---------- RWD (§6.2 七) ---------- */
   @media (max-width: 900px) {
-    .ptw-outer { height: 360vh; }
+    .ptw-outer { height: 480vh; } /* 260vh growth (unchanged) + 120vh hold (proportional) + 100vh */
     /* tablet: three most prominent figures stay, rest hide */
     .ptw-fig-dw2, .ptw-fig-dw3, .ptw-fig-grass, .ptw-fig-red { display: none; }
   }
 
   @media (max-width: 600px) {
-    .ptw-outer { height: 260vh; }
+    .ptw-outer { height: 335vh; } /* 160vh growth (unchanged) + 75vh hold (proportional) + 100vh */
     /* mobile: only two figures, moved above/below the frame rather than around it (§6.2 七) */
     .ptw-fig-dw5, .ptw-fig-orange, .ptw-fig-pink, .ptw-fig-yellow, .ptw-fig-leaf { display: none; }
     .ptw-fig-dw31 { left: 30%; top: -18%; width: 40%; height: auto; }
@@ -1133,13 +1147,15 @@
             </h2>
 
             <div class="ptw-frame" id="ptw-frame">
-              <div class="ptw-frame-inner" id="ptw-frame-inner">
-                <div class="ptw-carousel" id="ptw-carousel">
-                  <!-- current/next only — never more than two mounted at once (§6.2 五). Sources filled
-                       in by JS from PTW_SLIDES (assets/img/*, falls back to the Figma cover placeholder
-                       when that list is empty, so the crossfade logic runs correctly either way). -->
-                  <img class="ptw-slide is-current" id="ptw-slide-a" src="" alt="" aria-hidden="true">
-                  <img class="ptw-slide" id="ptw-slide-b" src="" alt="" aria-hidden="true">
+              <div class="ptw-frame-media" id="ptw-frame-media">
+                <div class="ptw-frame-inner" id="ptw-frame-inner">
+                  <div class="ptw-carousel" id="ptw-carousel">
+                    <!-- current/next only — never more than two mounted at once (§6.2 五). Sources filled
+                         in by JS from PTW_SLIDES (assets/img/*, falls back to the Figma cover placeholder
+                         when that list is empty, so the crossfade logic runs correctly either way). -->
+                    <img class="ptw-slide is-current" id="ptw-slide-a" src="" alt="" aria-hidden="true">
+                    <img class="ptw-slide" id="ptw-slide-b" src="" alt="" aria-hidden="true">
+                  </div>
                 </div>
               </div>
             </div>
@@ -1308,6 +1324,10 @@
   gsap.registerPlugin(ScrollTrigger);
   lenis.on('scroll', ScrollTrigger.update); // §3.2: ScrollTrigger must ride the shared Lenis instance
 
+  /* nav override while the video is grown/growing (§6.1: nav behavior; §6.2 hold). Declared out here
+     (not inside the Section 2 IIFE below) so the NAV block further down can read it — see setNavForceHidden. */
+  let navForceHidden = false;
+
   (function () {
     const ptwSection = document.getElementById('practice-to-work');
     const ptwStage = document.getElementById('ptw-stage');
@@ -1316,6 +1336,7 @@
     const ptwTitle = document.getElementById('ptw-title');
     const ptwTitleLines = ptwTitle.querySelectorAll('.reveal-inner');
     const ptwFrame = document.getElementById('ptw-frame');
+    const ptwFrameMedia = document.getElementById('ptw-frame-media');
     const ptwFrameInner = document.getElementById('ptw-frame-inner');
     const ptwSlideA = document.getElementById('ptw-slide-a');
     const ptwSlideB = document.getElementById('ptw-slide-b');
@@ -1371,7 +1392,19 @@
     /* ---------- Stage B: scroll timeline driven by progress p, with an extra manual lerp for
        inertial weight on top of ScrollTrigger's own scrub:1 (§6.2 二、六) ---------- */
     if (!reduceMotion) {
-      let rawP = 0;
+      /* growth/hold split, in vh, per breakpoint. "growth" is UNCHANGED from before this feature —
+         same distance as when the container was 420/360/260vh — "hold" is the new segment appended
+         after it (150vh desktop, scaled proportionally at the other two breakpoints: 150/320 of each
+         breakpoint's own growth distance). Matches the .ptw-outer heights set in CSS:
+           desktop: 320 + 150 + 100 = 570vh   tablet: 260 + 120 + 100 = 480vh   mobile: 160 + 75 + 100 = 335vh */
+      function ptwGrowthHold() {
+        if (window.innerWidth <= 600) return { growth: 160, hold: 75 };
+        if (window.innerWidth <= 900) return { growth: 260, hold: 120 };
+        return { growth: 320, hold: 150 };
+      }
+
+      let rawSelfProgress = 0;
+      let stIsActive = false;
       let smoothP = 0;
 
       ScrollTrigger.create({
@@ -1385,7 +1418,7 @@
            after the stage has already unstuck and the footer is already scrolling in underneath. */
         end: function () { return '+=' + (ptwSection.offsetHeight - window.innerHeight); },
         scrub: 1,
-        onUpdate: function (self) { rawP = self.progress; }
+        onUpdate: function (self) { rawSelfProgress = self.progress; stIsActive = self.isActive; }
       });
 
       function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
@@ -1416,39 +1449,51 @@
           scale: 1 - 0.05 * t1
         });
 
-        /* p 0.08 -> 0.85: video frame grows via clip-path + inner counter-scale (§6.2 四). Both ends
-           are Figma-measured insets of the same 1440x900 .ptw-viewport box (not a symmetric guess),
-           both locked to the video's real 16:9 ratio so growth never distorts or re-crops:
-           start = collage-phase frame, left/width from Figma (node 21:171), height re-derived from
-                   16:9 and re-centered on that box's own original vertical center
-           end   = ALL WORKS frame, 40px margins left/right, height from 16:9, centered in the
-                   viewport — margins on every side, not edge-to-edge. Corner-radius is 0 at both
-                   ends (confirmed from the raw SVG `<rect>`, neither has `rx`), so no rounding term
-                   is needed at all. */
+        /* p 0.08 -> 0.85: video frame grows. Both ends are Figma/user-measured left/top/width of the
+           same 1440x900 .ptw-viewport box, both exactly 16:9 (height = width*9/16 always, so it's
+           never computed/stored separately — see the .ptw-frame-media comment for why this replaced
+           the earlier clip-path approach):
+           start = collage-phase frame, left/width from Figma (node 21:171), top re-derived from 16:9
+                   and re-centered on that box's own original vertical center
+           end   = ALL WORKS frame, 40px margins left/right, height from 16:9 centered in the
+                   viewport then shifted down 20px (2.2222%) per feedback 2026-08-08 */
         const t2 = remap(p, 0.08, 0.85);
-        const top = 35.2029 + (7.5 - 35.2029) * t2;
-        const right = 13.4139 + (2.7778 - 13.4139) * t2;
-        const bottom = 28.8697 + (7.5 - 28.8697) * t2;
-        const left = 46.6667 + (2.7778 - 46.6667) * t2;
-        ptwFrame.style.clipPath = 'inset(' + top.toFixed(3) + '% ' + right.toFixed(3) + '% ' + bottom.toFixed(3) + '% ' + left.toFixed(3) + '%)';
+        const leftPct = 46.6667 + (2.7778 - 46.6667) * t2;
+        const topPct = 35.2029 + (9.7222 - 35.2029) * t2;
+        const widthPct = 39.9194 + (94.4444 - 39.9194) * t2;
+
+        const vpRect = ptwViewport.getBoundingClientRect();
+        const targetX = leftPct / 100 * vpRect.width;
+        const targetY = topPct / 100 * vpRect.height;
+        const scale = widthPct / 100;
+        ptwFrameMedia.style.transform = 'translate(' + targetX.toFixed(2) + 'px,' + targetY.toFixed(2) + 'px) scale(' + scale.toFixed(5) + ')';
         /* box-shadow is outside the transform/opacity/clip-path allowlist (§6.2 九) — kept anyway
            because the spec explicitly asks for it ("陰影：...→完全消失"); it's a paint, not a
            layout, so it doesn't break compositing elsewhere, but flag for the Chrome Performance
            check in Acceptance Criteria #10 if it turns out too costly on mid-tier laptops. */
-        ptwFrame.style.boxShadow = '0 ' + (24 * (1 - t2)).toFixed(1) + 'px ' + (60 * (1 - t2)).toFixed(1) + 'px rgba(0,0,0,' + (0.18 * (1 - t2)).toFixed(3) + ')';
+        ptwFrameMedia.style.boxShadow = '0 ' + (24 * (1 - t2)).toFixed(1) + 'px ' + (60 * (1 - t2)).toFixed(1) + 'px rgba(0,0,0,' + (0.18 * (1 - t2)).toFixed(3) + ')';
         ptwFrameInner.style.transform = 'scale(' + (1.12 - 0.12 * t2).toFixed(4) + ')';
 
         const isGrowing = t2 > 0 && t2 < 1;
         if (isGrowing !== frameGrowing) {
           frameGrowing = isGrowing;
-          ptwFrame.style.willChange = isGrowing ? 'clip-path' : '';
+          ptwFrameMedia.style.willChange = isGrowing ? 'transform' : '';
           ptwFrameInner.style.willChange = isGrowing ? 'transform' : '';
         }
       }
 
+      function setNavForceHidden(v) {
+        if (v === navForceHidden) return;
+        navForceHidden = v;
+        if (v) hideNav(); // force it down the instant we cross the threshold, don't just block future shows
+      }
+
       function ptwLoop() {
-        smoothP += (rawP - smoothP) * 0.1; // factor within the spec's 0.08-0.12 range
+        const gh = ptwGrowthHold();
+        const growthP = clamp01(rawSelfProgress * (gh.growth + gh.hold) / gh.growth);
+        smoothP += (growthP - smoothP) * 0.1; // factor within the spec's 0.08-0.12 range
         applyStageB(smoothP);
+        setNavForceHidden(stIsActive && smoothP >= 0.3); // §6.1/§6.2: nav forced hidden once the video is visibly grown, through the hold
         requestAnimationFrame(ptwLoop);
       }
       requestAnimationFrame(ptwLoop);
@@ -1508,6 +1553,7 @@
   let navHidden = false;
 
   function showNav() {
+    if (navForceHidden) return; // §6.2: video grown/growing (p>=0.3) through the hold overrides scroll-up
     if (!navHidden) return;
     navHidden = false;
     nav.style.willChange = 'transform';
