@@ -672,6 +672,150 @@
     .ptw-slide { transition: opacity 300ms linear; }
   }
 
+  /* ==================== SECTION 3 — GALLERY (§6.3) ==================== */
+  /* Card size/gap are Figma-measured (node 3:150~154, the gray placeholder row): 412.252px card
+     width / 1440 = 28.6286vw; 28.140px gap (the 3 consistent ones; a 4th at 33.768px is a Figma
+     layout outlier, not used) / 1440 = 1.9542vw. Height uses aspect-ratio instead of an independent
+     vh figure so the card never distorts at non-1440:900 viewport ratios. */
+  .gallery-outer {
+    position: relative;
+    padding: 96px 0;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  .gallery-title {
+    margin: 0 0 48px;
+    padding: 0 clamp(24px, 4vw, 40px);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    font-size: clamp(22px, 2.78vw, 40px);
+    text-transform: uppercase;
+    letter-spacing: -0.005em;
+    line-height: 1.45;
+    color: var(--accent);
+  }
+  .gallery-title .reveal-mask { display: block; overflow: hidden; }
+  .gallery-title .reveal-inner { display: block; transform: translateY(100%); will-change: transform; }
+
+  .gallery-viewport {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    touch-action: pan-y; /* reserve vertical for native scroll; JS decides per-gesture on horizontal */
+  }
+
+  .gallery-rail {
+    display: flex;
+    align-items: center;
+    gap: 1.9542vw; /* same gap between the real track and its clone, for a seamless loop */
+    width: max-content;
+    cursor: grab;
+    will-change: transform; /* effectively always in motion pre-interaction (drift) or during drag/inertia */
+  }
+  .gallery-rail.is-dragging { cursor: grabbing; }
+
+  .gallery-track {
+    display: flex;
+    align-items: center;
+    gap: 1.9542vw;
+  }
+
+  .gallery-card {
+    position: relative;
+    flex: 0 0 auto;
+    width: 28.6286vw;
+    aspect-ratio: 412.252 / 555;
+    display: block;
+    text-decoration: none;
+    overflow: hidden;
+    /* Layer 3's distance-based scale/opacity/saturate is set every rAF frame from JS, tracking
+       scroll position directly — but the hover on/off toggle needs its own eased transition
+       (§6.3: saturate 400ms, grayscale 500ms). One shared CSS transition on transform/opacity/
+       filter serves both: it's a no-op lag on the already-smooth continuous per-frame values, and
+       gives the discrete hover change its required easing without a second, hand-rolled tween. */
+    transition: transform 400ms, opacity 400ms, filter 500ms;
+  }
+
+  .gallery-card-media {
+    position: absolute;
+    inset: 0;
+    background: #d9d9d9; /* Figma placeholder color — swap for a real <img>/<picture> in the same box later */
+  }
+
+  .gallery-card-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 6px;
+    padding: 24px;
+    background: linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0) 45%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 400ms;
+  }
+
+  .gallery-card-title,
+  .gallery-card-tags {
+    transform: translateY(12px);
+    opacity: 0;
+    transition: opacity 400ms, transform 400ms;
+  }
+  .gallery-card-title {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: clamp(16px, 1.4vw, 22px);
+    color: #fff;
+  }
+  .gallery-card-tags {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(12px, 0.9vw, 14px);
+    color: rgba(255, 255, 255, 0.8);
+    transition-delay: 40ms;
+  }
+  /* year + one-line description have no data yet (§5.1 待補) — .gallery-card-meta is kept empty but
+     present in the DOM so adding that copy later doesn't require touching the layout */
+  .gallery-card-meta:empty { display: none; }
+
+  @media (hover: hover) {
+    .gallery-card:hover .gallery-card-overlay,
+    .gallery-card:focus-visible .gallery-card-overlay {
+      opacity: 1;
+    }
+    .gallery-card:hover .gallery-card-title,
+    .gallery-card:hover .gallery-card-tags,
+    .gallery-card:focus-visible .gallery-card-title,
+    .gallery-card:focus-visible .gallery-card-tags {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .gallery-card:focus-visible {
+    outline: 1px solid var(--accent);
+    outline-offset: 8px;
+  }
+
+  /* ---------- RWD (§6.3 RWD) ---------- */
+  @media (max-width: 900px) {
+    .gallery-card { width: 55vw; }
+  }
+
+  @media (max-width: 600px) {
+    .gallery-card { width: 78vw; }
+  }
+
+  /* ---------- reduced motion: native horizontal scroll + scroll-snap, no JS physics at all ---------- */
+  @media (prefers-reduced-motion: reduce) {
+    .gallery-viewport { overflow-x: auto; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
+    .gallery-rail { cursor: auto; }
+    .gallery-card { scroll-snap-align: center; }
+    .gallery-card-overlay { transition: opacity 200ms; }
+    .gallery-card-title, .gallery-card-tags { transition: opacity 200ms; transform: none; }
+  }
+
   /* ==================== FOOTER ==================== */
   .site-footer {
     padding: clamp(16px, 3vw, 32px);
@@ -1164,6 +1308,121 @@
         </div>
       </div>
     </section>
+
+    <section class="gallery-outer" id="gallery">
+      <h2 class="gallery-title" id="gallery-title">
+        <span class="reveal-mask"><span class="reveal-inner">UIUX/ Product Design/ APP Design /</span></span>
+        <span class="reveal-mask"><span class="reveal-inner">CAD/ Craft/ Reflective Design +more</span></span>
+      </h2>
+
+      <div class="gallery-viewport" id="gallery-viewport">
+        <div class="gallery-rail" id="gallery-rail">
+        <div class="gallery-track" id="gallery-track">
+          <!-- 12 real cards (§5.1) — populated once, then cloned by JS for the seamless loop. The
+               clone gets aria-hidden + tabindex=-1 on every link (§6.3 可存取性 / 修訂六), so it's
+               never reachable by keyboard or announced by a screen reader. JS appends the clone as a
+               sibling of this track inside #gallery-rail, so the two sit side by side and share one
+               transform (see the gallery IIFE). -->
+          <a class="gallery-card" href="/work/sui-sui" data-slug="sui-sui">
+            <div class="gallery-card-media"></div>
+            <div class="gallery-card-overlay">
+              <div class="gallery-card-title">Sui-Sui</div>
+              <div class="gallery-card-tags">UI/UX, Health</div>
+              <div class="gallery-card-meta"></div>
+            </div>
+          </a>
+          <a class="gallery-card" href="/work/aero-v" data-slug="aero-v">
+            <div class="gallery-card-media"></div>
+            <div class="gallery-card-overlay">
+              <div class="gallery-card-title">AERO V</div>
+              <div class="gallery-card-tags">Product Design, Environment</div>
+              <div class="gallery-card-meta"></div>
+            </div>
+          </a>
+          <a class="gallery-card" href="/work/mvs" data-slug="mvs">
+            <div class="gallery-card-media"></div>
+            <div class="gallery-card-overlay">
+              <div class="gallery-card-title">MVS</div>
+              <div class="gallery-card-tags">Mobility Design, Health</div>
+              <div class="gallery-card-meta"></div>
+            </div>
+          </a>
+          <a class="gallery-card" href="/work/blossom-care" data-slug="blossom-care">
+            <div class="gallery-card-media"></div>
+            <div class="gallery-card-overlay">
+              <div class="gallery-card-title">Blossom Care</div>
+              <div class="gallery-card-tags">Product Design, Medical Design, Health</div>
+              <div class="gallery-card-meta"></div>
+            </div>
+          </a>
+          <a class="gallery-card" href="/work/ehms" data-slug="ehms">
+            <div class="gallery-card-media"></div>
+            <div class="gallery-card-overlay">
+              <div class="gallery-card-title">Healthcare Management System (eHMS)</div>
+              <div class="gallery-card-tags">UI/UX, Medical Design, Health</div>
+              <div class="gallery-card-meta"></div>
+            </div>
+          </a>
+          <a class="gallery-card" href="/work/dh2" data-slug="dh2">
+            <div class="gallery-card-media"></div>
+            <div class="gallery-card-overlay">
+              <div class="gallery-card-title">DH2</div>
+              <div class="gallery-card-tags">Product Design, Appliance Design, Health</div>
+              <div class="gallery-card-meta"></div>
+            </div>
+          </a>
+          <a class="gallery-card" href="/work/color-lab" data-slug="color-lab">
+            <div class="gallery-card-media"></div>
+            <div class="gallery-card-overlay">
+              <div class="gallery-card-title">Color Lab</div>
+              <div class="gallery-card-tags">Product Design, Children's Products</div>
+              <div class="gallery-card-meta"></div>
+            </div>
+          </a>
+          <a class="gallery-card" href="/work/cool-cook" data-slug="cool-cook">
+            <div class="gallery-card-media"></div>
+            <div class="gallery-card-overlay">
+              <div class="gallery-card-title">Cool Cook</div>
+              <div class="gallery-card-tags">Product Design, UI/UX, Children's Products</div>
+              <div class="gallery-card-meta"></div>
+            </div>
+          </a>
+          <a class="gallery-card" href="/work/co2-exting" data-slug="co2-exting">
+            <div class="gallery-card-media"></div>
+            <div class="gallery-card-overlay">
+              <div class="gallery-card-title">CO2-EXTING</div>
+              <div class="gallery-card-tags">Product Design, Public Architecture, Environment</div>
+              <div class="gallery-card-meta"></div>
+            </div>
+          </a>
+          <a class="gallery-card" href="/work/wanderbuddy" data-slug="wanderbuddy">
+            <div class="gallery-card-media"></div>
+            <div class="gallery-card-overlay">
+              <div class="gallery-card-title">WanderBuddy</div>
+              <div class="gallery-card-tags">UI/UX</div>
+              <div class="gallery-card-meta"></div>
+            </div>
+          </a>
+          <a class="gallery-card" href="/work/trace-of-conversation" data-slug="trace-of-conversation">
+            <div class="gallery-card-media"></div>
+            <div class="gallery-card-overlay">
+              <div class="gallery-card-title">Trace of Conversation</div>
+              <div class="gallery-card-tags">Reflective Design, Craft</div>
+              <div class="gallery-card-meta"></div>
+            </div>
+          </a>
+          <a class="gallery-card" href="/work/conversation" data-slug="conversation">
+            <div class="gallery-card-media"></div>
+            <div class="gallery-card-overlay">
+              <div class="gallery-card-title">Conversation</div>
+              <div class="gallery-card-tags">Research, Publication</div>
+              <div class="gallery-card-meta"></div>
+            </div>
+          </a>
+        </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer class="site-footer" id="site-footer">
@@ -1546,6 +1805,256 @@
 
       setInterval(advance, 5000);
     }
+  })();
+
+  /* ==================== SECTION 3 — GALLERY (§6.3) ==================== */
+  (function () {
+    const galleryOuter = document.getElementById('gallery');
+    const galleryTitle = document.getElementById('gallery-title');
+    const titleLines = galleryTitle.querySelectorAll('.reveal-inner');
+    const viewport = document.getElementById('gallery-viewport');
+    const rail = document.getElementById('gallery-rail');
+    const track = document.getElementById('gallery-track');
+
+    /* click preventDefault applies regardless of reduced-motion (§6.3 點擊/導航 暫行處理) — detail
+       pages don't exist yet, but the <a href> itself stays real (right-click/open-in-new-tab/crawl
+       all still work), only the primary click is suppressed. */
+    function suppressNav(a) { a.addEventListener('click', function (e) { e.preventDefault(); }); }
+    track.querySelectorAll('.gallery-card').forEach(suppressNav);
+
+    /* title entrance — masked line reveal, once, same pattern as every other section (§6.3 整體體驗) */
+    if (reduceMotion) {
+      gsap.set(titleLines, { y: '0%' });
+    } else {
+      ScrollTrigger.create({
+        trigger: galleryOuter,
+        start: 'top 80%',
+        once: true,
+        onEnter: function () {
+          const tl = gsap.timeline();
+          tl.to(titleLines[0], { y: '0%', duration: 0.75, ease: mainEase }, 0);
+          tl.to(titleLines[1], { y: '0%', duration: 0.75, ease: mainEase }, 0.13);
+        }
+      });
+    }
+
+    /* reduced motion: native horizontal scroll + scroll-snap (CSS) does the rest — no drift, no
+       drag physics, no per-frame distance styling, no shared-element/hover choreography (§6.3 可存取性) */
+    if (reduceMotion) return;
+
+    /* ---------- seamless infinite loop: clone the track on BOTH sides, fully inert for a11y
+       (§6.3 修訂六) — aria-hidden on each clone container, tabindex=-1 on every link inside them,
+       so neither is ever reachable by keyboard or announced by a screen reader. Two clones (not
+       one) so that centering ANY real card — including the first/last, right at the seam — always
+       has real content to show either side of it; with only a trailing clone, centering the very
+       first card left nothing to show on its left, and the fix was silently centering the *clone's*
+       copy instead of the real (focused) element, leaving the focus-visible ring off-screen. ---------- */
+    function makeInertClone(id) {
+      const c = track.cloneNode(true);
+      c.id = id;
+      c.setAttribute('aria-hidden', 'true');
+      c.querySelectorAll('a').forEach(function (a) {
+        a.setAttribute('tabindex', '-1');
+        suppressNav(a);
+      });
+      return c;
+    }
+    const prevClone = makeInertClone('gallery-track-clone-prev');
+    const nextClone = makeInertClone('gallery-track-clone-next');
+    track.before(prevClone);
+    track.after(nextClone);
+
+    const realCards = Array.prototype.slice.call(track.querySelectorAll('.gallery-card'));
+    const allCards = Array.prototype.slice.call(rail.querySelectorAll('.gallery-card'));
+    const allMedia = allCards.map(function (c) { return c.querySelector('.gallery-card-media'); });
+
+    /* modulo cycle length = distance from the start of the real track to the start of the next
+       clone — shifting by exactly this much makes a clone land exactly where the real track
+       started, which is what makes the loop seamless regardless of how the gap/card-width math is
+       tuned. Drift/drag/inertia use this to wrap offsetX into a single canonical (-cycle, 0] range;
+       keyboard centering (below) instead picks whichever multiple of `cycle` keeps the REAL card
+       on screen, since prevClone/nextClone mean that's always possible without a canonical-range
+       restriction. */
+    let cycle = 0;
+    function measureCycle() { cycle = nextClone.offsetLeft - track.offsetLeft; }
+    measureCycle();
+    window.addEventListener('resize', measureCycle);
+
+    function wrap(x) {
+      if (cycle <= 0) return 0;
+      x = x % cycle;
+      if (x > 0) x -= cycle;
+      return x;
+    }
+
+    let offsetX = 0; // rail translateX in px — starts showing prevClone, visually identical to the real track
+
+    /* ---------- Layer 1: environment auto-drift — stops once, never resumes (§6.3 修訂三) ---------- */
+    const DRIFT_PX_PER_MS = -22 / 1000; // within the spec's 18-25px/s range, leftward
+    const DRIFT_FADE_MS = 600;
+    let hasInteracted = false;
+    let driftFadeStart = null;
+    function stopDriftForever() {
+      if (hasInteracted) return;
+      hasInteracted = true;
+      driftFadeStart = performance.now();
+    }
+    viewport.addEventListener('mouseenter', stopDriftForever); // "游標進入" alone counts, per 修訂三
+
+    /* ---------- Layer 2: user-driven horizontal movement (§6.3 修訂一) ----------
+       Vertical-vs-horizontal intent is decided from the first few px of movement: if the vertical
+       component is larger, this is a page-scroll gesture — release it back to the browser
+       untouched. Only once the horizontal component is clearly larger do we take over. */
+    let velocity = 0; // px/ms, carries into inertia after release
+    let pointerActive = false, dragDeciding = false, dragConfirmed = false;
+    let startX = 0, startY = 0, startOffsetX = 0, lastX = 0, lastT = 0;
+    const DIRECTION_DECIDE_PX = 6;
+
+    viewport.addEventListener('pointerdown', function (e) {
+      if (e.button !== undefined && e.button !== 0) return;
+      pointerActive = true;
+      dragDeciding = true;
+      dragConfirmed = false;
+      startX = e.clientX; startY = e.clientY;
+      startOffsetX = offsetX;
+      lastX = e.clientX; lastT = performance.now();
+      velocity = 0;
+    });
+
+    window.addEventListener('pointermove', function (e) {
+      if (!pointerActive) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+
+      if (dragDeciding) {
+        if (Math.abs(dx) < DIRECTION_DECIDE_PX && Math.abs(dy) < DIRECTION_DECIDE_PX) return;
+        dragDeciding = false;
+        if (Math.abs(dy) > Math.abs(dx)) { pointerActive = false; return; } // vertical intent: hands off
+        dragConfirmed = true;
+        stopDriftForever();
+        rail.classList.add('is-dragging');
+        if (viewport.setPointerCapture && e.pointerId != null) {
+          try { viewport.setPointerCapture(e.pointerId); } catch (err) {}
+        }
+      }
+
+      if (!dragConfirmed) return;
+      e.preventDefault();
+      const now = performance.now();
+      const dt = Math.max(1, now - lastT);
+      velocity = (e.clientX - lastX) / dt;
+      lastX = e.clientX; lastT = now;
+      offsetX = wrap(startOffsetX + dx);
+    }, { passive: false });
+
+    function endDrag() {
+      if (dragConfirmed) rail.classList.remove('is-dragging');
+      pointerActive = false; dragDeciding = false; dragConfirmed = false;
+    }
+    window.addEventListener('pointerup', endDrag);
+    window.addEventListener('pointercancel', endDrag);
+
+    /* trackpad/mouse horizontal wheel gesture — same direction test as drag */
+    viewport.addEventListener('wheel', function (e) {
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return; // vertical-dominant: let the page scroll
+      e.preventDefault();
+      stopDriftForever();
+      velocity = 0;
+      offsetX = wrap(offsetX - e.deltaX);
+    }, { passive: false });
+
+    /* keyboard: focusing a card (Tab / shift+Tab) centers it (§6.3 點擊/導航). Deliberately NOT
+       passed through wrap() — that would fold the target back into the single (-cycle, 0] canonical
+       range and could land on a *clone's* copy of the card instead of the real (focused) one,
+       leaving the :focus-visible ring off-screen. card.offsetLeft already accounts for whatever
+       precedes it in the rail (prevClone included), so this directly targets the real element. */
+    realCards.forEach(function (card) {
+      card.addEventListener('focus', function () {
+        stopDriftForever();
+        const target = (viewport.clientWidth - card.offsetWidth) / 2 - card.offsetLeft;
+        const proxy = { v: offsetX };
+        gsap.to(proxy, {
+          v: target, duration: 0.6, ease: mainEase,
+          onUpdate: function () { offsetX = proxy.v; }
+        });
+      });
+    });
+
+    /* ---------- hover (desktop only — §6.3 Hover 互動) ---------- */
+    let hoveredCard = null;
+    allCards.forEach(function (card) {
+      card.addEventListener('mouseenter', function () {
+        hoveredCard = card;
+        card.style.willChange = 'transform, filter, opacity';
+      });
+      card.addEventListener('mouseleave', function () {
+        if (hoveredCard === card) hoveredCard = null;
+        card.style.willChange = '';
+      });
+    });
+
+    /* ---------- per-frame: drift/inertia integration + Layer 3 distance styling + hover ---------- */
+    const INERTIA_DECAY = 0.94; // per ~16ms frame — free stop, no snap-to-card (§6.3 修訂二)
+    let lastFrame = performance.now();
+
+    function frame(now) {
+      const dt = Math.min(48, now - lastFrame);
+      lastFrame = now;
+
+      if (dragConfirmed) {
+        // position already driven directly by pointermove above
+      } else if (Math.abs(velocity) > 0.005) {
+        offsetX = wrap(offsetX + velocity * dt);
+        velocity *= Math.pow(INERTIA_DECAY, dt / 16);
+      } else if (driftFadeStart !== null) {
+        const t = Math.min(1, (now - driftFadeStart) / DRIFT_FADE_MS);
+        offsetX = wrap(offsetX + DRIFT_PX_PER_MS * (1 - t) * dt);
+        if (t >= 1) driftFadeStart = null; // fully stopped — never resumes
+      } else if (!hasInteracted) {
+        offsetX = wrap(offsetX + DRIFT_PX_PER_MS * dt);
+      }
+
+      rail.style.transform = 'translateX(' + offsetX.toFixed(2) + 'px)';
+
+      const vpRect = viewport.getBoundingClientRect();
+      const centerX = vpRect.left + vpRect.width / 2;
+      const maxDist = vpRect.width / 2 + (allCards[0] ? allCards[0].offsetWidth : 0);
+
+      for (let i = 0; i < allCards.length; i++) {
+        const card = allCards[i];
+        const rect = card.getBoundingClientRect();
+        const cardCenter = rect.left + rect.width / 2;
+        const dist = Math.abs(cardCenter - centerX);
+        const d = maxDist > 0 ? Math.min(1, dist / maxDist) : 0;
+
+        const baseScale = 1 - 0.10 * d;   // Layer 3: scale 1.0 -> 0.90
+        const baseOpacity = 1 - 0.35 * d; // Layer 3: opacity 1.0 -> 0.65
+        const baseSaturate = 100 - 25 * d; // Layer 3: saturate 100% -> 75%
+
+        const isHovered = card === hoveredCard;
+        const anyHovered = hoveredCard !== null;
+
+        let scale = baseScale, opacity = baseOpacity, saturate = baseSaturate, gray = 0;
+        if (isHovered) {
+          scale = baseScale * 1.04; opacity = 1; saturate = 100; gray = 0;
+        } else if (anyHovered) {
+          scale = baseScale * 0.96; opacity = 0.45; gray = 100; // saturate stays distance-based (§6.3 修訂七)
+        }
+
+        card.style.transform = 'scale(' + scale.toFixed(4) + ')';
+        card.style.opacity = opacity.toFixed(3);
+        card.style.filter = 'saturate(' + saturate.toFixed(2) + '%) grayscale(' + gray + '%)';
+
+        const media = allMedia[i];
+        if (media) {
+          const sign = cardCenter < centerX ? 1 : -1; // parallax opposite the track's own motion
+          media.style.transform = 'translateX(' + (sign * 16 * d).toFixed(2) + 'px)';
+        }
+      }
+
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
   })();
 
   /* ==================== NAV ==================== */
