@@ -29,6 +29,11 @@
     --footer-muted: #909597;
     --footer-rule: #8F8F8F;
     --footer-circle-stroke: #0B0B0B;
+
+    /* Gallery card height — set from JS (computeGalleryCardMetrics, §6.3 十) once the title block's
+       real rendered height is known; this is only the pre-JS fallback so there's no flash of an
+       unsized card (moot in practice — the loading overlay covers first paint anyway). */
+    --gallery-card-h: 61.67vh;
   }
 
   * { box-sizing: border-box; }
@@ -740,7 +745,12 @@
   .gallery-card {
     position: relative;
     flex: 0 0 auto;
-    width: 28.6286vw;
+    /* 2026-08-09: height-driven (not width-driven) on desktop, so "title block + one row of cards"
+       can be fit to exactly 100vh — see computeGalleryCardMetrics() (§6.3 十). Width follows from
+       aspect-ratio, so the card never distorts. RWD (<=900px) flips this back to width-driven,
+       unchanged from before. */
+    width: auto;
+    height: var(--gallery-card-h);
     aspect-ratio: 412.252 / 555;
     display: block;
     text-decoration: none;
@@ -816,11 +826,12 @@
 
   /* ---------- RWD (§6.3 RWD) ---------- */
   @media (max-width: 900px) {
-    .gallery-card { width: 55vw; }
+    /* back to width-driven — the 100vh-fit computation (§6.3 十) is desktop-only, unchanged here */
+    .gallery-card { width: 55vw; height: auto; }
   }
 
   @media (max-width: 600px) {
-    .gallery-card { width: 78vw; }
+    .gallery-card { width: 78vw; height: auto; }
   }
 
   /* ---------- reduced motion: native horizontal scroll + scroll-snap, no JS physics at all ---------- */
@@ -952,14 +963,13 @@
 
   /* ---------- scroll-to-next-section button (new, 2026-08-09) ----------
      Shares the .back-to-top class for all circle/border/hover/icon styling — no separate visual
-     component, so future style edits to one apply to both, per instruction. Only position/visibility
-     differ, scoped under this modifier class. Vertical centering uses a fixed `top` offset (half the
-     shared 63px diameter) instead of `transform: translateY(-50%)`, so it doesn't fight
-     .back-to-top:hover's own `transform: scale(1.06)` (transform doesn't compose across separate
-     rules — whichever applies last would silently replace the other). */
+     component, so future style edits to one apply to both, per instruction. Default appearance is
+     already .back-to-top's own default (1px outline, transparent, ink arrow) — solid red only shows
+     on hover, no override needed here. Position 2026-08-09 feedback: bottom-right instead of
+     vertically centered, `bottom: 15vh` (not flush with the bottom edge). */
   .scroll-next-btn {
     position: fixed;
-    top: calc(50% - 31.5px);
+    bottom: 15vh;
     right: clamp(20px, 2.8vw, 40px); /* matches .footer-frame's own right padding, so it lines up with back-to-top's own resting position */
     z-index: 900; /* below nav's 1000 (nav always topmost), above page content */
     opacity: 0;
@@ -1660,6 +1670,35 @@
     return { growth: 180, hold: 150 };
   }
 
+  /* Gallery card height (§6.3 十, 2026-08-09): fit "title block + one row of cards" into exactly
+     100vh so landing at the top of the section (via the scroll-to-next-section button or the
+     boundary snap, both below) shows a complete row, not cards cut off at the bottom edge. Falls
+     back to a fixed 70vh — and shifts the landing anchor past the title — if the fitted height would
+     go below 55vh (too squashed to read as a work-showcase card). Desktop only (>900px); tablet/
+     mobile keep their own fixed-vw card width (§6.3 RWD), unrelated to this. Hoisted (not inside the
+     Gallery IIFE) so the button/snap code below can also call it — idempotent, safe to call anytime. */
+  function computeGalleryCardMetrics() {
+    if (window.innerWidth <= 900) return { usedFallback: false, titleBlockH: 0 };
+    const galleryOuter = document.getElementById('gallery');
+    const galleryViewport = document.getElementById('gallery-viewport');
+    const titleBlockH = galleryViewport.getBoundingClientRect().top - galleryOuter.getBoundingClientRect().top;
+    const fitH = window.innerHeight - titleBlockH;
+    const MIN_VH = 0.55, FALLBACK_VH = 0.70;
+    const usedFallback = fitH < window.innerHeight * MIN_VH;
+    const cardH = usedFallback ? window.innerHeight * FALLBACK_VH : fitH;
+    document.documentElement.style.setProperty('--gallery-card-h', cardH.toFixed(2) + 'px');
+    return { cardH: cardH, titleBlockH: titleBlockH, usedFallback: usedFallback };
+  }
+
+  /* Gallery's landing anchor for both the next-section button and the boundary snap: the fallback
+     path skips past the title block entirely (§6.3 十 fallback: "箭頭的落點往下偏移，讓標題部分捲出畫面"),
+     landing where the (now fully visible) card row itself begins. */
+  function getGalleryAnchorY() {
+    const outerTop = document.getElementById('gallery').offsetTop;
+    const m = computeGalleryCardMetrics();
+    return m.usedFallback ? outerTop + m.titleBlockH : outerTop;
+  }
+
   (function () {
     const ptwSection = document.getElementById('practice-to-work');
     const ptwStage = document.getElementById('ptw-stage');
@@ -1939,10 +1978,15 @@
        keyboard centering (below) instead picks whichever multiple of `cycle` keeps the REAL card
        on screen, since prevClone/nextClone mean that's always possible without a canonical-range
        restriction. */
+    computeGalleryCardMetrics(); // fit card height before measuring cycle width — see its own comment above (§6.3 十)
+
     let cycle = 0;
     function measureCycle() { cycle = nextClone.offsetLeft - track.offsetLeft; }
     measureCycle();
-    window.addEventListener('resize', measureCycle);
+    window.addEventListener('resize', function () {
+      computeGalleryCardMetrics();
+      measureCycle();
+    });
 
     function wrap(x) {
       if (cycle <= 0) return 0;
@@ -2347,10 +2391,11 @@
     const gh = ptwGrowthHold();
     const collageStart = ptwSection.offsetTop;
     const holdStart = collageStart + window.innerHeight * (gh.growth / 100);
-    return [0, collageStart, holdStart, document.getElementById('gallery').offsetTop, footer.offsetTop];
+    return [0, collageStart, holdStart, getGalleryAnchorY(), footer.offsetTop];
   }
 
   scrollNextBtn.addEventListener('click', function () {
+    cancelSnap(); // the click's own scrollTo should own the animation outright, not race a pending snap
     const anchors = getNextSectionAnchors();
     const current = lenis.scroll;
     const EPS = 4; // px slack so landing exactly on an anchor still advances to the next one
@@ -2364,6 +2409,64 @@
        smoothly instead of jump-cutting; shortened under reduced motion like the rest of the site. */
     lenis.scrollTo(target, { duration: reduceMotion ? 0.3 : 1.2, easing: mainEase });
   });
+
+  /* ---------- section-boundary scroll-snap ("brake", new item, 2026-08-09) ----------
+     If the user stops scrolling within ±25vh of one of the same five anchors the button above jumps
+     between, ease the rest of the way there — mouse/trackpad scrolling gives no feedback about where
+     a section boundary actually is, so it's easy to overshoot and rest half inside §6.2's video-grow
+     or barely into Gallery. Anywhere else (mid-animation, deliberately) is left alone. Any fresh user
+     gesture during an in-flight snap cancels it immediately — this must never fight the user for
+     control of the scroll. */
+  let snapIdleTimer = null;
+  let snapActive = false;
+
+  function cancelSnap() {
+    if (!snapActive) return;
+    snapActive = false;
+    lenis.scrollTo(lenis.scroll, { duration: 0 }); // re-target to the current (already-interpolated) position — halts the in-flight tween without a visible jump
+  }
+
+  if (!reduceMotion) {
+    const SNAP_IDLE_MS = 150;
+    const SNAP_CAPTURE_VH = 25;
+    const SNAP_DURATION_S = 0.6;
+
+    function trySnap() {
+      if (snapActive) return;
+      const anchors = getNextSectionAnchors();
+      const current = lenis.scroll;
+      const captureRange = window.innerHeight * (SNAP_CAPTURE_VH / 100);
+      let nearest = null, nearestDist = Infinity;
+      anchors.forEach(function (a) {
+        const d = Math.abs(a - current);
+        if (d < nearestDist) { nearestDist = d; nearest = a; }
+      });
+      if (nearest === null || nearestDist > captureRange || nearestDist < 1) return; // nothing to do — either out of range, or already there
+      snapActive = true;
+      lenis.scrollTo(nearest, {
+        duration: SNAP_DURATION_S,
+        easing: mainEase,
+        onComplete: function () { snapActive = false; }
+      });
+    }
+
+    /* schedule/reschedule the idle check on every real scroll tick — including the ones the snap's
+       own scrollTo produces, which is fine, trySnap() is a no-op while snapActive is already true */
+    lenis.on('scroll', function () {
+      if (snapIdleTimer) clearTimeout(snapIdleTimer);
+      snapIdleTimer = setTimeout(trySnap, SNAP_IDLE_MS);
+    });
+
+    /* raw input gestures (not lenis's own 'scroll' event, which fires identically for both
+       user-driven and programmatic scrollTo-driven movement and so can't tell them apart) — this is
+       what actually distinguishes "the user grabbed the wheel again" from the snap's own motion */
+    ['wheel', 'touchstart', 'pointerdown'].forEach(function (evt) {
+      window.addEventListener(evt, function () {
+        if (snapIdleTimer) { clearTimeout(snapIdleTimer); snapIdleTimer = null; }
+        cancelSnap();
+      }, { passive: true });
+    });
+  }
 
   /* ==================== SHARED: underline wipe hover (nav links + footer links) ==================== */
   function bindUnderline(el, options) {
