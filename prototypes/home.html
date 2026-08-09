@@ -500,12 +500,14 @@
 
   /* height = growth distance + hold distance + 100vh (the sticky viewport itself, per the
      containerHeight = pinnedDistance + 100vh identity already established for this section).
-     Growth distance (320vh) is UNCHANGED from before — the hold segment is purely additive, see
-     the JS growth/hold breakdown comment near the ScrollTrigger setup for the full old-p/new-p
-     conversion table. */
+     Growth distance shortened 320vh->180vh (2026-08-09, "捲動距離太長"); hold stays 150vh (deliberate
+     dwell time on the video). All of Stage B's internal timings (t1/t2 in applyStageB) are already
+     expressed as FRACTIONS of the growth phase, not absolute vh, so this change needs no threshold
+     recalculation there — see the JS growth/hold breakdown comment near the ScrollTrigger setup for
+     the full old-p/new-p absolute-scroll conversion table. */
   .ptw-outer {
     position: relative;
-    height: 570vh; /* 320vh growth (unchanged pacing) + 150vh hold + 100vh viewport */
+    height: 430vh; /* 180vh growth (shortened, faster pacing accepted as tradeoff) + 150vh hold + 100vh viewport */
   }
 
   .ptw-stage {
@@ -660,13 +662,13 @@
 
   /* ---------- RWD (§6.2 七) ---------- */
   @media (max-width: 900px) {
-    .ptw-outer { height: 480vh; } /* 260vh growth (unchanged) + 120vh hold (proportional) + 100vh */
+    .ptw-outer { height: 366vh; } /* 146vh growth (180/320 ratio of the old 260vh) + 120vh hold (unchanged) + 100vh */
     /* tablet: three most prominent figures stay, rest hide */
     .ptw-fig-dw2, .ptw-fig-dw3, .ptw-fig-grass, .ptw-fig-red { display: none; }
   }
 
   @media (max-width: 600px) {
-    .ptw-outer { height: 335vh; } /* 160vh growth (unchanged) + 75vh hold (proportional) + 100vh */
+    .ptw-outer { height: 265vh; } /* 90vh growth (180/320 ratio of the old 160vh) + 75vh hold (unchanged) + 100vh */
     /* mobile: only two figures, moved above/below the frame rather than around it (§6.2 七) */
     .ptw-fig-dw5, .ptw-fig-orange, .ptw-fig-pink, .ptw-fig-yellow, .ptw-fig-leaf { display: none; }
     .ptw-fig-dw31 { left: 30%; top: -18%; width: 40%; height: auto; }
@@ -920,6 +922,11 @@
     transform: scale(1.06);
   }
 
+  .back-to-top:focus-visible {
+    outline: 1px solid var(--accent);
+    outline-offset: 4px;
+  }
+
   .btt-icon-wrap {
     /* traced from assets/svg/arrow in circle.png: arrow occupies ~45% of the circle's diameter */
     width: 28px;
@@ -941,6 +948,32 @@
   .back-to-top:focus-visible .btt-icon {
     stroke: var(--bg);
     transform: translateY(-4px);
+  }
+
+  /* ---------- scroll-to-next-section button (new, 2026-08-09) ----------
+     Shares the .back-to-top class for all circle/border/hover/icon styling — no separate visual
+     component, so future style edits to one apply to both, per instruction. Only position/visibility
+     differ, scoped under this modifier class. Vertical centering uses a fixed `top` offset (half the
+     shared 63px diameter) instead of `transform: translateY(-50%)`, so it doesn't fight
+     .back-to-top:hover's own `transform: scale(1.06)` (transform doesn't compose across separate
+     rules — whichever applies last would silently replace the other). */
+  .scroll-next-btn {
+    position: fixed;
+    top: calc(50% - 31.5px);
+    right: clamp(20px, 2.8vw, 40px); /* matches .footer-frame's own right padding, so it lines up with back-to-top's own resting position */
+    z-index: 900; /* below nav's 1000 (nav always topmost), above page content */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 300ms ease-out, background 400ms ease-out, border-color 400ms ease-out, transform 400ms ease-out;
+  }
+
+  .scroll-next-btn.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .scroll-next-btn .btt-icon-wrap {
+    transform: rotate(180deg); /* flips the shared up-arrow glyph to point down; also flips its hover translateY(-4px) into a downward nudge for free, same shared rule */
   }
 
   .footer-divider {
@@ -1178,6 +1211,20 @@
       <li><a href="/contact" class="link-underline" data-hover="nav">Contact Me</a></li>
     </ul>
   </nav>
+
+  <button
+    class="back-to-top scroll-next-btn"
+    id="scroll-next-btn"
+    type="button"
+    aria-label="Jump to next section"
+  >
+    <span class="btt-icon-wrap">
+      <svg class="btt-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <line x1="12" y1="19" x2="12" y2="5"></line>
+        <polyline points="5 12 12 5 19 12"></polyline>
+      </svg>
+    </span>
+  </button>
 
   <div class="proto-toggle-label">Prototype only — behavior switch</div>
   <div class="proto-toggle" role="group" aria-label="Nav behavior mode">
@@ -1601,6 +1648,18 @@
      (not inside the Section 2 IIFE below) so the NAV block further down can read it — see setNavForceHidden. */
   let navForceHidden = false;
 
+  /* growth/hold split, in vh, per breakpoint. Declared out here (not inside the Section 2 IIFE) so the
+     scroll-to-next-section button further down can also read it, to compute the hold-start anchor.
+     "growth" shortened 2026-08-09 (320/260/160 -> 180/146/90, desktop given directly, tablet/mobile
+     scaled by the same 180/320 ratio); "hold" stays unchanged (150/120/75 — deliberate dwell time on
+     the video). Matches the .ptw-outer heights set in CSS:
+       desktop: 180 + 150 + 100 = 430vh   tablet: 146 + 120 + 100 = 366vh   mobile: 90 + 75 + 100 = 265vh */
+  function ptwGrowthHold() {
+    if (window.innerWidth <= 600) return { growth: 90, hold: 75 };
+    if (window.innerWidth <= 900) return { growth: 146, hold: 120 };
+    return { growth: 180, hold: 150 };
+  }
+
   (function () {
     const ptwSection = document.getElementById('practice-to-work');
     const ptwStage = document.getElementById('ptw-stage');
@@ -1665,17 +1724,8 @@
     /* ---------- Stage B: scroll timeline driven by progress p, with an extra manual lerp for
        inertial weight on top of ScrollTrigger's own scrub:1 (§6.2 二、六) ---------- */
     if (!reduceMotion) {
-      /* growth/hold split, in vh, per breakpoint. "growth" is UNCHANGED from before this feature —
-         same distance as when the container was 420/360/260vh — "hold" is the new segment appended
-         after it (150vh desktop, scaled proportionally at the other two breakpoints: 150/320 of each
-         breakpoint's own growth distance). Matches the .ptw-outer heights set in CSS:
-           desktop: 320 + 150 + 100 = 570vh   tablet: 260 + 120 + 100 = 480vh   mobile: 160 + 75 + 100 = 335vh */
-      function ptwGrowthHold() {
-        if (window.innerWidth <= 600) return { growth: 160, hold: 75 };
-        if (window.innerWidth <= 900) return { growth: 260, hold: 120 };
-        return { growth: 320, hold: 150 };
-      }
-
+      /* growth/hold split now comes from the shared, hoisted ptwGrowthHold() (declared above, before
+         this IIFE) — see its own comment for the current per-breakpoint values. */
       let rawSelfProgress = 0;
       let stIsActive = false;
       let smoothP = 0;
@@ -2247,6 +2297,73 @@
     );
     observer.observe(footer);
   }
+
+  /* ---------- scroll-to-next-section button (new, 2026-08-09) ---------- */
+  const scrollNextBtn = document.getElementById('scroll-next-btn');
+
+  let nextBtnLoadingDone = false;
+  let nextBtnReachedFooter = false;
+
+  function updateNextBtnVisibility() {
+    scrollNextBtn.classList.toggle('is-visible', nextBtnLoadingDone && !nextBtnReachedFooter);
+  }
+
+  /* deferred to a rAF callback (not checked synchronously here) so it only runs after the loading
+     sequence's own `document.documentElement.style.overflow = 'hidden'` lock — set further down in
+     script order — has actually taken effect; checking synchronously at this point in the script
+     would race ahead of that line and wrongly read the pre-lock '' value. */
+  function pollLoadingUnlock() {
+    if (document.documentElement.style.overflow !== 'hidden') {
+      nextBtnLoadingDone = true;
+      updateNextBtnVisibility();
+      return;
+    }
+    requestAnimationFrame(pollLoadingUnlock);
+  }
+  requestAnimationFrame(pollLoadingUnlock);
+
+  /* hidden once scrolled to the footer (last section — nothing left to jump to); reappears if the
+     user scrolls back up away from it. Reuses the same IntersectionObserver pattern as the footer's
+     own entrance trigger above, but persistent (no disconnect). */
+  const nextBtnFooterObserver = new IntersectionObserver(
+    function (entries) {
+      entries.forEach(function (entry) {
+        nextBtnReachedFooter = entry.isIntersecting;
+        updateNextBtnVisibility();
+      });
+    },
+    { rootMargin: '0px 0px -20% 0px', threshold: 0 }
+  );
+  nextBtnFooterObserver.observe(footer);
+
+  /* anchors, in order: Hero top / §6.2 collage-start / §6.2 hold-start / Gallery / Footer. Recomputed
+     on every click (not cached) so a resize crossing a breakpoint — which changes ptwGrowthHold()'s
+     growth value — stays correct. The hold-start anchor is its own stop (not folded into collage-start
+     or skipped straight to Gallery): jumping from mid-growth should land on the fully-grown video
+     (what the hold segment exists to show), and jumping from inside the hold should advance to
+     Gallery, not re-trigger growth. */
+  function getNextSectionAnchors() {
+    const ptwSection = document.getElementById('practice-to-work');
+    const gh = ptwGrowthHold();
+    const collageStart = ptwSection.offsetTop;
+    const holdStart = collageStart + window.innerHeight * (gh.growth / 100);
+    return [0, collageStart, holdStart, document.getElementById('gallery').offsetTop, footer.offsetTop];
+  }
+
+  scrollNextBtn.addEventListener('click', function () {
+    const anchors = getNextSectionAnchors();
+    const current = lenis.scroll;
+    const EPS = 4; // px slack so landing exactly on an anchor still advances to the next one
+    let target = anchors[anchors.length - 1];
+    for (let i = 0; i < anchors.length; i++) {
+      if (anchors[i] > current + EPS) { target = anchors[i]; break; }
+    }
+    /* must go through lenis.scrollTo, never native scrollTo — otherwise it fights the shared Lenis
+       instance and jitters (same rule the back-to-top button above already follows). 1200ms so the
+       scrubbed animations it passes through (§6.2 collage disperse + video grow) fast-forward
+       smoothly instead of jump-cutting; shortened under reduced motion like the rest of the site. */
+    lenis.scrollTo(target, { duration: reduceMotion ? 0.3 : 1.2, easing: mainEase });
+  });
 
   /* ==================== SHARED: underline wipe hover (nav links + footer links) ==================== */
   function bindUnderline(el, options) {
