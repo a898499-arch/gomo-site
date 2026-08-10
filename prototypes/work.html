@@ -861,6 +861,125 @@
     </div>
   </footer>
 
+  <!-- ==================== 作品資料（§6.5）====================
+       2026-08-11：改為內嵌 JSON，讓 work.html 用 file:// 直接開也能運作（fetch() 在
+       file:// origin 下會被瀏覽器 CORS 政策擋掉）。所有作品資料集中在這一個 script
+       區塊裡編輯，不要散落到別處——之後搬進 Next.js 時，把這個區塊的內容原樣搬回
+       獨立的 data/works.json（該檔案仍保留在 repo 裡作為之後遷移的範本，目前這份
+       內嵌版本才是實際生效的來源，兩者手動編輯時要同步）。 -->
+  <script type="application/json" id="works-data">
+[
+  {
+    "slug": "sui-sui",
+    "title": "Sui-Sui",
+    "description": "Project description coming soon.",
+    "tags": ["UI/UX", "Health"],
+    "group": ["product"],
+    "year": null,
+    "cover": ""
+  },
+  {
+    "slug": "aero-v",
+    "title": "AERO V",
+    "description": "Project description coming soon.",
+    "tags": ["Product Design", "Environment"],
+    "group": ["product"],
+    "year": null,
+    "cover": ""
+  },
+  {
+    "slug": "mvs",
+    "title": "MVS",
+    "description": "Project description coming soon.",
+    "tags": ["Mobility Design", "Health"],
+    "group": ["product"],
+    "year": null,
+    "cover": ""
+  },
+  {
+    "slug": "blossom-care",
+    "title": "Blossom Care",
+    "description": "Project description coming soon.",
+    "tags": ["Product Design", "Medical Design", "Health"],
+    "group": ["product"],
+    "year": null,
+    "cover": ""
+  },
+  {
+    "slug": "ehms",
+    "title": "Healthcare Management System (eHMS)",
+    "description": "Project description coming soon.",
+    "tags": ["UI/UX", "Medical Design", "Health"],
+    "group": ["product"],
+    "year": null,
+    "cover": ""
+  },
+  {
+    "slug": "dh2",
+    "title": "DH2",
+    "description": "Project description coming soon.",
+    "tags": ["Product Design", "Appliance Design", "Health"],
+    "group": ["product"],
+    "year": null,
+    "cover": ""
+  },
+  {
+    "slug": "color-lab",
+    "title": "Color Lab",
+    "description": "Project description coming soon.",
+    "tags": ["Product Design", "Children's Products"],
+    "group": ["product"],
+    "year": null,
+    "cover": ""
+  },
+  {
+    "slug": "cool-cook",
+    "title": "Cool Cook",
+    "description": "Project description coming soon.",
+    "tags": ["Product Design", "UI/UX", "Children's Products"],
+    "group": ["product"],
+    "year": null,
+    "cover": ""
+  },
+  {
+    "slug": "co2-exting",
+    "title": "CO2-EXTING",
+    "description": "Project description coming soon.",
+    "tags": ["Product Design", "Public Architecture", "Environment"],
+    "group": ["product"],
+    "year": null,
+    "cover": ""
+  },
+  {
+    "slug": "wanderbuddy",
+    "title": "WanderBuddy",
+    "description": "Project description coming soon.",
+    "tags": ["UI/UX"],
+    "group": ["product"],
+    "year": null,
+    "cover": ""
+  },
+  {
+    "slug": "trace-of-conversation",
+    "title": "Trace of Conversation",
+    "description": "Project description coming soon.",
+    "tags": ["Reflective Design", "Craft"],
+    "group": ["product"],
+    "year": null,
+    "cover": ""
+  },
+  {
+    "slug": "conversation",
+    "title": "Conversation",
+    "description": "Project description coming soon.",
+    "tags": ["Research", "Publication"],
+    "group": ["product"],
+    "year": null,
+    "cover": ""
+  }
+]
+  </script>
+
 <script>
 (function () {
   "use strict";
@@ -1245,37 +1364,28 @@
 
     runIntroEntrance();
 
-    /* ---------- load data, render, wire up ---------- */
-    const worksUrl = '../data/works.json';
-    fetch(worksUrl)
-      .then(function (res) {
-        if (!res.ok) {
-          const err = new Error('HTTP ' + res.status + (res.statusText ? ' ' + res.statusText : ''));
-          err.status = res.status;
-          throw err;
-        }
-        return res.json();
-      })
-      .then(function (data) {
-        works = data;
-        worksBySlug = {};
-        works.forEach(function (w) { worksBySlug[w.slug] = w; });
+    /* ---------- load data (inline <script type="application/json">, so this page works
+       over file:// too — see the data block's own comment for why fetch() was dropped),
+       render, wire up ---------- */
+    try {
+      const dataEl = document.getElementById('works-data');
+      if (!dataEl) throw new Error('#works-data script block not found in page');
+      works = JSON.parse(dataEl.textContent);
+      worksBySlug = {};
+      works.forEach(function (w) { worksBySlug[w.slug] = w; });
 
-        renderAllCards();
+      renderAllCards();
 
-        currentFilter = getFilterFromURL();
-        setActiveTab(currentFilter);
-        applyFilter(currentFilter, { instant: true });
+      currentFilter = getFilterFromURL();
+      setActiveTab(currentFilter);
+      applyFilter(currentFilter, { instant: true });
 
-        runCardsEntrance();
-      })
-      .catch(function (err) {
-        console.error('Failed to load works.json', err);
-        const attemptedUrl = new URL(worksUrl, location.href).href;
-        const reason = (err && err.status) ? ('HTTP ' + err.status) : ((err && err.message) ? err.message : 'Unknown error');
-        emptyEl.textContent = 'Could not load works. (' + reason + ' — tried: ' + attemptedUrl + ')';
-        emptyEl.hidden = false;
-      });
+      runCardsEntrance();
+    } catch (err) {
+      console.error('Failed to parse embedded works data', err);
+      emptyEl.textContent = 'Could not load works. (' + (err && err.message ? err.message : 'Unknown error') + ')';
+      emptyEl.hidden = false;
+    }
   })();
 
 })();
