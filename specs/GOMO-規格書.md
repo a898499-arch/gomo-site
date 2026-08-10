@@ -1001,7 +1001,7 @@ footer 越過視窗高度 80% 時觸發一次（IntersectionObserver，`once: tr
    - 右側「About」膠囊標籤，其下兩段 bio
 3. **下區**：左欄為 Employment 與 Education，右欄為 Awards
    - 「Employment」「Education」「Awards」皆為膠囊標籤（1px `--ink` 描邊，無填色）
-4. **`See More Detail`** — 右下，大字，底線
+4. **`See More Detail`** — 右下，大字，底線。連到 CV 的 PDF，`target="_blank"` 開新分頁**預覽**（不可加 `download` 屬性，那會變成強制存檔——這點刻意跟 §6.4 CV Download 的行為相反，兩者不共用同一套點擊邏輯）（2026-08-10 補上，原規格待補）
 5. **Footer**（§6.4）
 
 ### 內容
@@ -1068,8 +1068,8 @@ footer 越過視窗高度 80% 時觸發一次（IntersectionObserver，`once: tr
 
 ### Hover
 
-- `See More Detail`：與 §6.4 相同的底線擦除動畫
-- 肖像：紅色虛線描邊緩慢旋轉（`rotate` 360°，20s 線性，無限循環）。**這是唯一的 idle 動效**，幅度必須讓人幾乎不會注意到
+- `See More Detail`：與 §6.4 相同的底線擦除動畫，**另加**文字垂直遮罩交換（與 §6.4 CV Download 相同技法）——「See More Detail」→「Preview My CV」，舊文字往上滑出、新文字往上滑入，`overflow: hidden` 包裝，300ms（2026-08-10 修正）
+- 肖像：紅色虛線描邊**沿路徑流動**（`stroke-dashoffset` 動畫，`stroke-dasharray` 不變；圓本身的形狀與角度完全不動，只有虛線在跑），20s 線性、無限循環。**這是唯一的 idle 動效**，速度必須讓人幾乎不會察覺（2026-08-10 修正：原規格誤寫成整個圓 `rotate` 360°，圓的形狀會跟著轉，這不是要的效果）
 
 ### RWD
 
@@ -1149,7 +1149,7 @@ footer 越過視窗高度 80% 時觸發一次（IntersectionObserver，`once: tr
 
 - [ ] `/work/[slug]` 作品詳情頁
 - [ ] `/contact` 頁
-- [ ] `See More Detail` 連到哪裡
+- [x] `See More Detail` 連到哪裡 — CV PDF，`target="_blank"` 預覽，不下載（2026-08-10 已定案，見 §6.6 結構第 4 點）
 
 ### 待確認
 
