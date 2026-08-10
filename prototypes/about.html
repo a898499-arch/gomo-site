@@ -985,7 +985,7 @@
   const mainEase = makeBezierEase(0.22, 1, 0.36, 1);
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ---------- Lenis: single instance shared by nav (scroll-direction, unused here — Behavior B) and footer (back-to-top, IntersectionObserver runs off native scroll) ---------- */
+  /* ---------- Lenis: single instance shared by nav (scroll-direction) and footer (back-to-top, IntersectionObserver runs off native scroll) ---------- */
   const lenis = new Lenis({ duration: 1.2, smoothWheel: true });
   function raf(time) {
     lenis.raf(time);
@@ -996,9 +996,65 @@
   gsap.registerPlugin(ScrollTrigger);
   lenis.on('scroll', ScrollTrigger.update);
 
-  /* ==================== NAV — Behavior B (fixed, never hides on scroll), per instruction ==================== */
+  /* ==================== NAV — hide-on-scroll（全站統一, 2026-08-11, 與 home.html 同一套邏輯：
+     dead zone + 方向防抖，見 specs §4）==================== */
   const nav = document.getElementById('site-nav');
-  gsap.set(nav, { y: 0 }); // Behavior B: always visible, no scroll-direction logic attached (unlike home.html's Behavior A)
+  let navHidden = false;
+
+  function showNav() {
+    if (!navHidden) return;
+    navHidden = false;
+    nav.style.willChange = 'transform';
+    gsap.to(nav, {
+      y: 0, duration: 0.3, ease: mainEase,
+      onComplete: () => { nav.style.willChange = ''; }
+    });
+  }
+
+  function hideNav() {
+    if (navHidden) return;
+    navHidden = true;
+    nav.style.willChange = 'transform';
+    gsap.to(nav, {
+      y: '-100%', duration: 0.3, ease: mainEase,
+      onComplete: () => { nav.style.willChange = ''; }
+    });
+  }
+
+  const TOP_DEAD_ZONE = 100; // px — always show within this distance of the top
+  const DIRECTION_THRESHOLD = 8; // px — cumulative delta required before counting as a real direction change
+
+  let lastScrollY = 0;
+  let accumDelta = 0;
+
+  if (!reduceMotion) {
+    lenis.on('scroll', ({ scroll }) => {
+      const y = scroll;
+      const diff = y - lastScrollY;
+      lastScrollY = y;
+
+      if (y <= TOP_DEAD_ZONE) {
+        accumDelta = 0;
+        showNav();
+        return;
+      }
+
+      if (accumDelta === 0 || (diff > 0 && accumDelta > 0) || (diff < 0 && accumDelta < 0)) {
+        accumDelta += diff;
+      } else {
+        accumDelta = diff;
+      }
+
+      if (accumDelta > DIRECTION_THRESHOLD) {
+        hideNav();
+        accumDelta = 0;
+      } else if (accumDelta < -DIRECTION_THRESHOLD) {
+        showNav();
+        accumDelta = 0;
+      }
+    });
+  }
+  /* prefers-reduced-motion: the whole hide/show mechanism is skipped — nav stays fixed and visible */
 
   /* ==================== FOOTER (copied verbatim from home.html) ==================== */
   const backToTop = document.getElementById('back-to-top');
