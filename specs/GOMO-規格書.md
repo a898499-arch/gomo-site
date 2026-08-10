@@ -911,11 +911,13 @@ footer 越過視窗高度 80% 時觸發一次（IntersectionObserver，`once: tr
 
 1. **導覽列**（全站共用，此頁固定於頂端不隱藏）
 2. **簡介區**
-   - `Mihumisang! I'm Maida,` — 粗體斜體，`--ink`
-   - 其下 bio 段落（見 §6.6 的 Brief 版本）
+   - `Mihumisang! I'm Maida,` — Poppins Bold Italic 36px，`--ink`
+   - 其下 bio 段落：**`a Taiwanese Indigenous designer and maker based in London. Working across industrial, product, and reflective design, she uncovers problems others overlook, often around health, women's health, and the environment, and explores identity and environment through craft and material.`** —Poppins Light（300）24px，`#0B0B0B`（2026-08-11 修正：這段是接續上一行「Mihumisang! I'm Maida,」的同一個句子，開頭小寫 `a`，**不是** §6.4 footer 那份獨立的「Maida Hu is a Taiwanese...」Brief 版本——兩處文案刻意不同，不要互相複製）
+   - 簡介區距頁面頂端 **201px**（Figma node 3:281 metadata 實測，標題行 top=201）；標題→bio 間距 20px；bio→頁籤間距 73px（皆為 Figma 實測）
 3. **篩選頁籤**：`All Works` / `Product design` / `Personal Work`
    - 當前選中者為 `--accent` 紅 + 加粗；其餘為 `--ink-muted`
-   - 下方一條滿寬 1px 分隔線
+   - **Hover / focus-visible**（2026-08-11 補上，原規格未涵蓋）：文字變 `--accent` 紅，同時畫出紅色底線（`::after` + `scaleX`，`transform-origin: left`，300ms，主曲線），滑鼠離開/失焦時反向擦除；當前選中的頁籤 hover 時不變化
+   - 下方一條滿寬 1px 分隔線，頁籤→分隔線→grid 總間距 54px（Figma 實測；分隔線本身在 Figma 稿上無獨立節點，內部切分為延用比例的假設值）
 4. **作品 grid**：桌機 **2 欄**，行間距寬鬆
 5. **Footer**（§6.4）
 
@@ -926,7 +928,7 @@ footer 越過視窗高度 80% 時觸發一次（IntersectionObserver，`once: tr
 - 主圖（16:10 左右，Figma 精確比例 672:415，`object-fit: cover`，圓角 0）。目前尚無真實照片，用 CSS 灰底（與 §6.3 Gallery 佔位手法一致）；`cover` 有值且圖片載入成功才顯示圖片，否則（空值或載入失敗）顯示灰底 fallback，資料補齊過程中頁面不會破
 - 標題（**Poppins 400**，`--ink`）（2026-08-11 修正：原規格寫 600 是口述推測值，非量測值，Figma 實測是 Regular/400）
 - 一句話描述（`--ink-muted`，最多兩行，超出以 `…` 截斷）
-- Tag 群組：膠囊狀，1px 描邊 **`--tag-border`（`#5B5B5B`，本頁專用變數，2026-08-11 新增——不可用全域 `--rule`，Figma 實測色值明顯更深，且 `--rule` 另有他用，改了會牽動頁腳分隔線等其他地方）**，無填色，`--ink` 文字
+- Tag 群組：膠囊狀，1px 描邊 **`--tag-border`（`#5B5B5B`，本頁專用變數，2026-08-11 新增——不可用全域 `--rule`，Figma 實測色值明顯更深，且 `--rule` 另有他用，改了會牽動頁腳分隔線等其他地方）**，無填色，`--ink` 文字。膠囊尺寸（2026-08-11 Figma 實測，node 3:281 metadata 反推）：固定高度 32px，內距上下 4px／左右 21px，膠囊間距 12px
 
 整張卡是 `<a href="/work/[slug]">`。
 

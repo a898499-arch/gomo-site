@@ -457,12 +457,17 @@
   }
 
   /* ---------- intro ---------- */
+  /* 2026-08-11 Figma 精確量測 (node 3:281, get_metadata bounding box):
+     標題 top=201 / height=52; bio top=273 / height=140; 頁籤 top=486 / height=46;
+     grid top=586。頁面頂端(y=0)在此頁對應 #page-content 起點前的 116+10=126px nav 佔位。
+     故 work-intro padding-top = 201-126 = 75px；heading→bio gap = 273-(201+52) = 20px；
+     bio→頁籤 gap = 486-(273+140) = 73px（= work-intro padding-bottom）。 */
   .work-intro {
-    padding: 48px 0 40px;
+    padding: 75px 0 73px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    max-width: 940px;
+    gap: 20px;
+    max-width: 901px; /* Figma 精確量測：bio 文字框寬度 901px（node 3:283） */
   }
 
   .work-intro-heading {
@@ -470,6 +475,7 @@
     font-style: italic;
     font-weight: 700;
     font-size: clamp(24px, 2.5vw, 36px);
+    line-height: 1.45; /* Figma: line box height 52px = 36px * 1.45 */
     letter-spacing: -0.18px;
     text-transform: capitalize;
     color: var(--ink);
@@ -485,10 +491,14 @@
   }
 
   /* ---------- filter tabs ---------- */
+  /* 2026-08-11: 頁籤→分隔線→grid 總間距 Figma 量測為 54px(=486+46 到 586)。
+     分隔線本身在 Figma 稿上找不到獨立節點（可能是稿內未拆出的裝飾線），
+     內部 17px/1px/36px 的切分是延用先前版本的比例縮放假設，不是逐一量測值——
+     只有「頁籤文字底部到 grid 頂部＝54px」這個總和是 Figma 實測。 */
   .work-tabs-wrap {
-    padding-bottom: 24px;
+    padding-bottom: 17px;
     border-bottom: 1px solid var(--rule);
-    margin-bottom: 48px;
+    margin-bottom: 36px;
   }
 
   .work-tabs {
@@ -500,6 +510,7 @@
   }
 
   .work-tab {
+    position: relative;
     appearance: none;
     background: none;
     border: none;
@@ -513,7 +524,32 @@
     line-height: 1.45;
     color: var(--work-muted);
     font-weight: 400;
-    transition: color 300ms ease-out;
+    transition: color 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* 2026-08-11 新增：頁籤 hover/focus 底線擦除（§6.5 原規格未涵蓋，沿用全站
+     ::after + scaleX 手法；未選中頁籤才觸發，選中頁籤維持紅色粗體不變） */
+  .work-tab::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -4px;
+    height: 1px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .work-tab:not([aria-selected="true"]):hover,
+  .work-tab:not([aria-selected="true"]):focus-visible {
+    color: var(--accent);
+  }
+
+  .work-tab:not([aria-selected="true"]):hover::after,
+  .work-tab:not([aria-selected="true"]):focus-visible::after {
+    transform: scaleX(1);
   }
 
   .work-tab[aria-selected="true"] {
@@ -611,7 +647,10 @@
   .work-card-tag {
     border: 1px solid var(--tag-border);
     border-radius: 999px;
-    padding: 5px 16px;
+    /* 2026-08-11 Figma 精確量測（node 3:281 metadata，膠囊矩形 vs. 文字 bounding box 反推）：
+       膠囊固定高度 32px、文字 line-height 22px、邊框 1px → 上下內距 (32-22-2)/2 = 4px；
+       左右內距用「UI/UX」這組最乾淨（緊貼卡片左緣、無尾隨空白）的樣本反推 ≈ 21px */
+    padding: 4px 21px;
     font-size: clamp(16px, 1.3889vw, 20px);
     letter-spacing: -0.43px;
     color: var(--ink);
@@ -638,7 +677,9 @@
     .back-to-top,
     .btt-icon,
     .cv-download,
-    .link-underline::after {
+    .link-underline::after,
+    .work-tab,
+    .work-tab::after {
       transition-duration: 150ms !important;
     }
     .cv-download:hover .cv-arrow-icon,
@@ -685,7 +726,7 @@
           <span class="reveal-mask"><span class="reveal-inner" data-reveal>Mihumisang! I'm Maida,</span></span>
         </h1>
         <p class="work-intro-bio">
-          <span class="reveal-mask"><span class="reveal-inner" data-reveal>Maida Hu is a Taiwanese Indigenous designer and maker based in London. Working across industrial, product, and reflective design, she uncovers problems others overlook, often around health, women's health, and the environment, and explores identity and environment through craft and material.</span></span>
+          <span class="reveal-mask"><span class="reveal-inner" data-reveal>a Taiwanese Indigenous designer and maker based in London. Working across industrial, product, and reflective design, she uncovers problems others overlook, often around health, women's health, and the environment, and explores identity and environment through craft and material.</span></span>
         </p>
       </section>
 
