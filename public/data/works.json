@@ -1,0 +1,110 @@
+[
+  {
+    "slug": "sui-sui",
+    "title": "Sui-Sui",
+    "description": "Project description coming soon.",
+    "tags": ["UI/UX", "Health"],
+    "group": ["product"],
+    "year": null,
+    "cover": ""
+  },
+  {
+    "slug": "aero-v",
+    "title": "AERO V",
+    "description": "Project description coming soon.",
+    "tags": ["Product Design", "Environment"],
+    "group": ["product"],
+    "year": null,
+    "cover": ""
+  },
+  {
+    "slug": "mvs",
+    "title": "MVS",
+    "description": "Project description coming soon.",
+    "tags": ["Mobility Design", "Health"],
+    "group": ["product"],
+    "year": null,
+    "cover": ""
+  },
+  {
+    "slug": "blossom-care",
+    "title": "Blossom Care",
+    "description": "Project description coming soon.",
+    "tags": ["Product Design", "Medical Design", "Health"],
+    "group": ["product"],
+    "year": null,
+    "cover": ""
+  },
+  {
+    "slug": "ehms",
+    "title": "Healthcare Management System (eHMS)",
+    "description": "Project description coming soon.",
+    "tags": ["UI/UX", "Medical Design", "Health"],
+    "group": ["product"],
+    "year": null,
+    "cover": ""
+  },
+  {
+    "slug": "dh2",
+    "title": "DH2",
+    "description": "Project description coming soon.",
+    "tags": ["Product Design", "Appliance Design", "Health"],
+    "group": ["product"],
+    "year": null,
+    "cover": ""
+  },
+  {
+    "slug": "color-lab",
+    "title": "Color Lab",
+    "description": "Project description coming soon.",
+    "tags": ["Product Design", "Children's Products"],
+    "group": ["product"],
+    "year": null,
+    "cover": ""
+  },
+  {
+    "slug": "cool-cook",
+    "title": "Cool Cook",
+    "description": "Project description coming soon.",
+    "tags": ["Product Design", "UI/UX", "Children's Products"],
+    "group": ["product"],
+    "year": null,
+    "cover": ""
+  },
+  {
+    "slug": "co2-exting",
+    "title": "CO2-EXTING",
+    "description": "Project description coming soon.",
+    "tags": ["Product Design", "Public Architecture", "Environment"],
+    "group": ["product"],
+    "year": null,
+    "cover": ""
+  },
+  {
+    "slug": "wanderbuddy",
+    "title": "WanderBuddy",
+    "description": "Project description coming soon.",
+    "tags": ["UI/UX"],
+    "group": ["product"],
+    "year": null,
+    "cover": ""
+  },
+  {
+    "slug": "trace-of-conversation",
+    "title": "Trace of Conversation",
+    "description": "Project description coming soon.",
+    "tags": ["Reflective Design", "Craft"],
+    "group": ["product"],
+    "year": null,
+    "cover": ""
+  },
+  {
+    "slug": "conversation",
+    "title": "Conversation",
+    "description": "Project description coming soon.",
+    "tags": ["Research", "Publication"],
+    "group": ["product"],
+    "year": null,
+    "cover": ""
+  }
+]

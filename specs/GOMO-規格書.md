@@ -171,9 +171,14 @@ useEffect(() => {
 
 **導覽列**（全站共用）：左上 GOMO logo，右上 `Home` / `Works` / `About Me`（2026-08-10 修正：拿掉 `Contact Me`，新增 `Home` 放最前面；頁腳 SITEMAPS 的 `Contact` 暫時保留不動）。`z-index` 必須高於頁面所有內容（實作為 1000，全站其餘內容目前最高只到 25），**背景必須是不透明的 `--bg`，不能是 transparent**——透明背景時 z-index 雖然數字夠高，視覺上底下的文字（例如 §6.3 Gallery 的區塊標題）還是會透出來跟導覽列疊在一起變得難以閱讀；不透明背景才能讓導覽列在任何情況下重疊時都完整可見、蓋住底下的內容（2026-08-08 修正，過 Hero 區時因為 Hero 底色本來就是 `--bg`，視覺上跟原本的 transparent 沒有差異）。
 
-首頁的導覽列行為：在 Hero 區固定於頂端；往下滾時隱藏；往上滾時重新出現（`translateY(-100%)` ↔ `0`，300ms，主曲線）。導覽列距視窗頂緣 `10px`（`--nav-top-gap`，全站共用變數，2026-08-10 新增，原本是 `0`）。
+**導覽列行為（全站統一，2026-08-11 起所有頁面一致，不再依頁面分成「首頁 hide-on-scroll／其他頁固定」兩種）**：往下滾時隱藏、往上滾時重新出現（`translateY(-100%)` ↔ `0`，300ms，主曲線）。細節：
 
-> ⚠️ 例外（§6.2）：進入 Practice → All Work 區塊、影片放大到明顯尺寸之後（progress p ≥ 0.3，含後續的定住區間），導覽列強制隱藏，此時往上滾也不會叫出來——蓋在放大中的影片上會很醜。離開這個區間（往上滾回到 p < 0.3，或往下滾出整個區塊）才恢復正常的往上滾出現行為。細節見 §6.2。
+- 距離頁面頂端 **100px** 以內永遠顯示（dead zone，不判斷方向）
+- 捲動方向要**累積超過 8px** 位移量才判定為一次真正的方向改變（防抖，避免小幅晃動觸發閃爍）
+- 導覽列距視窗頂緣 `10px`（`--nav-top-gap`，全站共用變數，2026-08-10 新增，原本是 `0`）
+- `prefers-reduced-motion` 時關閉整套隱藏機制，導覽列永遠固定顯示（不是縮短動畫時間，對這群使用者來說瞬間消失/出現比一直藏起來更糟）
+
+> ⚠️ 例外（僅首頁，§6.2）：進入 Practice → All Work 區塊、影片放大到明顯尺寸之後（progress p ≥ 0.3，含後續的定住區間），導覽列強制隱藏，此時往上滾也不會叫出來——蓋在放大中的影片上會很醜。離開這個區間（往上滾回到 p < 0.3，或往下滾出整個區塊）才恢復正常的往上滾出現行為。這條覆寫規則只存在於首頁（其他頁面沒有這段影片，不適用）。細節見 §6.2。
 
 ---
 
@@ -817,7 +822,7 @@ Hero 結束後，畫面不是切換，而是一台攝影機持續往前推軌：
 
 | 欄 | 內容 |
 |---|---|
-| SITEMAPS | Home、Works、Playground、Contact（皆底線） |
+| SITEMAPS | Home、Works、About、Playground（皆底線）（2026-08-11 修正：拿掉 Contact——導覽列已經沒有 Contact Me，頁腳留著會變死連結；新增 Home 放最前面；「About」用短版標籤，跟導覽列的「About Me」不同没關係；Playground 移到最後） |
 | SOCIALS | LinkedIn（底線） |
 | CONTACTS | `London, UK` 與 email——**純文字，無底線** |
 
@@ -828,8 +833,8 @@ Hero 結束後，畫面不是切換，而是一台攝影機持續往前推軌：
 | 元素 | 行為 |
 |---|---|
 | `Let's Talk! ↗` | `mailto:a898499@gmail.com?subject=Let's%20talk` |
-| Home / Works / Contact | 內部路由 `/`、`/work`、`/contact` |
-| **Playground** | 施工中，但**視覺樣式與 Home/Works/Contact 完全相同**（不做灰階、不降低不透明度——Figma node `3:163` 四個連結共用同一組樣式，沒有視覺區分）。不可點擊純粹是功能限制：`pointer-events: none`、`aria-disabled="true"`、`tabindex="-1"` 讓**鍵盤 Tab 跳過**。無 tooltip（Figma 沒有畫出對應樣式） |
+| Home / Works / About | 內部路由 `/`、`/work`、`/about`（2026-08-11 修正：原表格是 Home/Works/Contact，Contact 頁不建了，改成 About） |
+| **Playground** | 施工中，但**視覺樣式與其餘三個連結完全相同**（不做灰階、不降低不透明度——Figma node `3:163` 共用同一組樣式，沒有視覺區分）。不可點擊純粹是功能限制：`pointer-events: none`、`aria-disabled="true"`、`tabindex="-1"` 讓**鍵盤 Tab 跳過**。無 tooltip（Figma 沒有畫出對應樣式） |
 | LinkedIn | `https://www.linkedin.com/in/lin-wei-ting-h-8a9732343`，`target="_blank"` + `rel="noopener noreferrer"` |
 | CV Download | `<a href="/cv/Maida-Hu-CV.pdf" download="Maida-Hu-CV-2026.pdf">`。檔案放在 `/public/cv/`，`download` 屬性才會生效（僅同源有效） |
 | CONTACTS 的 email | 也是 `mailto:` 連結。顯示套 `text-transform: capitalize` 取得 editorial 感，但**實際 href 必須小寫**：`mailto:a898499@gmail.com` |
@@ -909,7 +914,7 @@ footer 越過視窗高度 80% 時觸發一次（IntersectionObserver，`once: tr
 
 由上而下：
 
-1. **導覽列**（全站共用，此頁固定於頂端不隱藏）
+1. **導覽列**（全站共用，見 §4——hide-on-scroll，與其他頁行為一致）
 2. **簡介區**
    - `Mihumisang! I'm Maida,` — Poppins Bold Italic 36px，`--ink`
    - 其下 bio 段落：**`a Taiwanese Indigenous designer and maker based in London. Working across industrial, product, and reflective design, she uncovers problems others overlook, often around health, women's health, and the environment, and explores identity and environment through craft and material.`** —Poppins Light（300）24px，`#0B0B0B`（2026-08-11 修正：這段是接續上一行「Mihumisang! I'm Maida,」的同一個句子，開頭小寫 `a`，**不是** §6.4 footer 那份獨立的「Maida Hu is a Taiwanese...」Brief 版本——兩處文案刻意不同，不要互相複製）
@@ -999,7 +1004,7 @@ footer 越過視窗高度 80% 時觸發一次（IntersectionObserver，`once: tr
 
 ### 結構
 
-1. **導覽列**（固定於頂端）
+1. **導覽列**（全站共用，見 §4——hide-on-scroll，與其他頁行為一致）
 2. **上區**：左為肖像，右為 About 文字
    - 肖像：黑白照，橢圓遮罩（2026-08-10 移除原本的紅色虛線描邊，肖像本身淡入+縮放的進場動畫保留）
    - 右側「About」膠囊標籤，其下兩段 bio
