@@ -169,9 +169,9 @@ useEffect(() => {
 | `/contact` | Contact Me | ⚠️ 待補規格 |
 | `/playground` | **不建立**。導覽列保留但停用 | §6.4 |
 
-**導覽列**（全站共用）：左上 GOMO logo，右上 `Works` / `About Me` / `Contact Me`。`z-index` 必須高於頁面所有內容（實作為 1000，全站其餘內容目前最高只到 25），**背景必須是不透明的 `--bg`，不能是 transparent**——透明背景時 z-index 雖然數字夠高，視覺上底下的文字（例如 §6.3 Gallery 的區塊標題）還是會透出來跟導覽列疊在一起變得難以閱讀；不透明背景才能讓導覽列在任何情況下重疊時都完整可見、蓋住底下的內容（2026-08-08 修正，過 Hero 區時因為 Hero 底色本來就是 `--bg`，視覺上跟原本的 transparent 沒有差異）。
+**導覽列**（全站共用）：左上 GOMO logo，右上 `Home` / `Works` / `About Me`（2026-08-10 修正：拿掉 `Contact Me`，新增 `Home` 放最前面；頁腳 SITEMAPS 的 `Contact` 暫時保留不動）。`z-index` 必須高於頁面所有內容（實作為 1000，全站其餘內容目前最高只到 25），**背景必須是不透明的 `--bg`，不能是 transparent**——透明背景時 z-index 雖然數字夠高，視覺上底下的文字（例如 §6.3 Gallery 的區塊標題）還是會透出來跟導覽列疊在一起變得難以閱讀；不透明背景才能讓導覽列在任何情況下重疊時都完整可見、蓋住底下的內容（2026-08-08 修正，過 Hero 區時因為 Hero 底色本來就是 `--bg`，視覺上跟原本的 transparent 沒有差異）。
 
-首頁的導覽列行為：在 Hero 區固定於頂端；往下滾時隱藏；往上滾時重新出現（`translateY(-100%)` ↔ `0`，300ms，主曲線）。
+首頁的導覽列行為：在 Hero 區固定於頂端；往下滾時隱藏；往上滾時重新出現（`translateY(-100%)` ↔ `0`，300ms，主曲線）。導覽列距視窗頂緣 `10px`（`--nav-top-gap`，全站共用變數，2026-08-10 新增，原本是 `0`）。
 
 > ⚠️ 例外（§6.2）：進入 Practice → All Work 區塊、影片放大到明顯尺寸之後（progress p ≥ 0.3，含後續的定住區間），導覽列強制隱藏，此時往上滾也不會叫出來——蓋在放大中的影片上會很醜。離開這個區間（往上滾回到 p < 0.3，或往下滾出整個區塊）才恢復正常的往上滾出現行為。細節見 §6.2。
 
@@ -325,7 +325,7 @@ Duration 1300ms，主曲線。**左板凳領先，右板凳晚 80ms**，不要�
 板凳還在移動的同時：
 
 - 小 GOMO logo 在左上角淡入。它應該讀起來就是剛從中央消散的那個標記——給它 12px 上升
-- 導覽連結（Works、About Me、Contact Me）在右上淡入，彼此**錯開 60ms**，各上升 10px
+- 導覽連結（Home、Works、About Me，2026-08-10 改版）在右上淡入，彼此**錯開 60ms**，各上升 10px
 
 ### PHASE 4 — Hero 內容（900ms 開始，與板凳移動重疊）
 
@@ -997,7 +997,7 @@ footer 越過視窗高度 80% 時觸發一次（IntersectionObserver，`once: tr
 
 1. **導覽列**（固定於頂端）
 2. **上區**：左為肖像，右為 About 文字
-   - 肖像：黑白照，**有機形狀的紅色虛線描邊**（非正圓，手繪感）
+   - 肖像：黑白照，橢圓遮罩（2026-08-10 移除原本的紅色虛線描邊，肖像本身淡入+縮放的進場動畫保留）
    - 右側「About」膠囊標籤，其下兩段 bio
 3. **下區**：左欄為 Employment 與 Education，右欄為 Awards
    - 「Employment」「Education」「Awards」皆為膠囊標籤（1px `--ink` 描邊，無填色）
@@ -1007,6 +1007,8 @@ footer 越過視窗高度 80% 時觸發一次（IntersectionObserver，`once: tr
 ### 內容
 
 **About**
+
+bio 兩段文字右緣對齊導覽列最右一個項目（`About Me`）的右緣——與導覽列共用同一套版面容器（`.page-container`/`--page-gutter`），不是各自寫一個數值（2026-08-10 修正：原本設了獨立的 863px max-width，比導覽列右緣還要窄約 95px）。字重改細（`font-weight: 300`，原本沒特別設，等於瀏覽器預設 ~400）。
 
 > Maida (Lin Wei-Ting) Hu is a Taiwanese Indigenous designer and Goldsmiths graduate based in London. Her practice moves across industrial, product, and reflective design, with an instinct for surfacing the problems others overlook and resolving them through design, often around health, women's health, and the environment.
 >
@@ -1044,7 +1046,7 @@ footer 越過視窗高度 80% 時觸發一次（IntersectionObserver，`once: tr
 | Yodex Industry–Academia Cooperation with Hitachi Cooling & Heating Taiwan | Silver Award |
 
 > **⚠️ 版面 bug（Figma 稿已出現）**：最後一列的獎項名稱過長，與右側 `Silver Award` **重疊**。
-> 修正要求：獎項名稱欄設 `max-width`，結果欄設固定寬度並 `flex-shrink: 0`，兩者之間留至少 24px 間距。名稱過長時換行，**不可截斷、不可重疊**。
+> 修正要求：獎項名稱欄設**固定寬度**（不是依內容自動撐開的 `max-width`——2026-08-10 修正：`max-width` 讓每列的可用寬度跟著該列自己的結果文字長度變動，導致每列換行的右邊界不一致），所有列共用同一個右邊界。結果欄設固定寬度並 `flex-shrink: 0`、右對齊，兩者之間留至少 24px 間距。名稱過長時換行，**不可截斷、不可重疊**。
 
 ### 進場動畫
 
@@ -1053,7 +1055,6 @@ footer 越過視窗高度 80% 時觸發一次（IntersectionObserver，`once: tr
 | 元素 | 延遲 |
 |---|---|
 | 肖像（另加 `scale(0.96) → 1`） | 0ms |
-| 肖像的紅色虛線描邊——沿路徑描繪（`stroke-dasharray` 動畫），1200ms | 200ms |
 | About 膠囊標籤 | 300ms |
 | bio 第一段 | 400ms |
 | bio 第二段 | 480ms |
@@ -1068,8 +1069,7 @@ footer 越過視窗高度 80% 時觸發一次（IntersectionObserver，`once: tr
 
 ### Hover
 
-- `See More Detail`：與 §6.4 相同的底線擦除動畫，**另加**文字垂直遮罩交換（與 §6.4 CV Download 相同技法）——「See More Detail」→「Preview My CV」，舊文字往上滑出、新文字往上滑入，`overflow: hidden` 包裝，300ms（2026-08-10 修正）
-- 肖像：紅色虛線描邊**沿路徑流動**（`stroke-dashoffset` 動畫，`stroke-dasharray` 不變；圓本身的形狀與角度完全不動，只有虛線在跑），20s 線性、無限循環。**這是唯一的 idle 動效**，速度必須讓人幾乎不會察覺（2026-08-10 修正：原規格誤寫成整個圓 `rotate` 360°，圓的形狀會跟著轉，這不是要的效果）
+- `See More Detail`：與 §6.4 相同的底線擦除動畫，**另加**文字垂直遮罩交換（與 §6.4 CV Download 相同技法）——「See More Detail」→「Preview My CV」，舊文字往上滑出、新文字往上滑入，`overflow: hidden` 包裝，300ms；同時文字與底線變成 `--accent` 紅（底線用 `currentColor` 自動跟著變），滑鼠移開恢復原本的 ink 色（2026-08-10 修正）
 
 ### RWD
 
@@ -1081,16 +1081,14 @@ footer 越過視窗高度 80% 時觸發一次（IntersectionObserver，`once: tr
 - 肖像需要 alt：`Portrait of Maida Hu`
 - Employment / Education 用 `<dl>` 或語意化清單，不要用 `<div>` 堆
 - Awards 用 `<table>` 或 `<dl>`，讓螢幕閱讀器能配對獎項與結果
-- 虛線描邊為裝飾性，`aria-hidden="true"`
-- `@media (prefers-reduced-motion: reduce)`：跳過所有進場，關閉描邊旋轉
+- `@media (prefers-reduced-motion: reduce)`：跳過所有進場
 
 ### Acceptance Criteria
 
 1. 最長的獎項名稱與其結果**不重疊**，在所有斷點皆然
 2. Awards 的錯開總時間不超過 700ms
 3. 螢幕閱讀器能正確配對每個獎項與其結果
-4. 肖像描邊旋轉幾乎無法察覺
-5. 手機上 Awards 不擠壓、不橫向溢出
+4. 手機上 Awards 不擠壓、不橫向溢出
 
 ---
 
@@ -1135,7 +1133,7 @@ footer 越過視窗高度 80% 時觸發一次（IntersectionObserver，`once: tr
 - [ ] 所有彩色塊 SVG + 實際 hex 值
 - [ ] 12 件作品主圖
 - [ ] 作品影片（暫以靜態圖代替）
-- [ ] Maida 肖像照（黑白）+ 有機形狀虛線描邊 SVG
+- [x] Maida 肖像照（黑白）— 已取得，紅色虛線描邊已於 2026-08-10 移除，不再需要
 - [ ] `Maida-Hu-CV.pdf` → 放 `/public/cv/`，並確認檔案大小
 
 ### 內容

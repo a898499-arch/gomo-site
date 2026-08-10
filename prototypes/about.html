@@ -32,16 +32,14 @@
     --footer-rule: #8F8F8F;
     --footer-circle-stroke: #0B0B0B;
 
-    /* About (§6.6) — Figma node 3:432. The portrait's dashed outline is its own red, NOT --accent
-       (#C90000) — Figma exported it as a rasterized image rather than a readable stroke token, so
-       this was sampled directly from the asset's pixel data (solid #E63030, confirmed 2026-08-10). */
-    --about-portrait-stroke: #E63030;
-
     /* ---------- site-wide layout system (2026-08-10, shared with home.html) ----------
        Figma's canvas is 1440px wide — a reference/max-width, not a viewport-filling stage to scale
        up. clamp() caps at exactly 40px once vw alone would exceed it (40/1440*100 = 2.7778vw), so
        this is identical at 1440/1920/2560 — only shrinks below 1440. */
     --page-gutter: clamp(20px, 2.7778vw, 40px);
+
+    /* 2026-08-10: shared with home.html, see its identical comment */
+    --nav-top-gap: 10px;
   }
 
   * { box-sizing: border-box; }
@@ -63,7 +61,7 @@
   }
 
   #page-content {
-    padding-top: 116px; /* clears the fixed nav — same value as home.html's #page-content */
+    padding-top: calc(116px + var(--nav-top-gap)); /* clears the fixed nav — same value as home.html's #page-content */
   }
 
   /* shared content container — copied verbatim from home.html, see its own comment for why */
@@ -76,7 +74,7 @@
   /* ==================== NAV (copied verbatim from home.html) ==================== */
   .site-nav {
     position: fixed;
-    top: 0;
+    top: var(--nav-top-gap);
     left: 0;
     width: 100%;
     height: 116px;
@@ -472,41 +470,17 @@
     padding: 64px 0 48px;
   }
 
-  /* 2026-08-10 correction: the outer bounding box I originally read via get_design_context
-     (397.846x479.592) turned out to be a rotated-image export artifact (Figma drew the dashed
-     ellipse as a 300.41x416.016 shape rotated 165°, and that tool returns the axis-aligned bounding
-     box of the ALREADY-ROTATED result, which is inherently larger than the shape's own visual
-     footprint for any non-90°-multiple rotation) — not the actual visual gap to the photo. Verified
-     instead by pixel-sampling the Figma screenshot directly: the dashed ellipse sits only ~5px
-     (at the 1440 reference) outside the photo on all sides, not ~30-50px. Border box below =
-     photo's own Figma size (301.235x410.683, still vector-precise, trustworthy) + 5px/side. */
+  /* 2026-08-10: dashed red outline removed entirely (was here, plus its entrance draw-in and idle
+     dash-flow animation) — portrait is now just the photo itself, sized to its own Figma box. */
   .about-portrait {
     position: relative;
     width: 100%;
-    aspect-ratio: 311.235 / 420.683;
-  }
-
-  .about-portrait-border {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    overflow: visible;
-  }
-  .about-portrait-border ellipse {
-    fill: none;
-    stroke: var(--about-portrait-stroke);
-    stroke-width: 1.5;
-    stroke-dasharray: 1.1 1.1; /* Figma exported this as a rasterized image, not a readable dasharray —
-      dash≈gap ratio is measured from the asset (roughly 1:1), exact px is an approximation, not a
-      literal Figma value */
+    aspect-ratio: 301.235 / 410.683;
   }
 
   .about-portrait-photo {
     position: absolute;
-    /* (311.235-301.235)/2 / 311.235 = 1.607%; (420.683-410.683)/2 / 420.683 = 1.189% — centers the
-       Figma-precise photo size inside the corrected border box above, ~5px gap on every side */
-    inset: 1.189% 1.607%;
+    inset: 0;
     border-radius: 50%;
     overflow: hidden;
   }
@@ -544,10 +518,15 @@
     flex-direction: column;
     gap: 0;
     font-size: clamp(16px, 1.39vw, 20px);
+    font-weight: 300; /* 2026-08-10 feedback: thinner than the previous unset (browser default ~400) */
     line-height: 1.45;
     letter-spacing: -0.43px;
     color: var(--footer-black);
-    max-width: 863px;
+    /* 2026-08-10: no independent max-width — was 863px (a Figma-measured but too-narrow number that
+       left the right edge ~95px short of nav's own right edge). Bio now just fills its grid column
+       (.about-hero's second column), which is already sized against the SAME .page-container/
+       --page-gutter system nav uses, so the right edges align without a second hardcoded number to
+       keep in sync. */
   }
   .about-bio p { margin: 0; }
   .about-bio p + p { margin-top: 1.45em; }
@@ -636,10 +615,13 @@
 
   .award-name {
     margin: 0;
-    flex: 1 1 auto;
+    /* 2026-08-10 fix: was flex:1 1 auto, which under justify-content:space-between grows to fill
+       whatever's left AFTER that row's own result text — so its right edge (and therefore its wrap
+       point) varied row to row depending on how long each row's OWN result happened to be, not a
+       shared column boundary. Fixed flex-basis makes every row wrap against the SAME right edge;
+       600px is sized so the longest row (Yodex...) breaks right after "Cooling &". */
+    flex: 0 0 600px;
     min-width: 0;
-    /* §6.6 修法：max-width 讓過長的名稱換行，不與結果重疊/截斷 */
-    max-width: 100%;
     font-size: clamp(16px, 1.39vw, 20px);
     font-weight: 400;
     letter-spacing: -0.43px;
@@ -671,6 +653,15 @@
     font-size: clamp(24px, 2.5vw, 36px);
     font-weight: 500;
     letter-spacing: -0.18px;
+    transition: color 300ms ease-out;
+  }
+
+  /* 2026-08-10: hover text ("Preview My CV") turns --accent red — the underline follows for free
+     since .link-underline::after uses currentColor. Reverts automatically on mouseleave (plain
+     :hover), no JS needed for the color itself. */
+  .about-more-detail:hover,
+  .about-more-detail:focus-visible {
+    color: var(--accent);
   }
 
   /* 2026-08-10: hover text swap — same vertical-mask-swap technique as Footer's CV Download
@@ -737,20 +728,6 @@
       opacity: 1 !important;
       transform: none !important;
     }
-    .about-portrait-border ellipse { animation: none !important; }
-  }
-
-  /* 2026-08-10 correction: NOT transform:rotate (that spins the whole ellipse shape/angle, which
-     isn't what §6.6 asks for) — the dashes themselves flow along the static path instead, via a
-     continuous stroke-dashoffset animation on the <ellipse> with stroke-dasharray left untouched.
-     Starts from dashoffset:0 (exactly where the entrance draw-in animation, further down, finishes),
-     so there's no visible jump when this idle loop picks up. */
-  @keyframes about-portrait-flow {
-    from { stroke-dashoffset: 0; }
-    to { stroke-dashoffset: -100; } /* -pathLength, one full lap in dash-pattern space */
-  }
-  .about-portrait-border.is-flowing ellipse {
-    animation: about-portrait-flow 20s linear infinite;
   }
 </style>
 </head>
@@ -765,9 +742,9 @@
     </a>
 
     <ul class="nav-links">
+      <li><a href="home.html" class="link-underline" data-hover="nav">Home</a></li>
       <li><a href="/work" class="link-underline" data-hover="nav" data-not-built>Works</a></li>
       <li><a href="about.html" class="link-underline" data-hover="nav">about me</a></li>
-      <li><a href="/contact" class="link-underline" data-hover="nav" data-not-built>Contact Me</a></li>
     </ul>
    </div>
   </nav>
@@ -777,9 +754,6 @@
 
       <section class="about-hero">
         <div class="about-portrait" id="about-portrait">
-          <svg class="about-portrait-border" id="about-portrait-border" viewBox="0 0 311.235 420.683" aria-hidden="true">
-            <ellipse cx="155.6175" cy="210.3415" rx="155.6175" ry="210.3415" pathLength="100" />
-          </svg>
           <div class="about-portrait-photo" data-animate="portrait-photo">
             <img src="../assets/img/maida-portrait.jpg" alt="Portrait of Maida Hu">
           </div>
@@ -1185,7 +1159,6 @@
   /* ==================== ABOUT ME (§6.6) ==================== */
   (function () {
     const portrait = document.getElementById('about-portrait');
-    const portraitBorder = document.getElementById('about-portrait-border');
     const portraitPhoto = portrait.querySelector('.about-portrait-photo');
     const aboutPill = document.querySelector('.about-hero .about-pill');
     const bio1 = document.querySelector('[data-animate="bio-1"]');
@@ -1194,31 +1167,21 @@
     const seeMoreDetail = document.getElementById('see-more-detail');
 
     if (reduceMotion) {
-      /* §6.6 可存取性: skip all entrance, no idle stroke rotation */
+      /* §6.6 可存取性: skip all entrance */
       return;
     }
 
     /* ---------- upper region: page-load stagger (§6.6 進場動畫) ---------- */
     gsap.set(portraitPhoto, { opacity: 0, scale: 0.96 });
-    gsap.set(portraitBorder, { opacity: 0 });
     gsap.set(aboutPill, { y: 24, opacity: 0 });
     gsap.set([bio1, bio2], { y: 24, opacity: 0 });
-
-    const borderEllipse = portraitBorder.querySelector('ellipse');
-    gsap.set(borderEllipse, { strokeDashoffset: 100 }); // pathLength=100 on the <ellipse> — see CSS comment
 
     const heroTl = gsap.timeline({ defaults: { ease: mainEase } });
     heroTl
       .to(portraitPhoto, { opacity: 1, scale: 1, duration: 0.6 }, 0)
-      .to(portraitBorder, { opacity: 1, duration: 0.1 }, 0.2)
-      .to(borderEllipse, { strokeDashoffset: 0, duration: 1.2 }, 0.2)
       .to(aboutPill, { y: 0, opacity: 1, duration: 0.6 }, 0.3)
       .to(bio1, { y: 0, opacity: 1, duration: 0.6 }, 0.4)
       .to(bio2, { y: 0, opacity: 1, duration: 0.6 }, 0.48);
-
-    /* idle dash-flow starts only once the WHOLE entrance sequence has finished (~1700ms from page
-       load, per 2026-08-10 clarification — not right after the stroke-draw itself completes) */
-    setTimeout(function () { portraitBorder.classList.add('is-flowing'); }, 1700);
 
     /* ---------- lower region: ScrollTrigger'd once, on entering viewport (§6.6 進場動畫) ---------- */
     const pills = detailsSection.querySelectorAll('[data-animate="pill"]');

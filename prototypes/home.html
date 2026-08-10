@@ -43,6 +43,11 @@
        two different actual pixel widths. clamp() caps at exactly 40px once vw alone would exceed it
        (40/1440*100 = 2.7778vw), so this is identical at 1440/1920/2560 — only shrinks below 1440. */
     --page-gutter: clamp(20px, 2.7778vw, 40px);
+
+    /* 2026-08-10: nav sits this far from the very top of the viewport (was flush at 0, felt cramped).
+       Shared so home.html/about.html can't drift apart — #page-content's own top padding below adds
+       this on top of the nav's own height so content still clears it exactly. */
+    --nav-top-gap: 10px;
   }
 
   * { box-sizing: border-box; }
@@ -381,7 +386,7 @@
   /* ==================== NAV ==================== */
   .site-nav {
     position: fixed;
-    top: 0;
+    top: var(--nav-top-gap);
     left: 0;
     width: 100%;
     height: 116px;
@@ -524,7 +529,7 @@
 
   /* ==================== PAGE BODY (placeholder) ==================== */
   #page-content {
-    padding-top: 116px; /* clears the fixed nav so filler content doesn't start underneath it */
+    padding-top: calc(116px + var(--nav-top-gap)); /* clears the fixed nav (now offset from the top by --nav-top-gap) so content doesn't start underneath it */
   }
 
   /* ==================== SECTION 2 — PRACTICE → ALL WORK (§6.2) ==================== */
@@ -1268,9 +1273,9 @@
     </a>
 
     <ul class="nav-links">
+      <li><a href="home.html" class="link-underline" data-hover="nav">Home</a></li>
       <li><a href="/work" class="link-underline" data-hover="nav" data-not-built>Works</a></li>
       <li><a href="about.html" class="link-underline" data-hover="nav">about me</a></li>
-      <li><a href="/contact" class="link-underline" data-hover="nav" data-not-built>Contact Me</a></li>
     </ul>
    </div>
   </nav>
