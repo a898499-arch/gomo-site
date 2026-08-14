@@ -1,0 +1,527 @@
+/* ====================================================================
+   WanderBuddy 作品詳情頁 — 個案研究內文樣式
+   全部包在 .wb-case 底下，跟 hero.css / flow.css（作品本身的 UI 重建）
+   是兩件不同的事：這裡是 GOMO 網站描述這個作品的文字排版，字體維持
+   全站的 Poppins，不套用 Raleway/Jost/Inter（Typography 展示區塊例外，
+   那裡刻意要秀出真正的 Raleway/Jost 長相）。
+   ==================================================================== */
+
+.wb-case {
+  display: flex;
+  flex-direction: column;
+}
+
+.wb-section {
+  padding-block: clamp(48px, 6vw, 96px);
+}
+
+.wb-section-inner {
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: var(--page-gutter);
+}
+
+/* ---------- Logo & Overview ---------- */
+.wb-overview-inner {
+  max-width: 1160px;
+  margin-inline: auto;
+  padding-inline: var(--page-gutter);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.wb-app-icon {
+  width: 95px;
+  height: 95px;
+  border-radius: 22px;
+  background: #87FA89;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.wb-app-icon svg { width: 62%; height: 62%; }
+
+.wb-overview-title {
+  margin: 24px 0 0;
+  font-weight: 600;
+  font-size: clamp(32px, 4.4vw, 64px);
+  letter-spacing: -0.32px;
+  color: #353535;
+  text-transform: capitalize;
+}
+
+.wb-overview-tagline {
+  margin: 12px 0 0;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(17px, 1.7vw, 24px);
+  letter-spacing: -0.12px;
+  color: #717171;
+}
+
+.wb-overview-body {
+  margin: 24px 0 0;
+  max-width: 1077px;
+  font-weight: 400;
+  font-size: clamp(15px, 1.25vw, 18px);
+  letter-spacing: -0.09px;
+  line-height: 1.5;
+  color: #353535;
+}
+
+.wb-overview-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--rule);
+  margin: 40px 0 0;
+}
+
+.wb-overview-meta {
+  display: flex;
+  justify-content: center;
+  gap: clamp(48px, 8vw, 254px);
+  margin-top: 46px;
+  flex-wrap: wrap;
+}
+
+.wb-overview-meta-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.wb-overview-meta-label {
+  font-weight: 400;
+  font-size: 16px;
+  color: #747474;
+}
+
+.wb-overview-meta-value {
+  font-weight: 600;
+  font-size: 20px;
+  color: #353535;
+  text-align: center;
+  line-height: 1.42;
+}
+
+/* ---------- Design Challenge ---------- */
+.wb-dc-eyebrow {
+  margin: 0;
+  text-align: center;
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #FF7BFF;
+}
+
+.wb-dc-heading {
+  margin: 24px auto 0;
+  max-width: 1157px;
+  text-align: center;
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(24px, 3vw, 36px);
+  text-transform: uppercase;
+  color: #1E1E1E;
+}
+
+.wb-dc-desc {
+  margin: 20px auto 0;
+  max-width: 1112px;
+  text-align: center;
+  font-weight: 400;
+  font-size: clamp(17px, 1.7vw, 24px);
+  color: #5B5B5B;
+}
+
+.wb-dc-cards {
+  margin-top: 64px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
+.wb-dc-card {
+  background: #F4F4F5;
+  border-radius: 28px;
+  padding: 44px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.wb-dc-badge {
+  width: 56px;
+  height: 56px;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 20px;
+}
+.wb-dc-card[data-tone="strategy"] .wb-dc-badge { background: #DCE4FF; color: #003AFF; }
+.wb-dc-card[data-tone="user"] .wb-dc-badge { background: #FFE0F4; color: #FF3DBB; }
+.wb-dc-card[data-tone="look"] .wb-dc-badge { background: #FFEBD6; color: #FF7A00; }
+
+.wb-dc-label {
+  margin: 0;
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: 1.6px;
+}
+.wb-dc-card[data-tone="strategy"] .wb-dc-label { color: #003AFF; }
+.wb-dc-card[data-tone="user"] .wb-dc-label { color: #FF3DBB; }
+.wb-dc-card[data-tone="look"] .wb-dc-label { color: #FF7A00; }
+
+.wb-dc-card-title {
+  margin: 0;
+  font-weight: 600;
+  font-size: 27px;
+  line-height: 1.2;
+  color: #16161A;
+}
+
+.wb-dc-card-body {
+  margin: 0;
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.6;
+  color: #4A4A52;
+}
+
+@media (max-width: 900px) {
+  .wb-dc-cards { grid-template-columns: 1fr; }
+}
+
+/* ---------- Sign Up Flow（靜態資訊圖，簡化版：只求資訊正確，
+   連接線是簡化的直線示意，不是逐一還原 Figma 的向量路徑）---------- */
+.wb-signup-title {
+  margin: 0 0 32px;
+  font-weight: 700;
+  font-size: 24px;
+  color: var(--ink);
+}
+
+.wb-signup-diagram {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 20px 40px;
+  background: #FAFAFA;
+  border-radius: 24px;
+  padding: 40px;
+}
+
+.wb-signup-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+.wb-signup-box {
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 14px 20px;
+  background: #fff;
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--ink);
+  text-align: center;
+  white-space: nowrap;
+}
+.wb-signup-box[data-variant="system"] {
+  border-style: dashed;
+  color: #747474;
+  font-weight: 400;
+}
+
+.wb-signup-arrow {
+  color: #B8B8BC;
+  font-size: 20px;
+}
+
+/* ---------- Typography（刻意例外：這裡要展示 Raleway/Jost 真正的長相）---------- */
+.wb-type-eyebrow {
+  margin: 0 0 40px;
+  font-weight: 700;
+  font-size: 24px;
+  text-transform: uppercase;
+  color: #747474;
+}
+
+.wb-type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 48px;
+}
+
+.wb-type-specimen-name {
+  margin: 0;
+  font-size: clamp(40px, 5vw, 64px);
+  color: #01253D;
+}
+.wb-type-specimen-name[data-font="raleway"] { font-family: 'Raleway', sans-serif; font-weight: 800; }
+.wb-type-specimen-name[data-font="jost"] { font-family: 'Jost', sans-serif; font-weight: 400; }
+
+.wb-type-specimen-desc {
+  margin: 16px 0 0;
+  max-width: 574px;
+  font-size: 18px;
+  line-height: 1.5;
+  color: #717171;
+}
+
+/* ---------- Color ---------- */
+.wb-color-eyebrow {
+  margin: 0 0 32px;
+  font-weight: 600;
+  font-size: 32px;
+  color: var(--ink);
+}
+
+.wb-color-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.wb-color-swatch {
+  border-radius: 20px;
+  height: 204px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 20px;
+  color: #1E1E1E;
+}
+
+.wb-color-swatch-name {
+  margin: 0;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.wb-color-swatch-hex {
+  margin: 4px 0 0;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+@media (max-width: 900px) {
+  .wb-color-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ---------- Before & After ---------- */
+.wb-ba-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+
+.wb-ba-card {
+  border-radius: 28px;
+  padding: 40px;
+  min-height: 660px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.wb-ba-card[data-card="before"] { background: #F4F4F5; }
+.wb-ba-card[data-card="after"] { background: #E9EEFF; }
+
+.wb-ba-title {
+  margin: 0;
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: 2px;
+}
+.wb-ba-card[data-card="before"] .wb-ba-title { color: #6B6B70; }
+.wb-ba-card[data-card="after"] .wb-ba-title { color: #003AFF; }
+
+.wb-ba-subtitle {
+  margin: 8px 0 0;
+  font-weight: 600;
+  font-size: 20px;
+  color: #8A8A90;
+}
+
+.wb-ba-body {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  min-height: 499px;
+  margin-top: 24px;
+}
+
+.wb-ba-pill {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 26px 14px 22px;
+  border-radius: 100px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  white-space: nowrap;
+  font-weight: 500;
+  font-size: 20px;
+  color: #16161A;
+}
+
+.wb-ba-pill-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* AFTER 的流程是直向排列，不用絕對定位 */
+.wb-ba-flow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  max-width: 368px;
+  margin-inline: auto;
+}
+
+.wb-ba-flow .wb-ba-pill {
+  position: static;
+  box-shadow: 0 4px 14px rgba(0, 13, 77, 0.1);
+}
+
+.wb-ba-flow-arrow {
+  color: #8C97C9;
+  font-size: 26px;
+  line-height: 1;
+}
+
+.wb-ba-flow-label {
+  margin: 0;
+  font-weight: 400;
+  font-size: 20px;
+  color: #003AFF;
+}
+
+@media (max-width: 900px) {
+  .wb-ba-grid { grid-template-columns: 1fr; }
+  .wb-ba-body { min-height: 420px; }
+}
+
+/* ---------- Next Work（跟 §6.5 作品分類頁卡片同一套視覺規則：
+   灰底佔位、tag 膠囊 #5B5B5B 描邊、標題 Poppins 400） ---------- */
+.wb-next-title {
+  margin: 0 0 40px;
+  font-weight: 500;
+  font-size: 32px;
+  letter-spacing: -0.16px;
+  color: #353535;
+}
+
+.wb-next-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 21px;
+  row-gap: 48px;
+}
+
+.wb-next-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.wb-next-card-cover {
+  width: 100%;
+  aspect-ratio: 672 / 415;
+  background: #D9D9D9;
+  border-radius: 4px;
+}
+
+.wb-next-card-title {
+  margin: 16px 0 0;
+  font-weight: 400;
+  font-size: clamp(22px, 2.2222vw, 32px);
+  color: var(--ink);
+}
+
+.wb-next-card-desc {
+  margin: 4px 0 0;
+  font-weight: 400;
+  font-size: clamp(16px, 1.4vw, 20px);
+  line-height: 22px;
+  color: var(--work-muted, #747474);
+}
+
+.wb-next-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.wb-next-card-tag {
+  border: 1px solid #5B5B5B;
+  border-radius: 999px;
+  padding: 4px 21px;
+  font-size: 16px;
+  color: var(--ink);
+  line-height: 22px;
+}
+
+@media (max-width: 600px) {
+  .wb-next-grid { grid-template-columns: 1fr; }
+}
+
+/* ---------- Project Footage ---------- */
+.wb-footage {
+  text-align: center;
+}
+
+.wb-footage-icon {
+  margin-inline: auto;
+}
+
+.wb-footage-title {
+  margin: 24px 0 0;
+  font-weight: 600;
+  font-size: clamp(24px, 3.6vw, 36px);
+  letter-spacing: -0.18px;
+  color: #353535;
+  text-transform: capitalize;
+}
+
+.wb-footage-tagline {
+  margin: 12px 0 0;
+  font-style: italic;
+  font-size: clamp(17px, 1.7vw, 24px);
+  letter-spacing: -0.12px;
+  color: #717171;
+}
+
+/* ---------- placeholder blocks（Characters / Reference / Shot 等你的照片） ---------- */
+.wb-pending-block {
+  border-radius: 20px;
+  background: #D9D9D9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8A8A90;
+  font-size: 14px;
+  text-align: center;
+  padding: 24px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wb-case * { animation: none !important; }
+}

@@ -1,0 +1,513 @@
+/* Wander Buddy — Sign-up flow 動畫樣式（嵌入版）
+   由 tokens.css + screens.css + anim.css 合併而成，不含頁面層級樣式 */
+
+/* ==========================================================
+   Wander Buddy — Design tokens
+   全部數值取自 Figma 檔案 bxpJW3trFDtVFsgsDShUkC 的實際節點
+   ========================================================== */
+
+:root{
+  /* 介面底色 ------------------------------------------------ */
+  --surface:              #F5F5F5;   /* 所有畫面背景 */
+  --surface-raised:       #FFFFFF;   /* 卡片、輸入框、chip */
+  --surface-sheet:        #F2F2F7;   /* iOS action sheet */
+
+  /* 文字 ---------------------------------------------------- */
+  --text-primary:         #01253D;   /* 標題、主要文字 */
+  --text-secondary:       #757575;   /* 副標、placeholder */
+  --text-on-dark:         #FFFFFF;
+  --text-chip:            #000000;
+
+  /* 互動 ---------------------------------------------------- */
+  --action:               #01253D;   /* 主要按鈕 */
+  --action-disabled:      #D1D1D6;   /* 未啟用的 Continue */
+  --action-ios:           #007AFF;   /* Apple 系統按鈕 */
+
+  /* 八個活動類別色 ------------------------------------------ */
+  --cat-food:             #FF0005;
+  --cat-coffee:           #FF9E00;
+  --cat-film:             #FBD500;
+  --cat-outdoor:          #87FA89;
+  --cat-market:           #00DDF9;
+  --cat-music:            #003AFF;
+  --cat-art:              #FF7BFF;
+  --cat-workshop:         #ECE0D1;
+  --cat-workshop-deep:    #CDBDAA;
+
+  /* chip 選取狀態 ------------------------------------------- */
+  --chip-selected-art:    #FF7BFF;
+  --chip-selected-coffee: #FF9E00;
+
+  /* 字體 ---------------------------------------------------- */
+  --font-display: "Raleway", system-ui, sans-serif;   /* 標題 */
+  --font-body:    "Jost", system-ui, sans-serif;      /* 內文、UI */
+  --font-system:  "Inter", -apple-system, sans-serif; /* iOS 系統元件 */
+
+  /* 圓角 ---------------------------------------------------- */
+  --r-field:   10px;   /* 輸入框、按鈕 */
+  --r-pill:    100px;  /* chip、Continue */
+  --r-phone:   44px;
+
+  /* 動態 ---------------------------------------------------- */
+  --ease-bounce:  cubic-bezier(.22, 1.2, .36, 1);
+  --ease-pop:     cubic-bezier(.34, 1.56, .64, 1);
+  --ease-inout:   cubic-bezier(.4, 0, .2, 1);
+  --ease-strong:  cubic-bezier(.65, 0, .35, 1);
+  --ease-out-exp: cubic-bezier(.16, 1, .3, 1);
+}
+
+/* ==========================================================
+   五個畫面的靜態重建 — 座標全部取自 Figma，畫面基準 402×874
+   ========================================================== */
+
+.phone{
+  position:relative;
+  width:402px; height:874px;
+  background:var(--surface);
+  border-radius:var(--r-phone);
+  overflow:hidden;
+  flex:0 0 auto;
+}
+
+/* 每個 screen 疊在同一個位置，用 .is-active 控制顯示 */
+.screen{
+  position:absolute; inset:0;
+  background:var(--surface);
+}
+
+/* ---------- 狀態列 ---------------------------------------- */
+.statusbar{ position:absolute; top:0; left:0; width:402px; height:62px; z-index:40; }
+.statusbar .time{
+  position:absolute; left:56px; top:22px; width:37px; height:22px;
+  font:600 17px/22px var(--font-system); text-align:center; color:#000;
+}
+.statusbar .signal{ position:absolute; left:289px; top:26px; display:flex; align-items:flex-end; gap:2px; height:12px; }
+.statusbar .signal i{ width:3px; background:#000; border-radius:1px; display:block; }
+.statusbar .signal i:nth-child(1){ height:4px }
+.statusbar .signal i:nth-child(2){ height:6px }
+.statusbar .signal i:nth-child(3){ height:9px }
+.statusbar .signal i:nth-child(4){ height:12px }
+.statusbar .wifi{
+  position:absolute; left:315px; top:26px; width:17px; height:12px;
+  background:#000;
+  -webkit-mask:radial-gradient(circle at 50% 100%, #000 0 32%, transparent 33%) center/100% 100% no-repeat;
+  mask:radial-gradient(circle at 50% 100%, #000 0 32%, transparent 33%) center/100% 100% no-repeat;
+}
+.statusbar .batt{
+  position:absolute; left:339px; top:26px; width:25px; height:13px;
+  border:1px solid #000; border-radius:4.3px; opacity:.9;
+}
+.statusbar .batt::after{
+  content:""; position:absolute; left:1px; top:1px; width:19px; height:9px;
+  background:#000; border-radius:2.5px;
+}
+.statusbar .batt::before{
+  content:""; position:absolute; left:26px; top:4px; width:1.5px; height:4px;
+  background:#000; border-radius:0 1px 1px 0;
+}
+.home-indicator{
+  position:absolute; left:134px; top:857px; width:134px; height:5px;
+  background:#000; border-radius:100px; z-index:40;
+}
+
+/* ---------- 共用元件 -------------------------------------- */
+.social-btn{
+  position:absolute; width:52px; height:52px;
+  background:var(--surface-raised); border-radius:var(--r-field);
+  box-shadow:0 2px 7px rgba(0,0,0,.10);
+  display:grid; place-items:center;
+}
+.social-btn svg{ display:block }
+
+.primary-btn{
+  position:absolute; height:52px;
+  background:var(--action); border-radius:var(--r-field);
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  font:500 20px/1 var(--font-body); color:var(--text-on-dark);
+}
+
+/* ==========================================================
+   1. sign in
+   ========================================================== */
+.s-signin .card-stage{
+  position:absolute; left:0; top:0; width:402px; height:874px;
+  overflow:hidden; z-index:1;
+}
+.s-signin .card-strip{
+  position:absolute; left:0; top:0; width:1653px; height:660px;
+}
+.s-signin .card{ position:absolute; display:block; }
+
+.s-signin .headline{
+  position:absolute; left:58px; top:595px; width:286px;
+  font:800 36px/1.16 var(--font-display);
+  color:var(--text-primary); text-align:center; z-index:10;
+}
+.s-signin .subhead{
+  position:absolute; left:100px; top:694px; width:200px;
+  font:400 16px/18px var(--font-body);
+  color:var(--text-secondary); text-align:center; z-index:10;
+}
+.s-signin .cta{ left:34px; top:786px; width:214px; z-index:10; }
+.s-signin .cta .arrow{
+  width:10px; height:10px; border-top:2.5px solid #fff; border-right:2.5px solid #fff;
+  transform:rotate(45deg) translateY(1px);
+}
+.s-signin .btn-apple { left:256px; top:786px; z-index:10; }
+.s-signin .btn-google{ left:316px; top:786px; z-index:10; }
+
+/* ==========================================================
+   2. Email 註冊分支
+   ========================================================== */
+.s-email .blob{ position:absolute; z-index:1; }
+
+.s-email .headline{
+  position:absolute; left:34px; top:267px; width:300px;
+  font:800 48px/1.16 var(--font-display);
+  color:var(--text-primary); z-index:5; white-space:pre-line;
+}
+
+.s-email .field{
+  position:absolute; left:34px; width:334px; height:52px;
+  background:var(--surface-raised); border-radius:var(--r-field);
+  z-index:5;
+  border:1.5px solid transparent;
+  transition:border-color .18s var(--ease-inout), box-shadow .18s var(--ease-inout);
+}
+.s-email .field.is-focused{
+  border-color:var(--text-primary);
+  box-shadow:0 0 0 3px rgba(1,37,61,.08);
+}
+.s-email .field .icon{
+  position:absolute; left:13px; top:50%; translate:0 -50%;
+  width:24px; height:24px; display:grid; place-items:center;
+  color:var(--text-secondary);
+}
+.s-email .field .value{
+  position:absolute; left:37px; top:50%; translate:0 -50%;
+  font:300 16px/23px var(--font-body); color:var(--text-secondary);
+  white-space:pre; display:flex; align-items:center;
+}
+.s-email .field.has-value .value{ color:var(--text-primary); font-weight:400; }
+.s-email .field .caret{
+  display:inline-block; width:1.5px; height:19px; margin-left:1px;
+  background:var(--text-primary); opacity:0;
+}
+.s-email .field.is-focused .caret{ animation:caretBlink 1.06s steps(1) infinite; }
+@keyframes caretBlink{ 0%,49%{opacity:1} 50%,100%{opacity:0} }
+
+.s-email .f-name { top:397px }
+.s-email .f-email{ top:468px }
+.s-email .f-pass { top:539px }
+
+.s-email .cta{ left:34px; top:627px; width:334px; z-index:5; }
+
+.s-email .divider{
+  position:absolute; top:701px; height:1px; background:var(--text-secondary);
+  opacity:.5; z-index:5;
+}
+.s-email .divider.left { left:34px;  width:127px }
+.s-email .divider.right{ left:241px; width:127px }
+.s-email .or{
+  position:absolute; left:166px; top:692px; width:70px;
+  font:300 12px/17px var(--font-body); color:var(--text-secondary);
+  text-align:center; z-index:5;
+}
+.s-email .btn-apple { left:140px; top:720px; z-index:5; }
+.s-email .btn-google{ left:210px; top:720px; z-index:5; }
+
+/* ==========================================================
+   3. Apple ID（疊在註冊畫面之上）
+   ========================================================== */
+.s-apple{ background:transparent; z-index:30; pointer-events:none; }
+
+/* 進場：變暗 → 彈窗上滑 → Face ID 出現。順序與 iOS 一致 */
+.s-apple .dim{
+  position:absolute; inset:0; background:#000;
+  opacity:0; transition:opacity .3s var(--ease-inout);
+}
+.s-apple.is-open .dim{ opacity:.42 }
+
+.s-apple .sheet{ transform:translateY(100%); transition:transform .46s var(--ease-out-exp) }
+.s-apple.is-open .sheet{ transform:translateY(0) }
+
+.s-apple .faceid{
+  opacity:0; scale:.9;
+  transition:opacity .28s var(--ease-inout) .18s, scale .34s var(--ease-out-exp) .18s;
+}
+.s-apple.is-open .faceid{ opacity:1; scale:1 }
+/* Face ID — 符號取自 Figma 原檔，動態依 Apple 實際驗證流程 ---- */
+.s-apple .faceid{
+  position:absolute; left:126px; top:11px; width:151px; height:151px;
+  background:#000; border-radius:40px; display:grid; place-items:center;
+  box-shadow:0 12px 37px rgba(0,0,0,.22);
+}
+.s-apple .faceid .glyph{ position:relative; width:70px; height:70px; }
+.s-apple .faceid .glyph svg{ position:absolute; inset:0; display:block }
+
+/* 1. 待機：符號完整顯示 */
+.s-apple .fid-symbol{
+  opacity:1; transform:scale(1); transform-origin:center;
+  transition:opacity .22s var(--ease-inout), transform .22s var(--ease-inout);
+}
+
+/* 2. 掃描中：緩慢呼吸兩次。Apple 的節奏是「暗→亮→暗」，不是閃爍 */
+.s-apple .faceid.is-scanning .fid-symbol{
+  animation:fidScan 1.15s var(--ease-inout) 2 both;
+}
+@keyframes fidScan{
+  0%   { opacity:.42; transform:scale(.955) }
+  50%  { opacity:1;   transform:scale(1.03) }
+  100% { opacity:.42; transform:scale(.955) }
+}
+
+/* 3. 成功：符號縮小淡出，勾勾以描邊方式畫出來 */
+.s-apple .fid-check{
+  opacity:0;
+  stroke-dasharray:80;
+  stroke-dashoffset:80;
+}
+.s-apple .faceid.is-done .fid-symbol{
+  opacity:0; transform:scale(.82);
+}
+.s-apple .faceid.is-done .fid-check{
+  opacity:1;
+  animation:fidDraw .42s var(--ease-out-exp) .1s both;
+}
+@keyframes fidDraw{
+  from{ stroke-dashoffset:80 }
+  to  { stroke-dashoffset:0 }
+}
+/* 成功時整個黑框輕微一縮一放，對應 iOS 的觸覺回饋 */
+.s-apple .faceid.is-done{
+  animation:fidPop .38s var(--ease-pop) both;
+}
+@keyframes fidPop{
+  0%{ transform:scale(1) } 40%{ transform:scale(.955) } 100%{ transform:scale(1) }
+}
+
+.s-apple .sheet{
+  position:absolute; left:0; top:537px; width:402px; height:337px;
+  background:var(--surface-sheet); border-radius:14px 14px 0 0;
+}
+.s-apple .sheet .sheet-title{
+  position:absolute; left:16px; top:19px;
+  font:600 20px/24px var(--font-system); color:#000;
+}
+.s-apple .sheet .sheet-close{
+  position:absolute; left:354px; top:15px; width:32px; height:32px;
+  border-radius:100px; background:rgba(120,120,128,.16);
+  display:grid; place-items:center; color:#3C3C43; font:600 15px/1 var(--font-system);
+}
+.s-apple .sheet .app-icon{
+  position:absolute; left:174px; top:75px; width:54px; height:54px;
+  border-radius:12px; overflow:hidden;
+}
+.s-apple .sheet .app-icon img{ width:100%; height:100%; display:block }
+.s-apple .sheet .sheet-copy{
+  position:absolute; left:37px; top:157px; width:328px;
+  font:600 13.8px/17px var(--font-system); color:#000; text-align:center;
+}
+.s-apple .sheet .sheet-btn{
+  position:absolute; left:142px; top:245px; width:118px; height:42px;
+  background:var(--action-ios); border-radius:9px;
+  display:grid; place-items:center;
+  font:400 17px/1 var(--font-system); color:#fff;
+}
+
+/* ==========================================================
+   4. event & interest
+   ========================================================== */
+.s-interest .title{
+  position:absolute; left:34px; top:83px; width:334px;
+  font:800 36px/1.16 var(--font-display); color:var(--text-primary); z-index:5;
+}
+.s-interest .scroller{
+  position:absolute; left:0; top:170px; width:402px; height:704px;
+  overflow:hidden; z-index:2;
+}
+.s-interest .scroll-inner{ position:relative; width:402px; height:700px; }
+.s-interest .group-label{
+  position:absolute; font:500 20px/23px var(--font-body); color:var(--text-primary);
+}
+.s-interest .chip{
+  position:absolute; height:34px;
+  background:var(--surface-raised); border-radius:var(--r-pill);
+  display:flex; align-items:center; justify-content:center;
+  font:300 14px/1 var(--font-body); color:var(--text-chip);
+  box-shadow:0 1px 3px rgba(0,0,0,.07);
+  white-space:nowrap;
+  transition:background-color .22s var(--ease-inout);
+}
+.s-interest .chip.sel-art   { background:var(--chip-selected-art) }
+.s-interest .chip.sel-coffee{ background:var(--chip-selected-coffee) }
+
+.s-interest .cta{
+  position:absolute; left:34px; top:786px; width:334px; height:52px;
+  border-radius:var(--r-pill); background:var(--action-disabled);
+  display:grid; place-items:center; z-index:20;
+  font:500 20px/1 var(--font-body); color:var(--text-on-dark);
+  transition:background-color .3s var(--ease-inout);
+}
+.s-interest .cta.is-enabled{ background:var(--action) }
+
+/* ==========================================================
+   比對用的展示版面（step 1 專用，之後會拿掉）
+   ========================================================== */
+.compare{
+  display:flex; gap:40px; padding:60px 40px; overflow-x:auto;
+  background:#E7E9EC; align-items:flex-start;
+}
+.compare figure{ margin:0; display:flex; flex-direction:column; gap:14px; align-items:center }
+.compare figcaption{
+  font:500 14px/1 var(--font-body); color:#4A4A52; letter-spacing:.4px;
+}
+.compare .phone{ box-shadow:0 24px 60px rgba(20,30,50,.16) }
+
+/* ==========================================================
+   流程動畫 — 舞台、假游標、場景轉換
+   ========================================================== */
+
+.film{
+  position:relative;
+  width:100%;
+  /* 高度由外部決定，預設一個視窗高。放進頁面時可以覆蓋 */
+  min-height:var(--film-height, 100svh);
+  background:var(--surface);
+  display:grid; place-items:center;
+  overflow:hidden;
+}
+
+.stage{
+  position:relative;
+  width:402px; height:874px;
+  transform-origin:center center;
+  transition:transform .7s var(--ease-strong);
+}
+
+.film .phone{
+  box-shadow:0 30px 70px rgba(20,30,50,.16);
+  transition:opacity .4s var(--ease-inout);
+}
+
+/* ---------- 畫面切換 -------------------------------------- */
+.screen{
+  opacity:0; pointer-events:none;
+  transition:opacity .38s var(--ease-inout);
+}
+.screen.is-on{ opacity:1 }
+
+/* ---------- 第 1 幕：卡片飛入 ------------------------------ */
+.s-signin .card{
+  opacity:0;
+  transform:translateY(46px) scale(.88) rotate(-6deg);
+  transition:opacity .52s var(--ease-bounce), transform .52s var(--ease-bounce);
+}
+.s-signin .card.is-in{
+  opacity:1; transform:translateY(0) scale(1) rotate(0deg);
+}
+/* 落定後單向無限飄移，兩份內容跑到 -835px 剛好接回起點 */
+.s-signin .card-strip.is-drifting{
+  animation:cardDrift 26s linear infinite;
+}
+@keyframes cardDrift{
+  from{ transform:translate3d(0,0,0) }
+  to  { transform:translate3d(-835px,0,0) }
+}
+
+/* 文案與按鈕依序浮現 */
+.s-signin .headline,
+.s-signin .subhead,
+.s-signin .cta,
+.s-signin .btn-apple,
+.s-signin .btn-google{
+  opacity:0; translate:0 14px;
+  transition:opacity .46s var(--ease-out-exp), translate .46s var(--ease-out-exp);
+}
+.s-signin .is-up{ opacity:1; translate:0 0 }
+
+/* ---------- 按鈕按下的回饋 --------------------------------- */
+.is-pressed{ animation:pressFx .3s var(--ease-inout) }
+@keyframes pressFx{
+  0%{ transform:scale(1) } 40%{ transform:scale(.955) } 100%{ transform:scale(1) }
+}
+
+/* ---------- 假游標 ----------------------------------------
+   刻意不做位移動畫：游標直接出現在要點的位置、點下去、淡出。
+   讓它在畫面上滑來滑去會變成干擾，觀眾的注意力會跟著游標跑，
+   而不是看被點的東西。
+   -------------------------------------------------------- */
+.cursor{
+  position:absolute; left:0; top:0; z-index:200;
+  width:22px; height:22px; margin:-11px 0 0 -11px;
+  opacity:0; pointer-events:none;
+  transition:opacity .2s var(--ease-inout);
+}
+.cursor.is-on{ opacity:1 }
+
+.cursor .dot{
+  display:block; width:100%; height:100%; border-radius:100px;
+  background:rgba(1,37,61,.28);
+  border:1.5px solid rgba(1,37,61,.48);
+  scale:1.34;
+  transition:scale .24s var(--ease-out-exp);
+}
+.cursor.is-on .dot{ scale:1 }
+.cursor.is-clicking .dot{ animation:curPress .3s var(--ease-inout) }
+@keyframes curPress{
+  0%{ transform:scale(1) } 45%{ transform:scale(.7) } 100%{ transform:scale(1) }
+}
+
+.cursor::after{
+  content:""; position:absolute; inset:-6px;
+  border-radius:100px; border:2px solid rgba(1,37,61,.42);
+  opacity:0; transform:scale(.5);
+}
+.cursor.is-clicking::after{ animation:curRipple .44s var(--ease-out-exp) }
+@keyframes curRipple{
+  0%  { opacity:.85; transform:scale(.5) }
+  100%{ opacity:0;   transform:scale(2.3) }
+}
+
+/* ---------- 路徑標籤 -------------------------------------- */
+.badge{
+  position:absolute; left:50%; top:-46px; translate:-50% 0;
+  padding:7px 18px; border-radius:100px;
+  background:var(--action); color:#fff;
+  font:500 14px/1 var(--font-body); letter-spacing:.4px;
+  opacity:0; transition:opacity .34s var(--ease-inout);
+  white-space:nowrap;
+}
+.badge.is-on{ opacity:1 }
+
+/* OR：分支切換的訊號 */
+.or-badge{
+  position:absolute; left:50%; top:50%; translate:-50% -50%;
+  z-index:150;
+  font:800 64px/1 var(--font-display); letter-spacing:4px;
+  color:var(--text-primary);
+  opacity:0; scale:.86;
+  transition:opacity .3s var(--ease-inout), scale .4s var(--ease-out-exp);
+}
+.or-badge.is-on{ opacity:1; scale:1 }
+
+/* ---------- 第 7 幕：結尾 logo ----------------------------- */
+.endlogo{
+  position:absolute; left:50%; top:50%; translate:-50% -50%;
+  width:300px; z-index:180;
+  opacity:0; scale:.94;
+  transition:opacity .9s var(--ease-out-exp), scale .9s var(--ease-out-exp);
+}
+.endlogo.is-on{ opacity:1; scale:1 }
+.endlogo img{ width:100%; display:block }
+
+/* ---------- 響應式 ---------------------------------------- */
+@media (max-height:960px){ .film .stage{ zoom:.82 } }
+@media (max-height:800px){ .film .stage{ zoom:.7 } }
+
+
+/* ---------- 無障礙 ---------------------------------------- */
+@media (prefers-reduced-motion:reduce){
+  .s-signin .card-strip.is-drifting{ animation:none }
+  .cursor{ display:none }
+}
