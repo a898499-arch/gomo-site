@@ -15,17 +15,28 @@
   padding-block: clamp(48px, 6vw, 96px);
 }
 
+/* 2026-08-15：Typography → Color 之間 Figma 實測只有 ~15px（514:557 底部到
+   514:563 內容頂部），不是兩個 --section 各自的預設留白疊起來那麼多 */
+.wb-section--tight-b { padding-bottom: 8px; }
+.wb-section--tight-t { padding-top: 8px; }
+
 .wb-section-inner {
   max-width: 1280px;
   margin-inline: auto;
   padding-inline: var(--page-gutter);
 }
 
-/* ---------- Logo & Overview ---------- */
+/* ---------- Logo & Overview ----------
+   2026-08-14 Figma 精確量測（node 491:508 metadata）：
+   整段區塊在 1440 參考寬度下左右各留白 140px（不是全站的 --page-gutter
+   40px），所以用專屬的 clamp(20px, 9.7222vw, 140px) 而不是共用 token；
+   內文文字欄寬 1077px，置中在 1160px 的區塊裡；icon 底部到標題頂部幾乎
+   貼齊（0px）；標題→tagline 11px；tagline→簡介 11px；簡介→分隔線 53px；
+   分隔線→Type/Category/Tool 標籤列 46px；標籤列→數值列 28px。 */
 .wb-overview-inner {
   max-width: 1160px;
   margin-inline: auto;
-  padding-inline: var(--page-gutter);
+  padding-inline: clamp(20px, 9.7222vw, 140px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -35,48 +46,52 @@
 .wb-app-icon {
   width: 95px;
   height: 95px;
-  border-radius: 22px;
-  background: #87FA89;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   flex-shrink: 0;
 }
-.wb-app-icon svg { width: 62%; height: 62%; }
+.wb-app-icon svg { display: block; width: 100%; height: 100%; }
+
+.wb-overview-text {
+  max-width: 1077px;
+  margin-inline: auto;
+}
 
 .wb-overview-title {
-  margin: 24px 0 0;
+  margin: 0;
   font-weight: 600;
-  font-size: clamp(32px, 4.4vw, 64px);
+  font-size: clamp(32px, 4.4444vw, 64px);
+  line-height: 1.45;
   letter-spacing: -0.32px;
   color: #353535;
   text-transform: capitalize;
 }
 
 .wb-overview-tagline {
-  margin: 12px 0 0;
+  margin: 11px 0 0;
   font-style: italic;
   font-weight: 400;
-  font-size: clamp(17px, 1.7vw, 24px);
+  font-size: clamp(17px, 1.6667vw, 24px);
+  line-height: 1.45;
   letter-spacing: -0.12px;
   color: #717171;
+  /* Figma 上刻意設定每個單字首字母大寫，不是一般句首大寫 */
+  text-transform: capitalize;
 }
 
 .wb-overview-body {
-  margin: 24px 0 0;
-  max-width: 1077px;
+  margin: 11px 0 0;
   font-weight: 400;
   font-size: clamp(15px, 1.25vw, 18px);
   letter-spacing: -0.09px;
   line-height: 1.5;
   color: #353535;
+  text-transform: capitalize;
 }
 
 .wb-overview-divider {
   width: 100%;
   height: 1px;
   background: var(--rule);
-  margin: 40px 0 0;
+  margin: 53px 0 0;
 }
 
 .wb-overview-meta {
@@ -91,7 +106,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 28px;
 }
 
 .wb-overview-meta-label {
@@ -199,63 +214,109 @@
   .wb-dc-cards { grid-template-columns: 1fr; }
 }
 
-/* ---------- Sign Up Flow（靜態資訊圖，簡化版：只求資訊正確，
-   連接線是簡化的直線示意，不是逐一還原 Figma 的向量路徑）---------- */
-.wb-signup-title {
-  margin: 0 0 32px;
-  font-weight: 700;
-  font-size: 24px;
-  color: var(--ink);
+/* ---------- Sign Up Flow ----------
+   2026-08-14 用你匯出的 5 個真實形狀 SVG 重做（node 491:232）。座標全部
+   換算成 % 定位在 1440×541 的參考框裡，隨容器寬度等比縮放。連接線是簡化
+   的直線示意，不是逐一還原 Figma 的彎折向量路徑（已跟你確認過可以簡化）。 */
+.wb-signup-diagram {
+  position: relative;
+  width: 100%;
+  background: #303030;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
-.wb-signup-diagram {
+.wb-signup-title {
+  position: absolute;
+  left: 2.7778%;
+  top: 3.6%;
+  margin: 0;
+  font-weight: 700;
+  font-size: clamp(14px, 1.6667vw, 24px);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.wb-signup-line-h {
+  position: absolute;
+  height: 1px;
+  background: #FBD500;
+}
+
+.wb-signup-line-v {
+  position: absolute;
+  width: 1px;
+  background: #FBD500;
+}
+
+.wb-signup-dot {
+  position: absolute;
+  border-radius: 50%;
+  background: #FBD500;
+}
+
+.wb-signup-system-box {
+  position: absolute;
+  border: 1px solid #fff;
+  border-radius: 19px;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 20px 40px;
-  background: #FAFAFA;
-  border-radius: 24px;
-  padding: 40px;
-}
-
-.wb-signup-col {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  align-items: center;
-}
-
-.wb-signup-box {
-  border: 1px solid var(--rule);
-  border-radius: 12px;
-  padding: 14px 20px;
-  background: #fff;
-  font-weight: 500;
-  font-size: 15px;
-  color: var(--ink);
   text-align: center;
-  white-space: nowrap;
-}
-.wb-signup-box[data-variant="system"] {
-  border-style: dashed;
-  color: #747474;
+  padding: 4px 10px;
   font-weight: 400;
+  font-size: clamp(10px, 1.25vw, 18px);
+  line-height: 1.35;
+  color: #fff;
 }
 
-.wb-signup-arrow {
-  color: #B8B8BC;
-  font-size: 20px;
+.wb-signup-shape {
+  position: absolute;
 }
 
-/* ---------- Typography（刻意例外：這裡要展示 Raleway/Jost 真正的長相）---------- */
-.wb-type-eyebrow {
+.wb-signup-shape-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.wb-signup-shape-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-weight: 400;
+  line-height: 1.3;
+  padding-inline: 12%;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* ---------- 共用的小標籤樣式（Typography 的「TYPOGRAPHY」、Color 的「COLOR」
+   是同一層級、同一套樣式，Figma 上兩者字級/字重/字距/顏色完全一致，
+   共用同一個 class，不要各寫一套） ---------- */
+.wb-eyebrow {
   margin: 0 0 40px;
   font-weight: 700;
   font-size: 24px;
   text-transform: uppercase;
   color: #747474;
 }
+
+/* ---------- Typography（刻意例外：這裡要展示 Raleway/Jost 真正的長相）---------- */
 
 .wb-type-grid {
   display: grid;
@@ -279,40 +340,34 @@
   color: #717171;
 }
 
-/* ---------- Color ---------- */
-.wb-color-eyebrow {
-  margin: 0 0 32px;
-  font-weight: 600;
-  font-size: 32px;
-  color: var(--ink);
-}
-
+/* ---------- Color ----------
+   2026-08-14 Figma 精確量測（node 514:563）：色票直角、彼此緊貼無間距、
+   340×204（≈1.6667:1）、文字全部白色 Poppins SemiBold 18px，
+   line-height 35.4px，分類名稱在上、hex 在下。 */
 .wb-color-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  gap: 0;
 }
 
 .wb-color-swatch {
-  border-radius: 20px;
-  height: 204px;
+  aspect-ratio: 340 / 204;
+  border-radius: 0;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 20px;
-  color: #1E1E1E;
+  padding: 24px;
+  color: #fff;
 }
 
-.wb-color-swatch-name {
-  margin: 0;
-  font-weight: 500;
-  font-size: 16px;
-}
-
+.wb-color-swatch-name,
 .wb-color-swatch-hex {
-  margin: 4px 0 0;
-  font-weight: 600;
-  font-size: 18px;
+  margin: 0;
+  /* 2026-08-15：Figma 原稿是 SemiBold 600，但使用者看過後決定小字級下
+     600 視覺上偏重，主動選擇偏離 Figma 改成 Regular 400——不是抓漏。 */
+  font-weight: 400;
+  font-size: clamp(13px, 1.25vw, 18px);
+  line-height: 1.9667;
 }
 
 @media (max-width: 900px) {
@@ -342,6 +397,7 @@
   font-weight: 700;
   font-size: 24px;
   letter-spacing: 2px;
+  text-align: center;
 }
 .wb-ba-card[data-card="before"] .wb-ba-title { color: #6B6B70; }
 .wb-ba-card[data-card="after"] .wb-ba-title { color: #003AFF; }
@@ -351,6 +407,7 @@
   font-weight: 600;
   font-size: 20px;
   color: #8A8A90;
+  text-align: center;
 }
 
 .wb-ba-body {
@@ -509,7 +566,109 @@
   color: #717171;
 }
 
-/* ---------- placeholder blocks（Characters / Reference / Shot 等你的照片） ---------- */
+/* ---------- Characters 兩列（純 CSS 無限漂移，不用 JS/rAF） ---------- */
+.wb-characters-row {
+  width: 100%;
+  overflow: hidden;
+}
+
+.wb-characters-track {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  width: max-content;
+  animation: wbCharDrift 42s linear infinite;
+}
+
+.wb-characters-row[data-direction="right"] .wb-characters-track {
+  animation-direction: reverse;
+}
+
+/* 6 份複製，一份 = 總寬度的 1/6，translateX 對一份寬度取模 */
+@keyframes wbCharDrift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-16.6667%, 0, 0); }
+}
+
+.wb-character-icon {
+  display: block;
+  width: clamp(72px, 9vw, 130px);
+  height: clamp(72px, 9vw, 130px);
+  flex-shrink: 0;
+}
+
+/* ---------- Characters Reference（node 514:576，滿版出血、左右兩個等寬
+   色塊面板，2026-08-15 整段重做——原本的米色網格版本跟 Figma 完全不符） */
+.wb-charref-frame {
+  position: relative;
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+}
+
+.wb-charref-panel {
+  position: relative;
+  flex: 1 1 50%;
+  overflow: hidden;
+}
+
+.wb-charref-panel--left { background: #FFDCFF; }
+.wb-charref-panel--right { background: #FF7BFF; }
+
+.wb-charref-title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: 0;
+  text-align: center;
+  font-weight: 700;
+  font-size: clamp(20px, 2.5035vw, 36px);
+}
+
+.wb-charref-photos-img {
+  position: absolute;
+  display: block;
+  height: auto;
+}
+
+.wb-charref-chars {
+  position: absolute;
+}
+
+.wb-charref-desc {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  text-align: center;
+  font-weight: 600;
+  font-size: clamp(14px, 1.3908vw, 20px);
+  line-height: 1.4;
+}
+
+/* 中間的跨面板換色箭頭：兩段各自的顏色跟正下方面板相反（見
+   CharactersReference.jsx 的 CrossoverArrow 註解），在面板交界處重疊，
+   垂直置中在整個 514:576 frame 的正中央 */
+.wb-charref-arrow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.wb-charref-arrow-piece {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: block;
+}
+
+@media (max-width: 700px) {
+  .wb-charref-frame { flex-direction: column; aspect-ratio: unset !important; }
+  .wb-charref-panel { aspect-ratio: 719 / 900; }
+  .wb-charref-arrow { display: none; }
+}
+
+/* ---------- placeholder blocks（還在等圖檔的區塊用） ---------- */
 .wb-pending-block {
   border-radius: 20px;
   background: #D9D9D9;
@@ -520,6 +679,31 @@
   font-size: 14px;
   text-align: center;
   padding: 24px;
+}
+
+/* ---------- Shot（滿版置中，唯一維持標準進場的一張） ---------- */
+.wb-shot {
+  position: relative;
+  width: 100%;
+}
+.wb-shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ---------- Mock up 2/3/4（依 Figma 座標往畫布外出血，
+   不是置中；超出的部分用 overflow:hidden 真的裁掉） ---------- */
+.wb-mockup-bleed {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+.wb-mockup-bleed-img {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  object-fit: cover;
 }
 
 @media (prefers-reduced-motion: reduce) {

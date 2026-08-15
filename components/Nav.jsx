@@ -4,28 +4,44 @@ import Link from 'next/link';
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { useLenis } from './LenisProvider';
+import { useNavBehaviorConfig } from './NavBehaviorProvider';
 import { mainEase } from '@/lib/ease';
 
 // §4：全站統一的 hide-on-scroll — 往下滾隱藏、往上滾出現，distance<=100px 永遠顯示，
 // 累積位移超過 8px 才判定方向（防抖）。從 prototypes/*.html 逐字搬過來，唯一的差異是
 // home.html 專屬的「§6.2 影片放大時強制隱藏」覆寫規則，等 Section 2 動效一起搬過來時再加回去。
+//
+// 滿版 Hero 頁面（例如作品詳情頁）可以透過 NavBehaviorProvider 的
+// useNavBehavior({ startHidden: true }) 覆寫成：進頁時先隱藏、往下滾再往上滾
+// 才叫出來，且停用「距離頂端 100px 永遠顯示」這條規則（不然一停在頂端就會
+// 被強制拉出來，跟「先隱藏」互相打架）。其他頁面不受影響。
 const TOP_DEAD_ZONE = 100;
 const DIRECTION_THRESHOLD = 8;
 
 export default function Nav() {
   const navRef = useRef(null);
   const lenis = useLenis();
+  const { config } = useNavBehaviorConfig();
+  const startHidden = config.startHidden;
 
   useEffect(() => {
     if (!lenis) return;
 
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduceMotion) return;
-
     const nav = navRef.current;
-    let navHidden = false;
-    let lastScrollY = 0;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (reduceMotion) {
+      gsap.set(nav, { y: 0 });
+      return;
+    }
+
+    let navHidden = startHidden;
+    let lastScrollY = lenis.scroll;
     let accumDelta = 0;
+
+    // 進場基準：一般頁面預設可見；startHidden 的頁面一進來就直接是隱藏狀態
+    // （用 gsap.set 瞬間套用，不是動畫過去的）。
+    gsap.set(nav, { y: navHidden ? '-100%' : 0 });
 
     function showNav() {
       if (!navHidden) return;
@@ -46,7 +62,7 @@ export default function Nav() {
       const diff = y - lastScrollY;
       lastScrollY = y;
 
-      if (y <= TOP_DEAD_ZONE) {
+      if (!startHidden && y <= TOP_DEAD_ZONE) {
         accumDelta = 0;
         showNav();
         return;
@@ -69,7 +85,7 @@ export default function Nav() {
 
     lenis.on('scroll', onScroll);
     return () => lenis.off('scroll', onScroll);
-  }, [lenis]);
+  }, [lenis, startHidden]);
 
   return (
     <nav className="site-nav" ref={navRef}>

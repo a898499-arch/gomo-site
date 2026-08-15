@@ -9,9 +9,9 @@ export default function Typography() {
   const ref = useStandardEntrance('.wb-entrance-item');
 
   return (
-    <section className="wb-section" ref={ref}>
+    <section className="wb-section wb-section--tight-b" ref={ref}>
       <div className="wb-section-inner">
-        <p className="wb-type-eyebrow wb-entrance-item">Typography</p>
+        <p className="wb-eyebrow wb-entrance-item">Typography</p>
         <div className="wb-type-grid">
           <div className="wb-entrance-item">
             <p className="wb-type-specimen-name" data-font="raleway">Raleway</p>

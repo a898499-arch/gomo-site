@@ -2,6 +2,7 @@ import { Poppins } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
 import { LenisProvider } from '@/components/LenisProvider';
+import { NavBehaviorProvider } from '@/components/NavBehaviorProvider';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 
@@ -37,9 +38,11 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <LenisProvider>
-          <Nav />
-          <main className="page-content">{children}</main>
-          <Footer />
+          <NavBehaviorProvider>
+            <Nav />
+            <main className="page-content">{children}</main>
+            <Footer />
+          </NavBehaviorProvider>
         </LenisProvider>
         {/* embed/README.md「Next.js（App Router）」步驟 3：flow.js 是原生 JS，
             用 next/script 掛全域，不要改寫成 React */}

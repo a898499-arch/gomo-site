@@ -13,19 +13,21 @@ export default function LogoOverview() {
           <AppIcon />
         </div>
 
-        <h1 className="wb-overview-title wb-entrance-item">Wander Buddy</h1>
+        <div className="wb-overview-text">
+          <h1 className="wb-overview-title wb-entrance-item">Wander Buddy</h1>
 
-        <p className="wb-overview-tagline wb-entrance-item">
-          Turning a three-minute sign-up into a 30-second first impression.
-        </p>
+          <p className="wb-overview-tagline wb-entrance-item">
+            Turning a three-minute sign-up into a 30-second first impression.
+          </p>
 
-        <p className="wb-overview-body wb-entrance-item">
-          WanderBuddy connects newcomers, international students, and remote workers with
-          companions for exploring the city. Most apps lose users at sign-up, too few options,
-          too many fields. I designed a flow with three entry points and only the essentials:
-          email, name, and interests, just enough to match people with the right activities from
-          day one.
-        </p>
+          <p className="wb-overview-body wb-entrance-item">
+            WanderBuddy connects newcomers, international students, and remote workers with
+            companions for exploring the city. Most apps lose users at sign-up, too few options,
+            too many fields. I designed a flow with three entry points and only the essentials:
+            email, name, and interests, just enough to match people with the right activities from
+            day one.
+          </p>
+        </div>
 
         <div className="wb-overview-divider wb-entrance-item" />
 

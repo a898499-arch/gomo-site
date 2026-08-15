@@ -17,9 +17,9 @@ export default function ColorPalette() {
   const ref = useStandardEntrance('.wb-color-swatch');
 
   return (
-    <section className="wb-section">
+    <section className="wb-section wb-section--tight-t">
       <div className="wb-section-inner">
-        <h2 className="wb-color-eyebrow">Color</h2>
+        <h2 className="wb-eyebrow">Color</h2>
         <div className="wb-color-grid" ref={ref}>
           {SWATCHES.map((swatch) => (
             <div
