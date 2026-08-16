@@ -4,6 +4,7 @@ import './globals.css';
 import { LenisProvider } from '@/components/LenisProvider';
 import { NavBehaviorProvider } from '@/components/NavBehaviorProvider';
 import Nav from '@/components/Nav';
+import PageContent from '@/components/PageContent';
 import Footer from '@/components/Footer';
 
 // latin-ext 子集是必要的：全站文案有台語羅馬字（例如 "lāi-té-tsē"）跟法文借字（Dècor Hoüse）
@@ -40,7 +41,7 @@ export default function RootLayout({ children }) {
         <LenisProvider>
           <NavBehaviorProvider>
             <Nav />
-            <main className="page-content">{children}</main>
+            <PageContent>{children}</PageContent>
             <Footer />
           </NavBehaviorProvider>
         </LenisProvider>

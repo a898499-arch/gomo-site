@@ -28,9 +28,16 @@ export default function LogoOverview() {
             day one.
           </p>
         </div>
+      </div>
 
-        <div className="wb-overview-divider wb-entrance-item" />
+      {/* 分隔線刻意脫離 .wb-overview-inner 自己的 140px 內距，改用跟導覽列
+          同一個 .page-container（同一個 --page-gutter 變數），左右緣對齊
+          導覽列 logo 左緣／About Me 右緣，兩邊改動會自動同步。 */}
+      <div className="wb-overview-divider-row page-container wb-entrance-item">
+        <div className="wb-overview-divider" />
+      </div>
 
+      <div className="wb-overview-inner wb-overview-inner--meta">
         <div className="wb-overview-meta wb-entrance-item">
           <div className="wb-overview-meta-item">
             <span className="wb-overview-meta-label">Type</span>

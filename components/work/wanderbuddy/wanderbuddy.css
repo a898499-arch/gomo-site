@@ -58,7 +58,7 @@
 .wb-overview-title {
   margin: 0;
   font-weight: 600;
-  font-size: clamp(32px, 4.4444vw, 64px);
+  font-size: clamp(32px, 3.8889vw, 56px);
   line-height: 1.45;
   letter-spacing: -0.32px;
   color: #353535;
@@ -87,11 +87,14 @@
   text-transform: capitalize;
 }
 
+.wb-overview-divider-row {
+  margin-top: 53px;
+}
+
 .wb-overview-divider {
   width: 100%;
   height: 1px;
   background: var(--rule);
-  margin: 53px 0 0;
 }
 
 .wb-overview-meta {
@@ -216,13 +219,13 @@
 
 /* ---------- Sign Up Flow ----------
    2026-08-14 用你匯出的 5 個真實形狀 SVG 重做（node 491:232）。座標全部
-   換算成 % 定位在 1440×541 的參考框裡，隨容器寬度等比縮放。連接線是簡化
-   的直線示意，不是逐一還原 Figma 的彎折向量路徑（已跟你確認過可以簡化）。 */
+   換算成 % 定位在 1440×541 的參考框裡，隨容器寬度等比縮放。
+   2026-08-15：滿版出血（不再受 .wb-section-inner 的 1280px 限制），連接線
+   換成 Figma 實際的圓角彎折 bracket 向量路徑。 */
 .wb-signup-diagram {
   position: relative;
   width: 100%;
   background: #303030;
-  border-radius: 4px;
   overflow: hidden;
 }
 
@@ -244,10 +247,14 @@
   background: #FBD500;
 }
 
-.wb-signup-line-v {
+.wb-signup-connector {
   position: absolute;
-  width: 1px;
-  background: #FBD500;
+}
+
+.wb-signup-connector-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .wb-signup-dot {
@@ -283,14 +290,14 @@
 
 .wb-signup-shape-label {
   position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  left: 50%;
+  /* top 由 SHAPES 的 centerY 內聯設定（多數 50%，Home Page 是 65.48%——
+     見 SignUpFlowStatic.jsx 的註解），不是固定值 */
+  transform: translate(-50%, -50%);
   text-align: center;
   font-weight: 400;
   line-height: 1.3;
-  padding-inline: 12%;
+  white-space: nowrap;
 }
 
 .visually-hidden {
@@ -416,6 +423,14 @@
   width: 100%;
   min-height: 499px;
   margin-top: 24px;
+  /* AFTER 卡片的流程（.wb-ba-flow）要垂直置中，不是貼在頂部下面空一大塊；
+     BEFORE 卡片的散落卡片群是 position:absolute + 寫死 left/top，abspos
+     子元素的位置由 left/top 決定，不受這裡的 flex 對齊影響，所以這個改動
+     對 BEFORE 是安全的。 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .wb-ba-pill {
@@ -546,7 +561,11 @@
 }
 
 .wb-footage-icon {
-  margin-inline: auto;
+  /* .wb-app-icon 是固定寬度的 <div>（display:block 預設），要置中的是
+     它本身，不是這層 100% 寬的 wrapper——margin-inline:auto 擺在沒有
+     固定寬度的 wrapper 上不會生效，改用 flex 置中子元素。 */
+  display: flex;
+  justify-content: center;
 }
 
 .wb-footage-title {
@@ -633,6 +652,43 @@
 
 .wb-charref-chars {
   position: absolute;
+}
+
+/* 8 個角色的 idle 漂移（比照首頁 §6.2 的做法）：純 CSS keyframes + 錯開
+   animation-delay，不用 JS/rAF（這頁已經有 Lenis + GSAP + flow.js 三個
+   迴圈，不能再加）。只動 transform，走 compositor thread，成本接近零。
+   transform-box:fill-box 讓 translate/rotate 以每個角色「自己的」bounding
+   box 為準，不是整張 SVG 的 viewBox 原點——不然 rotate 會繞著很遠的
+   支點轉，角色會整個位移到很奇怪的地方，不是「原地輕微搖擺」。 */
+@keyframes wbCharIdle {
+  0%   { transform: translateY(0)     rotate(0deg); }
+  25%  { transform: translateY(-5px)  rotate(2deg); }
+  50%  { transform: translateY(0)     rotate(0deg); }
+  75%  { transform: translateY(5px)   rotate(-2deg); }
+  100% { transform: translateY(0)     rotate(0deg); }
+}
+
+.wb-char-idle {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation-name: wbCharIdle;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+/* 週期落在 4–7 秒之間，用負值 animation-delay 讓每個角色一開場就落在
+   循環中不同的相位點，不會先同步擺一輪才慢慢岔開 */
+.wb-char-idle:nth-child(1) { animation-duration: 4.3s; animation-delay: -0.4s; }
+.wb-char-idle:nth-child(2) { animation-duration: 5.8s; animation-delay: -2.1s; }
+.wb-char-idle:nth-child(3) { animation-duration: 6.6s; animation-delay: -4.7s; }
+.wb-char-idle:nth-child(4) { animation-duration: 4.9s; animation-delay: -1.3s; }
+.wb-char-idle:nth-child(5) { animation-duration: 6.1s; animation-delay: -3.5s; }
+.wb-char-idle:nth-child(6) { animation-duration: 5.2s; animation-delay: -0.9s; }
+.wb-char-idle:nth-child(7) { animation-duration: 6.9s; animation-delay: -5.2s; }
+.wb-char-idle:nth-child(8) { animation-duration: 4.6s; animation-delay: -2.8s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .wb-char-idle { animation: none; }
 }
 
 .wb-charref-desc {

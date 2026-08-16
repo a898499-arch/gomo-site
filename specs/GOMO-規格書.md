@@ -1101,6 +1101,40 @@ bio 兩段文字右緣對齊導覽列最右一個項目（`About Me`）的右緣
 
 ---
 
+## 6.7 作品詳情頁 `/work/wanderbuddy`
+
+實作已存在（`components/work/wanderbuddy/`），這裡只記錄區塊順序，其餘視覺細節以 Figma（node 491:59）與實際程式碼為準，尚未逐項補齊規格。
+
+### 區塊順序（2026-08-16 起）
+
+1. Hero（滿版，`hero/` 套件）
+2. Logo & Overview
+3. **Flow Animation**（`embed/` 套件；2026-08-16 從原本 Sign Up Flow 之後搬到這裡，元件本身與內部的 IntersectionObserver 播放/暫停邏輯不變，純粹調整頁面順序）
+4. Design Challenge
+5. Before & After
+6. Sign Up Flow（靜態資訊圖）
+7. Typography
+8. Color
+9. Characters（漂移列 × 2、Characters Reference）
+10. Shot（4 支 iPhone 合成圖）
+11. Mock up 2 / 4（出血版面；2026-08-16 移除 Mock up 3，剩下的兩張改成一左一右交替出血——mockup-2 往左、mockup-4 往右，避免兩張都偏同一側失衡）
+12. Project Footage
+13. Next Work
+
+> ⚠️ 導覽列在這一頁背景是**透明**的（`site-nav--transparent`），跟 §4 記載的全站預設（不透明 `--bg`）不同——這是使用者針對這個滿版 Hero 頁面的明確例外要求，因為導覽列疊在 Hero 相片牆上時，不透明色塊會很突兀。其他頁面不受影響，仍遵守 §4 的不透明規則。
+
+### Characters 區的 idle 漂移（2026-08-16 新增）
+
+Characters Reference 區右側桃紅面板上的 8 個白色角色，比照首頁 §6.2 的 idle 漂移做法，各自跑持續的輕微動態，不是靜止：
+
+- 只動 `transform`（`translateY` ±5px、`rotate` ±2°），不動任何 layout 屬性
+- 純 CSS `@keyframes` + 慢速 sine 型緩動循環，**不用 JS / rAF**（這一頁已經有 Lenis、GSAP、`flow.js` 三個 RAF 迴圈，不能再加）；CSS animation 走 compositor thread，成本接近零
+- 每個角色週期落在 4–7 秒之間，8 個角色的週期與相位都要錯開（用 `animation-delay` 分散），不可整排同步擺動
+- 幅度比首頁 §6.2 的 idle 漂移明顯一點，但仍要小到「不會搶走注意力」
+- `@media (prefers-reduced-motion: reduce)`：完全靜止
+
+---
+
 ## 7. 全域可存取性
 
 - 所有互動元素都要可見的 `:focus-visible`：1px `--accent` 描邊，4px offset

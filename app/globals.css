@@ -66,6 +66,13 @@ body {
   padding-top: calc(116px + var(--nav-top-gap)); /* 讓內容不被 fixed nav 蓋住 */
 }
 
+/* 滿版 Hero 頁面（見 NavBehaviorProvider 的 fullBleedTop）：不留這塊空間，
+   Hero 直接從 y=0 開始；導覽列是 position:fixed，滑出時本來就會浮在
+   內容上面，不需要額外的 padding-top 幫忙讓位 */
+.page-content--bleed {
+  padding-top: 0;
+}
+
 .page-container {
   max-width: 1440px;
   margin-inline: auto;
@@ -82,6 +89,12 @@ body {
   background: var(--bg);
   z-index: 1000;
   transform: translateY(0);
+}
+
+/* 滿版 Hero 頁面（見 NavBehaviorProvider 的 fullBleedTop）：導覽列疊在
+   Hero 上面時不要不透明的米色底，讓 Hero 內容透出來 */
+.site-nav--transparent {
+  background: transparent;
 }
 
 .nav-inner {

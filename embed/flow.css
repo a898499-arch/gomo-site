@@ -75,6 +75,12 @@
   background:var(--surface);
 }
 
+/* 2026-08-16（使用者確認後補上）：.headline 都是 <h1>，瀏覽器預設會給
+   margin:0.67em 0（48px 字級下＝32.16px），這份檔案原本沒有 reset 掉它，
+   把 s-email 畫面的標題往下推到跟 Name 輸入欄重疊。這裡補的是「缺少的
+   reset」，不是重新設計座標——上面每個 .headline 的 top 值維持原樣不動。 */
+.headline{ margin:0; }
+
 /* ---------- 狀態列 ---------------------------------------- */
 .statusbar{ position:absolute; top:0; left:0; width:402px; height:62px; z-index:40; }
 .statusbar .time{

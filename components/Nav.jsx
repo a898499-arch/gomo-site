@@ -23,6 +23,7 @@ export default function Nav() {
   const lenis = useLenis();
   const { config } = useNavBehaviorConfig();
   const startHidden = config.startHidden;
+  const transparent = config.fullBleedTop;
 
   useEffect(() => {
     if (!lenis) return;
@@ -88,7 +89,7 @@ export default function Nav() {
   }, [lenis, startHidden]);
 
   return (
-    <nav className="site-nav" ref={navRef}>
+    <nav className={transparent ? 'site-nav site-nav--transparent' : 'site-nav'} ref={navRef}>
       <div className="nav-inner page-container">
         <Link href="/" className="nav-logo" aria-label="GOMO — back to home">
           <svg viewBox="0 0 91.2604 92.3216" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">

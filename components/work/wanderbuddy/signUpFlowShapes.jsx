@@ -44,3 +44,33 @@ export function ShapePill(props) {
     </svg>
   );
 }
+
+// 連接線的圓角彎折支架，逐字取自 Figma node 491:330（Vector 17）跟
+// 491:331（Vector 19）的向量路徑（不是簡化的直線＋轉角）。
+// ConnectorForkToMethods：從 Onboarding 單一出口，向右圓角彎折後上下分岔到
+// Apple/Google/Email 三個入口。
+export function ConnectorForkToMethods(props) {
+  return (
+    <svg viewBox="0 0 35.6273 216.097" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <path
+        d="M35.1273 0.5H30.5C13.9315 0.5 0.5 13.9315 0.5 30.5V185.597C0.5 202.165 13.9315 215.597 30.5 215.597H35.1273"
+        stroke="#FBD500"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+// ConnectorForkFromSystems：System: Face ID Auth／Google account Picker／
+// Verification Code 三個系統畫面圓角彎折匯流成單一出口，接到 Interest Page。
+export function ConnectorForkFromSystems(props) {
+  return (
+    <svg viewBox="0 0 106.104 215.282" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <path
+        d="M105.604 0.5H30.5C13.9314 0.5 0.5 13.9315 0.5 30.5V184.782C0.5 201.351 13.9315 214.782 30.5 214.782H105.604"
+        stroke="#FBD500"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
