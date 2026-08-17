@@ -1,0 +1,772 @@
+/* ====================================================================
+   Sui-Sui 作品詳情頁 — 個案研究內文樣式
+   全部包在 .ss-case 底下。字體維持全站的 Poppins，不套用 Lora/DM Sans
+   （Typography 展示區塊例外，那裡刻意要秀出真正的 Lora/DM Sans 長相，
+   比照 WanderBuddy 頁 Raleway/Jost 的處理方式）。
+   ==================================================================== */
+
+.ss-case {
+  display: flex;
+  flex-direction: column;
+}
+
+.ss-section {
+  padding-block: clamp(48px, 6vw, 96px);
+}
+
+.ss-section-inner {
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: var(--page-gutter);
+}
+
+/* ---------- 灰色動畫佔位塊（這輪骨架先擋位，之後補真正動效） ---------- */
+.ss-placeholder {
+  width: 100%;
+  background: #d9d9d9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.ss-placeholder-label {
+  font-weight: 600;
+  font-size: clamp(16px, 1.8vw, 24px);
+  color: #8a8a8a;
+  text-align: center;
+  padding-inline: 24px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* ---------- Logo & Overview（node 545:56，1160×533，左右各留白
+   140px＠1440 參考寬，跟 WanderBuddy 那頁同一個比例） ---------- */
+.ss-overview-inner {
+  max-width: 1160px;
+  margin-inline: auto;
+  padding-inline: clamp(20px, 9.7222vw, 140px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.ss-overview-logo {
+  width: clamp(180px, 19.7917vw, 285px);
+  margin-bottom: 11px;
+}
+.ss-overview-logo svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.ss-overview-quote {
+  margin: 0;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(17px, 1.6667vw, 24px);
+  line-height: 1.45;
+  color: #717171;
+  max-width: 1077px;
+}
+
+.ss-overview-body {
+  margin: 11px auto 0;
+  font-weight: 400;
+  font-size: clamp(14px, 1.25vw, 18px);
+  line-height: 1.5;
+  color: #353535;
+  max-width: 927px;
+}
+.ss-overview-body p {
+  margin: 0;
+}
+.ss-overview-body p + p {
+  margin-top: 0.2em;
+}
+
+/* 分隔線改用跟導覽列同一個 .page-container，不再是
+   .ss-overview-inner 自己的 140px 內距——見 LogoOverview.jsx 的註解 */
+.ss-overview-divider-row {
+  margin-top: 53px;
+}
+
+.ss-overview-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--rule);
+}
+
+/* 2026-08-17：這一列不套用 .ss-overview-inner 的 140px 內距——實測三欄
+   在 254px 真實 gap 下的自然寬度是 899.3px，跟 Figma 原稿的 Frame 15
+   寬度（898px）幾乎一致，但比 1160-140*2=880px 的內距文字欄寬 19px，
+   會被擠到換行。Figma 原稿這裡本來就不是用同一個 140px 邊界（量出來
+   左緣 243px、右緣 262px，本來就比其他內容寬），所以這裡改用整個
+   1160px 外框置中，不繼承文字欄的內距。 */
+.ss-overview-inner--meta {
+  padding-inline: 0;
+}
+
+.ss-overview-meta {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  justify-items: center;
+  width: 928px;
+  margin: 46px auto 0;
+}
+
+.ss-overview-meta-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+
+.ss-overview-meta-label {
+  font-weight: 400;
+  font-size: 16px;
+  color: #747474;
+}
+
+.ss-overview-meta-value {
+  font-weight: 600;
+  font-size: 20px;
+  color: #353535;
+  text-align: center;
+  line-height: 1.42;
+}
+
+/* ---------- 共用的區塊小標（紅色、大寫，Design Challenge / Background /
+   Cosmetic Therapy Intro / Color / Typography 都共用這個樣式） ---------- */
+.ss-eyebrow {
+  margin: 0 0 24px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #c90000;
+}
+
+/* ---------- Background（node 545:139，1360×769） ---------- */
+.ss-background {
+  max-width: 1360px;
+  text-align: center;
+}
+
+.ss-background-heading {
+  margin: 0 auto;
+  max-width: 1000px;
+  font-style: italic;
+  font-weight: 600;
+  font-size: clamp(24px, 2.5vw, 36px);
+  color: #303030;
+}
+
+.ss-background-body {
+  margin: 20px auto 0;
+  max-width: 1102px;
+  font-size: clamp(16px, 1.3889vw, 20px);
+  line-height: 1.5;
+  color: #5b5b5b;
+}
+
+.ss-background-cards {
+  display: grid;
+  grid-template-columns: 685fr 660fr;
+  gap: 15px;
+  margin-top: 40px;
+}
+
+.ss-background-card {
+  background: #f4f4f5;
+  border-radius: 26px;
+  padding: clamp(24px, 2.5vw, 32px);
+  text-align: left;
+}
+
+.ss-background-card-title {
+  margin: 0;
+  font-weight: 600;
+  font-size: clamp(20px, 2.0833vw, 30px);
+  color: #565656;
+}
+
+.ss-background-card-source {
+  margin: 8px 0 0;
+  font-weight: 300;
+  font-size: 14px;
+  color: #565656;
+}
+
+.ss-background-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 24px;
+}
+
+.ss-background-chart--line {
+  aspect-ratio: 625 / 331;
+}
+
+.ss-background-chart--ring {
+  aspect-ratio: 504 / 301;
+  object-fit: contain;
+}
+
+@media (max-width: 900px) {
+  .ss-background-cards { grid-template-columns: 1fr; }
+}
+
+/* ---------- Cosmetic Therapy Intro（node 545:182，1207.9×789.2） ---------- */
+.ss-cti-heading {
+  margin: 24px auto 0;
+  max-width: 940px;
+  text-align: center;
+  font-style: italic;
+  font-weight: 600;
+  font-size: clamp(24px, 2.5vw, 36px);
+  color: #303030;
+}
+
+.ss-cti-body {
+  margin: 20px auto 0;
+  max-width: 1102px;
+  text-align: center;
+  font-size: clamp(16px, 1.3889vw, 20px);
+  line-height: 1.5;
+  color: #5b5b5b;
+}
+
+.ss-cti-frame {
+  position: relative;
+  width: 100%;
+  /* 2026-08-17：改用 get_design_context 重讀 545:182 量到的實際間距——
+     說明文字最後一行 y≈240（top:150 + 3 行文字高度）到照片 y=259，
+     Figma 原稿只留約 19px，兩者幾乎是接在一起的，不是原本的 40px。 */
+  margin-top: 19px;
+}
+
+.ss-cti-photo {
+  position: absolute;
+  display: block;
+  left: 29.1465%;
+  top: 0%;
+  width: 46.4718%;
+  height: auto;
+}
+
+.ss-cti-chip {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(38%, 320px);
+  padding: 14px 20px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(20, 20, 20, 0.1);
+  font-weight: 500;
+  font-size: clamp(13px, 1.1vw, 16px);
+  line-height: 1.3;
+  color: #171717;
+}
+
+.ss-cti-chip-icon {
+  width: 28px;
+  height: 25px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 700px) {
+  .ss-cti-frame { aspect-ratio: unset !important; min-height: 640px; }
+  .ss-cti-chip { max-width: min(60%, 260px); }
+}
+
+/* ---------- Design Challenge（node 545:86，1279×790） ---------- */
+.ss-dc-heading {
+  margin: 24px auto 0;
+  max-width: 933px;
+  text-align: center;
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(24px, 2.5vw, 36px);
+  text-transform: uppercase;
+  color: #1e1e1e;
+}
+
+.ss-dc-body {
+  margin: 20px auto 0;
+  max-width: 1112px;
+  text-align: center;
+  font-size: clamp(16px, 1.6667vw, 24px);
+  color: #5b5b5b;
+}
+
+.ss-dc-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 27px;
+  margin-top: 48px;
+}
+
+.ss-dc-card {
+  background: #f4f4f5;
+  border-radius: 28px;
+  padding: clamp(24px, 2.7778vw, 40px) clamp(24px, 2.7778vw, 40px) clamp(28px, 3.0556vw, 44px);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.ss-dc-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 100px;
+  font-weight: 500;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.ss-dc-card-title {
+  margin: 0;
+  font-weight: 600;
+  font-size: clamp(20px, 1.875vw, 27px);
+  line-height: 1.2;
+  color: #16161a;
+}
+
+.ss-dc-card-text {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.65;
+  color: #666;
+}
+.ss-dc-card-text strong {
+  font-weight: 500;
+  color: #171717;
+}
+
+@media (max-width: 900px) {
+  .ss-dc-grid { grid-template-columns: 1fr; }
+}
+
+/* ---------- Before & After（node 545:247，正確 node id——使用者原本給的
+   545:139 其實是另一區「Background」統計。比照 WanderBuddy 版本的散落
+   卡片＋掉落進場寫法） ---------- */
+.ss-ba-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.ss-ba-card {
+  border-radius: 28px;
+  padding: 40px;
+  min-height: 660px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.ss-ba-card[data-card="before"] { background: #f4f4f5; }
+.ss-ba-card[data-card="after"] { background: #f9cdd3; }
+
+.ss-ba-title {
+  margin: 0;
+  font-weight: 800;
+  font-size: 24px;
+  letter-spacing: 2px;
+  text-align: center;
+}
+.ss-ba-card[data-card="before"] .ss-ba-title { color: #6b6b70; }
+.ss-ba-card[data-card="after"] .ss-ba-title { color: #c90000; }
+
+.ss-ba-body {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  min-height: 499px;
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.ss-ba-pill {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 26px 14px 22px;
+  border-radius: 100px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  white-space: nowrap;
+  font-weight: 500;
+  font-size: 20px;
+  color: #16161a;
+}
+
+.ss-ba-pill-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ss-ba-flow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  max-width: 368px;
+  margin-inline: auto;
+}
+
+.ss-ba-flow .ss-ba-pill {
+  position: static;
+  box-shadow: 0 4px 14px rgba(0, 13, 77, 0.1);
+}
+
+.ss-ba-flow-arrow {
+  color: #b48c8c;
+  font-size: 26px;
+  line-height: 1;
+}
+
+.ss-ba-flow-label {
+  margin: 0;
+  font-weight: 600;
+  font-size: 20px;
+  color: #b8001f;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .ss-ba-grid { grid-template-columns: 1fr; }
+  .ss-ba-body { min-height: 420px; }
+}
+
+/* ---------- Color（node 545:288，1366×613）。2026-08-17：照 Figma 原稿的
+   磚牆式不規則拼貼重做——三個直欄，每欄色塊高度各不相同，用 %
+   絕對定位還原每個色塊的實際座標，不是格狀。 ---------- */
+.ss-color-frame {
+  position: relative;
+  width: 100%;
+  margin-top: 32px;
+}
+
+.ss-color-swatch {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 400;
+  font-size: clamp(11px, 1.1vw, 16px);
+}
+
+.ss-color-text {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ss-color-title {
+  margin: 0 0 4px;
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #c90000;
+}
+
+.ss-color-text-muted {
+  margin: 0;
+  font-weight: 300;
+  font-size: clamp(14px, 1.4vw, 20px);
+  color: #000;
+}
+
+.ss-color-text-accent {
+  margin: 0;
+  font-weight: 600;
+  font-size: clamp(14px, 1.4vw, 20px);
+  color: #d42035;
+}
+
+@media (max-width: 900px) {
+  .ss-color-frame { aspect-ratio: unset !important; display: flex; flex-direction: column; }
+  .ss-color-swatch { position: static; width: 100% !important; height: 64px !important; }
+  .ss-color-text { position: static; width: 100% !important; margin-top: 24px; }
+}
+
+/* ---------- Typography（node 545:322，1386.2×313） ---------- */
+/* 2026-08-17：改用 get_design_context 重讀 545:322 重做。原本的
+   flex-wrap 版面在 1440px 寬時，因為量表圖片的內容寬度撐開，會把它擠
+   到第二列（跟 Figma 「三欄同一列」的實際版面不一樣，等於被「重新
+   編排」了）。改用 grid，三個直欄之間插兩個間距欄（37px／29.59px，
+   Figma 實測的兩個不同間距，不是同一個 gap），欄寬用 fr 比例對應
+   Figma 實測的 415 / 264 / 634.574，容器寬度改變時三欄仍保持同一列、
+   同一組比例。 */
+.ss-type-grid {
+  display: grid;
+  grid-template-columns: 415fr 37fr 264fr 29.59fr 634.574fr;
+  align-items: start;
+}
+
+.ss-type-text {
+  grid-column: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.ss-type-desc {
+  margin: 0;
+  font-weight: 300;
+  font-size: 20px;
+  color: #000;
+}
+.ss-type-desc--accent {
+  font-weight: 500;
+  color: #c90000;
+}
+
+.ss-type-swatches {
+  grid-column: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  min-width: 0;
+}
+
+.ss-type-swatch {
+  background: #f4f4f5;
+  border-radius: 34px;
+  padding: 38px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.09));
+}
+
+.ss-type-swatch-name {
+  margin: 0;
+  font-size: clamp(22px, 2.2vw, 34px);
+  white-space: nowrap;
+  color: #000;
+}
+.ss-type-swatch-name[data-font="lora"] {
+  font-family: 'Lora', serif;
+  font-weight: 400;
+}
+.ss-type-swatch-name[data-font="dm-sans"] {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 200;
+}
+
+.ss-type-scale {
+  grid-column: 5;
+  display: block;
+  width: 100%;
+  height: auto;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .ss-type-grid { grid-template-columns: 1fr; }
+  .ss-type-text,
+  .ss-type-swatches,
+  .ss-type-scale { grid-column: 1; }
+  .ss-type-swatches { flex-direction: row; margin-top: 24px; }
+  .ss-type-swatch { flex: 1; }
+  .ss-type-scale { margin-top: 24px; }
+}
+
+/* ---------- Function 2（node 545:510，1507×961） ---------- */
+.ss-fn2-frame {
+  position: relative;
+  width: 100%;
+}
+
+.ss-fn2-bg-blend {
+  position: absolute;
+  display: block;
+  height: auto;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+.ss-fn2-text {
+  position: absolute;
+  left: 0;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.ss-fn2-title {
+  margin: 0;
+  font-weight: 600;
+  font-size: clamp(24px, 2.5vw, 36px);
+  color: #000;
+}
+
+.ss-fn2-desc {
+  margin: 0;
+  font-size: clamp(15px, 1.3889vw, 20px);
+  color: #000;
+  max-width: 700px;
+}
+
+.ss-fn2-phone {
+  position: absolute;
+  display: block;
+  height: auto;
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+}
+
+.ss-fn2-phone--main {
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.ss-fn2-badge {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  border-radius: 50px;
+  background: #cb000f;
+  color: #fff;
+  text-align: center;
+  white-space: nowrap;
+  padding-inline: 8px;
+}
+
+/* ---------- Mockup 1/2/3（置中，非出血；淡入淡出比照 WanderBuddy 的
+   scrubbed 做法，見 MockupFade.jsx） ---------- */
+.ss-mockup {
+  margin-inline: auto;
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.ss-mockup-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---------- Work Footage（node 545:535） ---------- */
+.ss-footage {
+  text-align: center;
+}
+
+.ss-footage-icon {
+  display: flex;
+  justify-content: center;
+  width: clamp(200px, 22vw, 285px);
+  margin-inline: auto;
+}
+.ss-footage-icon svg { display: block; width: 100%; height: auto; }
+
+.ss-footage-tagline {
+  margin: 24px 0 0;
+  font-style: italic;
+  font-size: clamp(17px, 1.7vw, 24px);
+  letter-spacing: -0.12px;
+  color: #717171;
+}
+
+/* ---------- Next Work（node 545:558；同 §6.5 作品分類頁卡片視覺規則，
+   跟 WanderBuddy 那頁的 Next Work 共用同一套樣式邏輯） ---------- */
+.ss-next-title {
+  margin: 0 0 40px;
+  font-weight: 500;
+  font-size: 32px;
+  letter-spacing: -0.16px;
+  color: #353535;
+}
+
+.ss-next-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 21px;
+  row-gap: 48px;
+}
+
+.ss-next-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.ss-next-card-cover {
+  width: 100%;
+  aspect-ratio: 672 / 415;
+  background: #d9d9d9;
+  border-radius: 4px;
+}
+
+.ss-next-card-title {
+  margin: 16px 0 0;
+  font-weight: 400;
+  font-size: clamp(22px, 2.2222vw, 32px);
+  color: var(--ink);
+}
+
+.ss-next-card-desc {
+  margin: 4px 0 0;
+  font-weight: 400;
+  font-size: clamp(16px, 1.4vw, 20px);
+  line-height: 22px;
+  color: var(--work-muted, #747474);
+}
+
+.ss-next-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.ss-next-card-tag {
+  border: 1px solid #5b5b5b;
+  border-radius: 999px;
+  padding: 4px 21px;
+  font-size: 16px;
+  color: var(--ink);
+  line-height: 22px;
+}
+
+@media (max-width: 600px) {
+  .ss-next-grid { grid-template-columns: 1fr; }
+}

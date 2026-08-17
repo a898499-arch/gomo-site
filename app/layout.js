@@ -29,11 +29,13 @@ export default function RootLayout({ children }) {
         {/* embed/README.md：Raleway/Jost/Inter 是 WanderBuddy 作品內容（flow.css）自己的字體，
             不是全站字體，故意不用 next/font（會產生雜湊過的 font-family，跟 flow.css 裡
             寫死的 "Raleway" 對不上）。純字面 link 標籤，只讓 flow.css 自己的選擇器吃得到，
-            不影響全站的 Poppins。 */}
+            不影響全站的 Poppins。Lora/DM Sans 同理是 Sui-Sui 作品詳情頁 Design System —
+            Typography 區塊要展示的字體本身（比照 WanderBuddy 的 Raleway/Jost 處理方式），
+            頁面其餘真實內容仍用全站的 Poppins。 */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;800&family=Jost:wght@300;400;500;700&family=Inter:wght@400;600&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;800&family=Jost:wght@300;400;500;700&family=Inter:wght@400;600&family=Lora:wght@400;600&family=DM+Sans:opsz,wght@9..40,200..400&display=swap"
           rel="stylesheet"
         />
       </head>

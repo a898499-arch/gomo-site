@@ -97,12 +97,29 @@
   background: var(--rule);
 }
 
+/* 這一列不套用 .wb-overview-inner 的 140px 內距，理由跟 Sui-Sui 那頁
+   同一個 modifier class 一樣：三欄在 254px 真實 gap 下可能比文字欄寬，
+   改用整個 1160px 外框置中。 */
+.wb-overview-inner--meta {
+  padding-inline: 0;
+}
+
 .wb-overview-meta {
-  display: flex;
-  justify-content: center;
-  gap: clamp(48px, 8vw, 254px);
-  margin-top: 46px;
-  flex-wrap: wrap;
+  /* 2026-08-17：改用 get_design_context 重量的 get_metadata 數字重算。
+     254px 是上一輪誤讀（拿 Sui-Sui 一個不存在的「Frame 15」寬度湊出來
+     的），實際用 get_metadata 量各欄 label／value 文字的 x/width 算出
+     來的，是「每欄自己的中心點」在 WanderBuddy 跟 Sui-Sui 兩頁都各自
+     對齊（同欄 label 中心與 value 中心幾乎重合），欄與欄的中心距約
+     309–312px，不是欄框邊緣的固定 gap。三欄寬度本來就不同（如
+     WanderBuddy 的 "UI Challenge" 130px vs "Tool" 74px），固定 edge-gap
+     的 flex 沒辦法同時滿足「等中心距」，所以改成 3 欄等寬 grid，靠
+     justify-items:center 讓每欄內容自己置中，欄寬用 928/3≈309.3px
+     還原量到的中心距。 */
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  justify-items: center;
+  width: 928px;
+  margin: 46px auto 0;
 }
 
 .wb-overview-meta-item {

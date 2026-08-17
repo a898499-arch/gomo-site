@@ -1,10 +1,15 @@
 import WanderBuddyPage from '@/components/work/wanderbuddy/WanderBuddyPage';
+import SuiSuiPage from '@/components/work/sui-sui/SuiSuiPage';
 
 export default async function WorkDetailPage({ params }) {
   const { slug } = await params;
 
   if (slug === 'wanderbuddy') {
     return <WanderBuddyPage />;
+  }
+
+  if (slug === 'sui-sui') {
+    return <SuiSuiPage />;
   }
 
   return (
