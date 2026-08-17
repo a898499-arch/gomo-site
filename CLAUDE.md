@@ -23,6 +23,43 @@ GSAP（所有動畫 + ScrollTrigger）· Lenis（平滑捲動）· inline SVG
 - Limit code changes to the minimum. 只改我指定的部分。
 - 動手前先說明你要改哪些檔案、為什麼。
 - 完成後對照該段規格的 Acceptance Criteria 自我檢查，逐條回報通過與否。
+- 一次只做一到兩個區塊，不要一次做完整頁。流程固定如下：
+  1. 我指定要做哪個區塊
+  2. 你先用 `get_design_context` 讀那個區塊
+  3. 實作
+  4. 用 Chrome DevTools MCP 在 1155px 和 1440px 截圖，跟 Figma 該區塊並排回報
+  5. 我確認過了，才做下一個
+  一次做太多區塊，錯誤會堆在一起，難以分辨是哪裡出問題。
+
+## 純展示區塊：改用 Figma 匯出圖，不用程式碼重建
+原因：從 Figma 座標翻譯成 CSS 版面，每個元素都是一次走鐘機會，而截圖無法可靠地判斷還原度。純展示的內容不需要承擔這個風險。
+
+**必須用程式碼做的：**
+- 所有標題、內文、連結
+- Nav、Footer
+- 有動效的區塊（進場、捲動驅動、hover）
+- 資料驅動的區塊（Next Work、作品卡片）
+- 「單純文字卡片」類（例如 Design Challenge）——版面簡單、文字需要可選取，用程式碼反而穩
+
+**例外：WanderBuddy 頁已完成，不適用本規則。** 這個「純展示區塊改用匯出圖」的做法只套用在 Sui-Sui 頁跟之後的新頁面。WanderBuddy 的 Sign Up Flow、Characters Reference、Color、Typography 維持現狀（已經是程式碼實作），**不要回頭改**——看到這條規則也一樣，不要因為規則新增就回頭套用到 WanderBuddy。
+
+**改用 Figma 匯出圖的（純展示、不互動、只需要等比縮放的資訊圖與拼貼）——目前只有 Sui-Sui 頁：**
+- Background（失智症人口統計，含圖表）
+- Cosmetic Therapy Intro（照片拼貼 + chip）
+- Color（磚牆式色票）
+- Typography（字級表）
+- Function 2（手機截圖組合）
+
+**格式規則：**
+- 向量內容（圖表、色票、字級表、流程圖）→ SVG
+- 照片拼貼 → PNG 2x
+
+**無障礙補償（必要條件，不可省略）：**
+每一張這樣的圖都要：
+1. 有意義的 `alt`
+2. 額外附一份「視覺隱藏」的完整純文字副本，把圖裡所有文字內容都寫進去（用 `.visually-hidden` 或 `.sr-only` class）
+
+這樣螢幕閱讀器和搜尋引擎照樣讀得到，只是視覺上不顯示。
 
 ## 版本控制
 - 每完成一個可以跑、通過驗收的階段，主動提醒我要不要 commit，並附上建議的 commit 訊息。
