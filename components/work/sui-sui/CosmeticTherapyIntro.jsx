@@ -2,33 +2,96 @@
 
 import { useStandardEntrance } from '@/lib/useStandardEntrance';
 
-// 6 個 chip 卡片座標，取自 Figma node 545:182（整節點 1207.9×789.2，但
-// 標題／說明文字跟照片＋chip 群是同一個座標系裡的東西：文字 y=0~150，
-// 照片 Union 在 y=259 才開始）。2026-08-17：改用 get_design_context 重讀
-// 才發現，之前直接把「照片＋chip」這個 % 框的 y=0 對齊成節點自己的
-// y=0，等於在文字跟照片之間多墊了一層 259px 的空白（框內部從 0 到
-// 32.8% 都是空的），疊加 CSS 本來就有的 margin-top，才會有说明文字跟
-// 照片中間空一大格的問題。修正：所有 photo/chip 的 y 都減去 259（照片
-// 自己的原始 y），框高度也改成 789.2-259=530.2，讓框的本地 y=0 直接對齊
-// 照片頂端，不再有多餘空白；跟文字之間的實際間距改由 CSS margin-top
-// 控制。用 % 定位，讓整段隨容器寬度等比縮放（跟 WanderBuddy 的
-// SignUpFlowStatic 同一個作法）。裝飾用的星星／小箭頭（545:213/220/227/
-// 234/241/242/243/244）這輪骨架先省略，只做有實際內容的照片跟 6 個
-// chip——那些純裝飾的散落小圖示不影響資訊傳達，之後補動效時可以一併
-// 加回來。
+// node 545:182（整節點 1207.9×789.2，標題文字跟照片＋chip 群共用同一個
+// 座標系：文字 y=0~150，照片 Union 從 y=259 開始）。2026-08-17：用
+// get_design_context 重讀，修正四個跟 Figma 對不上的地方：
+// 1) 6 個 chip 裡只有 brain 有圖示 → 補上其餘 5 個外側裝飾圖示
+//    （眼睛/手掌/星星x2/雙箭頭x2），對應關係、座標、旋轉角度全部
+//    照 get_design_context／get_metadata 讀到的值。
+// 2) chip 文字換行 → chip 寬度改用 Figma 實際 w（不再讓瀏覽器自己撐
+//    開），字級改用 cqw 跟著框等比縮放（比照 Figma 匯出碼本身在裝飾
+//    圖示上用的技巧），跟 Figma 原本「auto-layout 讓寬度剛好貼合單行
+//    文字」的效果一致。
+// 3) chip 離照片太遠 → 其實 chip 容器座標本來就對，问题出在寬度/字級
+//    沒跟著等比縮放，改完 1)+2) 一併解決。
+// 4) 缺裝飾元素 → 補上 Daily independence 左側／Reduces caregiver
+//    burden 右側的雙箭頭（同一張 icon1.png，後者用 scaleY(-1) 對應
+//    Figma 自己也是同一個圖層鏡像出來的），Boosts self-confidence 兩側
+//    的星星（同一張 icon4.png 不同尺寸），另外照片底部邊緣還有兩個沒被
+//    使用者切圖涵蓋的小箭頭裝飾（545:227/234），這兩個是純向量，直接用
+//    Figma 匯出的 SVG 內嵌（跟 545:213/220 是同一個形狀，只是位置/角度
+//    不同）。
 const PHOTO_Y_OFFSET = 259;
 const FRAME_W = 1207.9;
 const FRAME_H = 789.2 - PHOTO_Y_OFFSET;
 const pctX = (v) => `${((v / FRAME_W) * 100).toFixed(4)}%`;
 const pctY = (v) => `${(((v - PHOTO_Y_OFFSET) / FRAME_H) * 100).toFixed(4)}%`;
+const pctW = (v) => `${((v / FRAME_W) * 100).toFixed(4)}%`;
+const pctH = (v) => `${((v / FRAME_H) * 100).toFixed(4)}%`;
 
+// 6 個 chip：x/y/w/rotate 取自 get_design_context 對 545:182 的重讀。
+// 2026-08-17：高度改成你指定的固定 66px（六個一致），不再用各自的
+// Figma 原始高度（原本 76.7~98.5px 不等）——這是你明確要的簡化，不是
+// 我自己決定的。文字用 CSS 在這個固定高度內垂直置中。
 const CHIPS = [
-  { key: 'brain', x: 0, y: 395, rotate: 3, label: 'Activates brain & cognitive function', hasIcon: true },
-  { key: 'grip', x: 106.88, y: 547.93, rotate: -2, label: 'Enhances grip strength' },
-  { key: 'independence', x: 156.03, y: 693.93, rotate: 2, label: 'Daily independence' },
-  { key: 'coordination', x: 800, y: 329, rotate: -3, label: 'Improves hand-eye coordination' },
-  { key: 'confidence', x: 862.7, y: 530.2, rotate: 2, label: 'Boosts self-confidence' },
-  { key: 'burden', x: 785, y: 694.33, rotate: -2, label: 'Reduces caregiver burden' },
+  {
+    key: 'brain',
+    x: 0, y: 395, w: 465.708, h: 66, rotate: 3,
+    label: 'Activates brain & cognitive function',
+    hasIcon: true,
+    padding: '0 1.3455cqw 0 1.9871cqw',
+  },
+  {
+    key: 'grip',
+    x: 106.88, y: 547.93, w: 311.115, h: 66, rotate: -2,
+    label: 'Enhances grip strength',
+    padding: '0 2.6495cqw',
+  },
+  {
+    key: 'independence',
+    x: 156.03, y: 693.93, w: 274.138, h: 66, rotate: 2,
+    label: 'Daily independence',
+    padding: '0 2.6495cqw',
+  },
+  {
+    key: 'coordination',
+    x: 800, y: 329, w: 407.899, h: 66, rotate: -3,
+    label: 'Improves hand-eye coordination',
+    padding: '0 2.6495cqw',
+  },
+  {
+    key: 'confidence',
+    x: 862.7, y: 530.2, w: 310.116, h: 66, rotate: 2,
+    label: 'Boosts self-confidence',
+    padding: '0 2.6495cqw',
+  },
+  {
+    key: 'burden',
+    x: 785, y: 694.33, w: 342.096, h: 66, rotate: -2,
+    label: 'Reduces caregiver burden',
+    padding: '0 2.6495cqw',
+  },
+];
+
+// chip 外側的裝飾圖示（跟 chip 本身不是同一個圖層，是疊在旁邊的獨立
+// 圖層）。x/y/w/h/rotate 取自 get_design_context；hand 圖示兩個工具讀到
+// 的 x 差了快 40px（get_metadata 125 vs get_design_context 換算後約
+// 85），先採用 85，貼上去如果偏了再調。
+const ICONS = [
+  { key: 'eye', src: '/work/sui-sui/icon2.png', alt: '', x: 767.9, y: 370.5, w: 50.928, h: 34.024, rotate: -3 },
+  { key: 'hand', src: '/work/sui-sui/icon5.png', alt: '', x: 85, y: 560.96, w: 44.686, h: 55.448, rotate: -5 },
+  { key: 'star-lg', src: '/work/sui-sui/icon4.png', alt: '', x: 840.07, y: 502.07, w: 55.852, h: 55.852, rotate: 2 },
+  { key: 'star-sm', src: '/work/sui-sui/icon4.png', alt: '', x: 1141, y: 580, w: 38.701, h: 38.701, rotate: 2 },
+  { key: 'arrow-up', src: '/work/sui-sui/icon1.png', alt: '', x: 142.88, y: 665.93, w: 58.434, h: 65.642, rotate: 2 },
+  { key: 'arrow-down', src: '/work/sui-sui/icon1.png', alt: '', x: 1098, y: 675, w: 58.434, h: 65.642, rotate: -2, flipY: true },
+];
+
+// 照片底部邊緣兩個沒有對應到使用者切圖清單的小箭頭裝飾（545:227/234），
+// 跟上面 arrow-up/arrow-down 是同一個形狀家族，純向量、無照片內容，
+// 直接內嵌 Figma 匯出的 SVG（見 DoubleArrowIcon）。
+const EXTRA_ARROWS = [
+  { key: 'extra-1', x: 398.99, y: 739.16, w: 40.223, h: 45.185, rotate: -178, flipY: true },
+  { key: 'extra-2', x: 773, y: 744, w: 40.223, h: 45.185, rotate: -2, flipY: true },
 ];
 
 // Figma node 545:196／Group 36939 的腦部圖示，5 個 path，逐字取自匯出的
@@ -42,6 +105,18 @@ function ChipBrainIcon(props) {
       <path fillRule="evenodd" clipRule="evenodd" d="M15.4044 18.4524C14.7428 18.2629 14.3601 17.5729 14.5496 16.9113C14.906 15.6669 14.8247 14.789 14.5138 14.1548C14.2029 13.5207 13.5588 12.9186 12.3569 12.4382C11.7178 12.1828 11.4068 11.4576 11.6622 10.8186C11.9177 10.1795 12.6428 9.8685 13.2819 10.1239C14.855 10.7527 16.0865 11.7008 16.7517 13.0578C17.4169 14.4148 17.4121 15.9689 16.9456 17.5975C16.7561 18.2592 16.0661 18.6419 15.4044 18.4524Z" fill="#C90000" />
       <path fillRule="evenodd" clipRule="evenodd" d="M33.7441 22.1489C33.0996 22.3904 32.773 23.1086 33.0145 23.7531C33.4969 25.0401 33.4573 25.9113 33.1839 26.5127C32.9104 27.114 32.2797 27.7164 30.9927 28.1988C30.3483 28.4403 30.0216 29.1585 30.2632 29.803C30.5047 30.4474 31.2229 30.7741 31.8674 30.5325C33.5141 29.9154 34.8089 28.9597 35.4526 27.5444C36.0962 26.1291 35.9655 24.5252 35.3483 22.8784C35.1068 22.234 34.3885 21.9073 33.7441 22.1489Z" fill="#C90000" />
       <path fillRule="evenodd" clipRule="evenodd" d="M11.2771 20.9715C11.8927 21.2791 12.1425 22.0275 11.8349 22.6432C11.2207 23.8727 11.1689 24.7433 11.3781 25.37C11.5872 25.9966 12.1514 26.6616 13.3809 27.2759C13.9966 27.5834 14.2464 28.3319 13.9388 28.9476C13.6312 29.5632 12.8828 29.813 12.2671 29.5054C10.6939 28.7195 9.5061 27.6337 9.01394 26.1589C8.52177 24.6841 8.81945 23.1026 9.60537 21.5294C9.91294 20.9137 10.6614 20.664 11.2771 20.9715Z" fill="#C90000" />
+    </svg>
+  );
+}
+
+// 545:227／545:234 的雙箭頭裝飾（深淺紅兩層），逐字取自 Figma 匯出的
+// SVG（跟 545:213／545:220 那組是同一個形狀家族，viewBox 0 0
+// 38.7158 43.8607）。
+function DoubleArrowIcon(props) {
+  return (
+    <svg viewBox="0 0 38.7158 43.8607" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <path d="M17.005 35.0374H12.6524V43.8597H9.97469V43.8606L7.02938 43.8597H4.35262V35.0374H0.0000782741L8.50203 22.4319L17.005 35.0374Z" fill="#B8001F" fillOpacity="0.51" />
+      <path d="M38.7158 19.5801H31.956V33.2861H19.0615V19.5801H12.3008L25.5078 0L38.7158 19.5801Z" fill="#C90000" />
     </svg>
   );
 }
@@ -68,17 +143,57 @@ export default function CosmeticTherapyIntro() {
             alt="An older woman receiving a cosmetic therapy session, having her face gently touched by a caregiver"
             className="ss-cti-photo"
           />
-          {CHIPS.map(({ key, x, y, rotate, label, hasIcon }) => (
+
+          {CHIPS.map(({ key, x, y, w, h, rotate, label, hasIcon, padding }) => (
             <div
               key={key}
-              className="ss-cti-chip"
-              style={{ left: pctX(x), top: pctY(y), transform: `rotate(${rotate}deg)` }}
+              className="ss-cti-chip-slot"
+              style={{ left: pctX(x), top: pctY(y), width: pctW(w), height: pctH(h) }}
             >
-              {hasIcon && <ChipBrainIcon className="ss-cti-chip-icon" />}
-              <span>{label}</span>
+              <div className="ss-cti-chip" style={{ transform: `rotate(${rotate}deg)`, padding }}>
+                {hasIcon && <ChipBrainIcon className="ss-cti-chip-icon" />}
+                <span>{label}</span>
+              </div>
             </div>
           ))}
+
+          {ICONS.map(({ key, src, alt, x, y, w, h, rotate, flipY }) => (
+            <img
+              key={key}
+              src={src}
+              alt={alt}
+              aria-hidden={alt ? undefined : 'true'}
+              className="ss-cti-icon"
+              style={{
+                left: pctX(x),
+                top: pctY(y),
+                width: pctW(w),
+                height: pctH(h),
+                transform: `rotate(${rotate}deg)${flipY ? ' scaleY(-1)' : ''}`,
+              }}
+            />
+          ))}
+
+          {EXTRA_ARROWS.map(({ key, x, y, w, h, rotate, flipY }) => (
+            <DoubleArrowIcon
+              key={key}
+              aria-hidden="true"
+              className="ss-cti-icon"
+              style={{
+                left: pctX(x),
+                top: pctY(y),
+                width: pctW(w),
+                height: pctH(h),
+                transform: `rotate(${rotate}deg)${flipY ? ' scaleY(-1)' : ''}`,
+              }}
+            />
+          ))}
         </div>
+
+        {/* 6 個 chip 的圖示是重複資訊（跟旁邊文字講同一件事），對螢幕
+            閱讀器來說是裝飾，已用 aria-hidden 處理；這裡不用另外補
+            visually-hidden 文字，因為 chip 本身的 <span> 已經是可讀的
+            真實文字。 */}
       </div>
     </section>
   );

@@ -8,13 +8,18 @@ if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-// Mockup 1/2/3 都置中在 1440 參考寬度內（不像 WanderBuddy 那頁刻意出血），
-// 但淡入淡出動畫比照 WanderBuddy 的 scrubbed 做法：進場淡入、中間停留、
-// 離場淡出，全程跟著捲動位置走，往回捲完整反向（不是 once）。只動
-// opacity，沒有位移。
+// 2026-08-17：改用 get_design_context 讀 545:47 底下 Mockup1/2/3 的實際
+// x 座標（相對頁面 1440 參考寬），不再一律置中——Figma 原稿本來就不是
+// 三張都置中：Mockup2（x=13,w=1434）右緣其實超出 1440 邊界 7px，
+// Mockup3（x=0）左緣貼齊頁面最左邊。超出的部分用外層 overflow:hidden
+// 真的裁掉，不是縮小塞進來。
+// 淡入淡出動畫比照 WanderBuddy 的 scrubbed 做法：進場淡入、中間停留、
+// 離場淡出，全程跟著捲動位置走，往回捲完整反向。只動 opacity，沒有位移。
 const FRAME_W = 1440;
+const pctX = (v) => `${((v / FRAME_W) * 100).toFixed(4)}%`;
+const pctW = (v) => `${((v / FRAME_W) * 100).toFixed(4)}%`;
 
-export default function MockupFade({ src, alt, w, h }) {
+export default function MockupFade({ src, alt, x = 0, w, h }) {
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -49,10 +54,10 @@ export default function MockupFade({ src, alt, w, h }) {
 
   return (
     <section className="ss-section">
-      <div className="ss-section-inner">
+      <div className="ss-mockup-clip">
         <div
           className="ss-mockup"
-          style={{ aspectRatio: `${w} / ${h}`, maxWidth: `${((w / FRAME_W) * 100).toFixed(4)}%` }}
+          style={{ aspectRatio: `${w} / ${h}`, marginLeft: pctX(x), width: pctW(w) }}
           ref={containerRef}
         >
           <img src={src} alt={alt} className="ss-mockup-img" />

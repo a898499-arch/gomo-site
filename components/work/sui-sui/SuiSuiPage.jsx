@@ -82,12 +82,20 @@ export default function SuiSuiPage() {
         <AnimationPlaceholder label="All UI Animation" w={1446} h={924} />
       </section>
 
-      {/* y=12890 / 13986 / 14874 — 都置中在 1440 參考寬度內，不像
-          WanderBuddy 那頁刻意出血；淡入淡出動畫比照 WanderBuddy 的
-          scrubbed 做法（見 MockupFade.jsx） */}
-      <MockupFade src="/work/sui-sui/mockup-1.png" alt="Sui-Sui mockup 1: an older woman using the app while doing her makeup at a mirror" w={1250} h={937} />
-      <MockupFade src="/work/sui-sui/mockup-2.png" alt="Sui-Sui mockup 2" w={1389} h={700} />
-      <MockupFade src="/work/sui-sui/mockup-3.png" alt="Sui-Sui mockup 3" w={1369} h={685} />
+      {/* y≈12861/13914/14930。2026-08-17：改用 get_design_context 讀
+          545:47 底下 Mockup1/2/3 的實際 x 座標（相對 1440 參考寬），不再
+          統一置中——Mockup1 x=109（跟置中的 95 差 14px，Figma 原稿本來就
+          不是正中央）、Mockup2 x=13（w=1434，右緣超出 1440 邊界 7px，會被
+          .ss-mockup-clip 裁掉）、Mockup3 x=0（左緣貼齊頁面最左邊）。
+          w/h：Mockup1／Mockup2 是 get_design_context 重讀確認過的值。
+          Mockup3 你給的 1440×832 對到的其實是組合裡「手機截圖遮罩」的
+          裁切尺寸（mask-size），不是 Mockup3 外層 frame 自己的大小
+          （Figma 目前這個 frame 本身量出來是 1454×899）——這裡先維持
+          1454×899，等你確認要哪一個再改。淡入淡出動畫比照 WanderBuddy 的
+          scrubbed 做法（見 MockupFade.jsx）。 */}
+      <MockupFade src="/work/sui-sui/mockup-1.png" alt="Sui-Sui mockup 1: an older woman using the app while doing her makeup at a mirror" x={109} w={1250} h={937} />
+      <MockupFade src="/work/sui-sui/mockup-2.png" alt="Sui-Sui mockup 2" x={13} w={1434} h={900} />
+      <MockupFade src="/work/sui-sui/mockup-3.png" alt="Sui-Sui mockup 3" x={0} w={1454} h={899} />
 
       {/* y=15747 */}
       <WorkFootage />

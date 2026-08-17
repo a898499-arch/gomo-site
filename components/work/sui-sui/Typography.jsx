@@ -14,7 +14,10 @@ export default function Typography() {
 
   return (
     <section className="ss-section" ref={ref}>
-      <div className="ss-section-inner ss-type-grid">
+      {/* 2026-08-17：改用跟導覽列同一個 .page-container，左右緣對齊
+          nav 的 GOMO logo 左緣／About Me 右緣，不再用 .ss-section-inner
+          自己的 1280 上限。 */}
+      <div className="page-container ss-type-grid">
         <div className="ss-type-text ss-entrance-item">
           <p className="ss-eyebrow" style={{ textAlign: 'left', margin: 0 }}>Typography</p>
           <p className="ss-type-desc">

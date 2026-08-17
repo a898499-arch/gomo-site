@@ -43,7 +43,10 @@ export default function ColorPalette() {
 
   return (
     <section className="ss-section">
-      <div className="ss-section-inner">
+      {/* 2026-08-17：改用跟導覽列同一個 .page-container（同一個
+          --page-gutter 變數），左緣對齊 nav 的 GOMO logo 左緣、右緣對齊
+          About Me 右緣，不再用 .ss-section-inner 自己的 1280 上限。 */}
+      <div className="page-container">
         <div className="ss-color-frame" style={{ aspectRatio: `${FRAME_W} / ${FRAME_H}` }} ref={ref}>
           {SWATCHES.map((s) => (
             <div
