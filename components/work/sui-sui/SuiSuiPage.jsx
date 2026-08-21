@@ -11,6 +11,7 @@ import BeforeAfter from './BeforeAfter';
 import ColorPalette from './ColorPalette';
 import Typography from './Typography';
 import Function2 from './Function2';
+import OnboardingDemo from './OnboardingDemo';
 import MockupFade from './MockupFade';
 import WorkFootage from './WorkFootage';
 import NextWork from './NextWork';
@@ -77,10 +78,11 @@ export default function SuiSuiPage() {
         <AnimationPlaceholder label="Function 4" w={1440} h={918} />
       </section>
 
-      {/* y=11818 — node 545:530，1446×924 */}
-      <section className="ss-section">
-        <AnimationPlaceholder label="All UI Animation" w={1446} h={924} />
-      </section>
+      {/* y=11818 — node 545:530，1446×924。2026-08-20：換成你做好的
+          onboarding 演示動畫，見 OnboardingDemo.jsx 檔頭說明。2026-08-21：
+          手機改固定 720px 高，不再跟著 Figma 槽位比例縮放，w/h props
+          拿掉了。 */}
+      <OnboardingDemo />
 
       {/* y≈12861/13914/14930。2026-08-17：改用 get_design_context 讀
           545:47 底下 Mockup1/2/3 的實際 x 座標（相對 1440 參考寬），不再
