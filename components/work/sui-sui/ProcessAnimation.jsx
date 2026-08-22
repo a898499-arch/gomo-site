@@ -16,17 +16,25 @@
 //
 // 外層 .ss-pa-frame 用 aspect-ratio:1450/900 鎖住 Figma 比例，隨容器寬度
 // 等比縮放；iframe 用 position:absolute + inset:0 填滿整個框。
+//
+// 2026-08-22 第四輪：改成滿版出血——你要手機從畫面左右邊緣直接切出去，
+// 跟直接開 carousel.html 看到的效果一樣。做法：不要包在 .page-container
+// 裡面（那個 class 會加 max-width:1440px + padding-inline 的左右內距，
+// 就是造成留白的原因）。.ss-section／.ss-case／.page-content 這幾層本身
+// 都沒有額外的水平 padding（只有 .page-container 才有），所以只要不套用
+// 那個 class，.ss-pa-frame 直接當 <section> 的子元素，天生就會撐滿整個
+// 視窗寬度，不需要另外用 100vw + 負 margin 那種技巧，也不會動到上下相鄰
+// 區塊（它們各自還是包在自己的 .page-container／.ss-section-inner 裡，
+// 不受影響）。
 export default function ProcessAnimation() {
   return (
     <section className="ss-section">
-      <div className="page-container">
-        <div className="ss-pa-frame" style={{ aspectRatio: '1450 / 900' }}>
-          <iframe
-            src="/work/sui-sui/ui-carousel/carousel.html"
-            title="Sui-Sui UI carousel"
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block', border: 0 }}
-          />
-        </div>
+      <div className="ss-pa-frame" style={{ aspectRatio: '1450 / 900' }}>
+        <iframe
+          src="/work/sui-sui/ui-carousel/carousel.html"
+          title="Sui-Sui UI carousel"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block', border: 0 }}
+        />
       </div>
     </section>
   );

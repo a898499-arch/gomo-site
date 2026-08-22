@@ -636,35 +636,19 @@
   width: 100%;
 }
 
-/* ---------- Function 1（node 545:110，1440×918） ---------- */
-.ss-fn1-frame {
-  position: relative;
-  width: 100%;
-  container-type: inline-size;
-}
-
-.ss-fn1-band {
-  position: absolute;
-  left: 0;
-  width: 100%;
-  background: #f3f4f8;
-}
-
+/* ---------- Function 1（node 545:110，「Setup in three questions」）。
+   2026-08-22 第四輪：拿掉 #f3f4f8 背景帶跟絕對定位的 Figma 框（你的
+   指示——只留手機動畫，背景維持頁面底色），改成一般文件流，跟
+   Background/DesignChallenge 等區塊同一套置中寫法（.ss-section-inner
+   +text-align:center+margin:0 auto），不再用 cqw/pctX/pctY。 ---------- */
 .ss-fn1-heading {
-  position: absolute;
-  top: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.4167cqw;
   text-align: center;
 }
 
 .ss-fn1-eyebrow {
-  margin: 0;
+  margin: 0 0 6px;
   font-weight: 600;
-  font-size: 1.6667cqw;
-  line-height: 2.8056cqw;
+  font-size: 24px;
   text-transform: uppercase;
   color: #b8001f;
 }
@@ -672,27 +656,33 @@
 .ss-fn1-title-group {
   display: flex;
   flex-direction: column;
-  gap: 1.1111cqw;
-  width: 100%;
+  gap: 16px;
+  max-width: 1360px;
+  margin: 0 auto;
 }
 
 .ss-fn1-title {
   margin: 0;
   font-weight: 600;
-  font-size: 2.5cqw;
-  line-height: 2.8056cqw;
+  font-size: clamp(24px, 2.5vw, 36px);
   color: #000;
 }
 
 .ss-fn1-desc {
   margin: 0;
   font-weight: 400;
-  font-size: 1.3889cqw;
+  font-size: clamp(16px, 1.3889vw, 20px);
   color: #000;
 }
 
-.ss-fn1-slot {
-  position: absolute;
+/* 手機固定 676px 高（你的指示，不再跟著容器寬度縮放）；54px 是手機頂端
+   跟上面說明文字的距離。 */
+.ss-fn1-phone-wrap {
+  position: relative;
+  margin-top: 54px;
+  height: 676px;
+  display: flex;
+  justify-content: center;
 }
 
 /* ---------- Function 2（node 545:510，1507×961） ---------- */
