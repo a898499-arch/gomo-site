@@ -1,10 +1,252 @@
-// suisui — Onboarding 演示的 DOM 標記，逐字取自
-// all-ui-animation/suisui-onboarding-demo/suisui-onboarding-demo.html
-// 的 <body> 內容（SVG symbol defs + .stage），只拿掉了 dev-only 的
-// .hint 提示文字（已經沒有任何腳本引用它，見 public/onboarding-demo.js
-// 檔頭說明）。不要手動編輯這段內容——要換圖示/文案，回 Figma 匯出後
-// 整段替換，比照原始檔案自己的註解說明。
-export const ONBOARDING_DEMO_MARKUP = `
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>suisui — Onboarding 演示</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,200;9..40,400;9..40,500;9..40,700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   suisui — Onboarding 自動演示
+   設計 tokens 取自 Figma 檔案 suisui_ui_2
+   red/500 #b8001f · neutral/50 #fafaf8 · neutral/800 #1a1a1a
+   字體 Lora + DM Sans
+   ============================================================ */
+:root{
+  --red-500:#b8001f;
+  --red-600:#8f0018;
+  --red-300:#d42035;
+  --neutral-50:#fafaf8;
+  --neutral-200:#e8e4e0;
+  --neutral-300:#cccccc;
+  --neutral-500:#5c5c5c;
+  --neutral-600:#3a3a3a;
+  --neutral-700:#2a2a2a;
+  --neutral-800:#1a1a1a;
+  --glow:0 0 4px 2px rgba(242,160,171,.89);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+html,body{height:100%}
+body{
+  background:radial-gradient(120% 100% at 50% 0%,#242024 0%,#131113 60%,#0b0a0b 100%);
+  color:#fff;font-family:'DM Sans',system-ui,sans-serif;
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;overflow:hidden;
+}
+.stage{display:flex;flex-direction:column;align-items:center;gap:22px}
+
+/* ---------- 手機外框 ---------- */
+.phone{
+  position:relative;width:426px;height:898px;border-radius:56px;
+  background:linear-gradient(160deg,#3b383b,#171517 40%,#2c292c);
+  padding:12px;
+  box-shadow:0 40px 90px -20px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.07),inset 0 0 0 1px rgba(255,255,255,.05);
+  flex:0 0 auto;
+}
+.screen{
+  position:relative;width:402px;height:874px;border-radius:44px;overflow:hidden;
+  background:var(--neutral-50);
+}
+
+/* ---------- 狀態列 ---------- */
+.statusbar{
+  position:absolute;inset:0 0 auto 0;height:54px;z-index:60;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 32px 0;pointer-events:none;
+  font-family:'DM Sans';font-weight:500;font-size:16px;color:#1a1a1a;
+  transition:opacity .4s ease;
+}
+.statusbar.hidden{opacity:0}
+.sb-right{display:flex;align-items:center;gap:6px}
+.sb-right svg{display:block}
+
+/* ---------- 畫面堆疊 ---------- */
+/* 畫面切換：新畫面永遠「疊在舊畫面之上」進場（滑入或淡入），
+   舊畫面保持不透明直到被完全蓋住才移除 —— 這樣兩層內容不會透出來變髒。 */
+.scr{
+  position:absolute;inset:0;opacity:0;visibility:hidden;z-index:1;
+  transition:opacity .45s ease, transform .55s cubic-bezier(.32,.72,0,1);
+}
+.scr.active{visibility:visible;z-index:10}
+.scr.entering{z-index:20}
+
+/* 絕對定位工具：所有座標直接對應 Figma 的 402×874 畫布 */
+.abs{position:absolute}
+
+/* ---------- 共用元件 ---------- */
+.h-display{font-family:'Lora';font-weight:500;font-size:32px;color:var(--neutral-800);line-height:1.1}
+.h-italic{font-family:'Lora';font-style:italic;font-weight:400;font-size:32px;line-height:37px;color:var(--red-500)}
+.body-lg{font-family:'DM Sans';font-weight:400;font-size:18px;color:var(--neutral-700);line-height:1.35}
+.body-lora{font-family:'Lora';font-weight:400;font-size:18px;color:var(--neutral-800);line-height:1.35}
+
+.btn-primary{
+  position:absolute;height:64px;border-radius:32px;background:var(--red-500);
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  color:#fff;font-family:'DM Sans';font-weight:700;font-size:24px;
+  box-shadow:0 6px 18px -6px rgba(184,0,31,.6);
+  transition:transform .14s ease, background .14s ease, box-shadow .14s ease;
+}
+.btn-primary .arrow{width:36px;height:30px}
+/* 按下狀態 —— 這是讓觀眾「看見有人在操作」的關鍵 */
+.btn-primary.pressed{transform:scale(.965);background:var(--red-600);box-shadow:0 2px 8px -4px rgba(184,0,31,.7)}
+
+/* 進度條是「跨頁共用」的一條，不屬於任何單一畫面 ——
+   所以換頁時它不會重置，寬度會從上一頁停的位置繼續往前推。 */
+.track{position:absolute;left:24px;right:24px;top:84px;height:14px;border-radius:13px;
+  background:rgba(120,120,120,.2);z-index:55;opacity:0;transition:opacity .35s ease;pointer-events:none}
+.track.on{opacity:1}
+.track-fill{position:absolute;left:0;top:0;height:14px;border-radius:13px;background:var(--red-500);width:0;
+  transition:width .7s cubic-bezier(.32,.72,0,1)}
+
+/* 選項膠囊 */
+.opt{
+  position:absolute;left:24px;width:354px;height:63px;border-radius:35px;
+  background:#fff;border:1px solid var(--neutral-300);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Lora';font-weight:400;font-size:20px;color:var(--neutral-800);
+  transition:background .3s ease,border-color .3s ease,color .3s ease,box-shadow .3s ease,transform .16s ease;
+}
+.opt.selected{background:var(--red-500);border:2px solid var(--red-300);color:#fff;font-weight:500;box-shadow:var(--glow)}
+.opt.pressed{transform:scale(.975)}
+
+/* 字級卡片 */
+.sizecard{
+  position:absolute;left:24px;width:354px;height:125px;border-radius:25px;
+  background:#fff;border:1px solid var(--neutral-300);
+  transition:background .35s ease,border-color .35s ease,box-shadow .35s ease,transform .16s ease;
+}
+.sizecard.selected{background:var(--red-500);border:2px solid rgba(102,0,18,.5);box-shadow:var(--glow)}
+.sizecard.pressed{transform:scale(.98)}
+.sizecard .t1{position:absolute;left:16px;font-family:'Lora';font-weight:500;color:var(--neutral-600);transition:color .35s ease}
+.sizecard .t2{position:absolute;left:16px;font-family:'DM Sans';font-weight:200;color:var(--neutral-600);transition:color .35s ease}
+.sizecard.selected .t1,.sizecard.selected .t2{color:#fff}
+.radio{position:absolute;right:20px;width:30px;height:30px;border-radius:50%;border:2px solid var(--neutral-300);
+  transition:border-color .35s ease,background .35s ease}
+.sizecard.selected .radio{border-color:#fff;background:radial-gradient(circle,#fff 0 42%,transparent 44%)}
+
+/* ---------- 假游標 ---------- */
+.cursor{
+  position:absolute;left:0;top:0;width:30px;height:30px;z-index:200;
+  margin:-15px 0 0 -15px;pointer-events:none;opacity:0;
+  transition:transform .62s cubic-bezier(.4,0,.2,1),opacity .3s ease;
+}
+.cursor::before{
+  content:'';position:absolute;inset:0;border-radius:50%;
+  background:rgba(26,26,26,.34);border:1.5px solid rgba(255,255,255,.85);
+  box-shadow:0 3px 10px rgba(0,0,0,.35);
+  transition:transform .13s ease,background .13s ease;
+}
+.cursor.down::before{transform:scale(.72);background:rgba(184,0,31,.5)}
+.ripple{
+  position:absolute;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;
+  border:2px solid rgba(184,0,31,.75);z-index:190;pointer-events:none;
+  animation:ripple .55s cubic-bezier(.2,.7,.3,1) forwards;
+}
+@keyframes ripple{to{width:78px;height:78px;margin:-39px 0 0 -39px;opacity:0;border-width:1px}}
+
+/* ---------- 控制列 ---------- */
+.controls{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  border-radius:999px;padding:8px 10px;backdrop-filter:blur(12px);
+  transition:opacity .3s ease;
+}
+.controls.hidden{opacity:0;pointer-events:none}
+.controls button{
+  background:transparent;border:0;color:rgba(255,255,255,.82);
+  font-family:'DM Sans';font-size:14px;font-weight:500;cursor:pointer;
+  padding:7px 14px;border-radius:999px;transition:background .2s,color .2s;
+}
+.controls button:hover{background:rgba(255,255,255,.13);color:#fff}
+.controls button.on{background:#fff;color:#141414}
+.sep{width:1px;height:18px;background:rgba(255,255,255,.16)}
+.caption{
+  font-family:'DM Sans';font-size:13px;font-weight:400;letter-spacing:.06em;
+  color:rgba(255,255,255,.4);text-transform:uppercase;
+  transition:opacity .3s ease;height:16px;
+}
+.hint{position:fixed;bottom:14px;right:18px;font-size:11px;color:rgba(255,255,255,.22);font-family:'DM Sans'}
+
+/* ---------- 螢幕特定樣式 ---------- */
+/* S1 Logo */
+#s-logo{background:var(--red-500)}
+/* 開場只做一件事：logo 慢慢淡入，不縮放、不位移 */
+#s-logo .mark{position:absolute;left:118px;top:305px;width:166px;height:265px;color:#fff;
+  opacity:0;transition:opacity 1.6s ease}
+#s-logo.lit .mark{opacity:1}
+
+/* S2 introduce */
+#s-intro{background:var(--neutral-50)}
+/* 介紹頁不做逐項動畫 —— 整頁一起緩慢淡入，內容同時到位 */
+
+/* S3 login */
+#s-login{background:#fff}
+.field{
+  position:absolute;height:72px;border-radius:14px;background:#fff;
+  border:1px solid #d8d8d8;box-shadow:0 1px 3px rgba(0,0,0,.07);
+  display:flex;align-items:center;
+  transition:border-color .25s ease,box-shadow .25s ease;
+}
+.field.focus{border-color:var(--red-500);box-shadow:0 0 0 3px rgba(184,0,31,.1)}
+.field .val{font-family:'DM Sans';font-size:20px;color:#1a1a1a}
+.field .ph{font-family:'DM Sans';font-size:20px;color:#9a9a9a}
+.caret{display:inline-block;width:2px;height:24px;background:var(--red-500);margin-left:2px;vertical-align:-4px;
+  animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.social{
+  position:absolute;top:584px;width:161px;height:56px;border-radius:50px;background:#fff;
+  border:.5px solid #8e8e93;box-shadow:0 2px 1px rgba(0,0,0,.18);
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  font-family:'DM Sans';font-size:16px;color:#000;
+}
+/* 數字鍵盤 */
+.keypad{
+  position:absolute;left:0;right:0;bottom:0;height:291px;background:#d1d4db;
+  padding:8px 6px 26px;display:grid;grid-template-columns:repeat(3,1fr);gap:9px 6px;
+  transform:translateY(100%);transition:transform .48s cubic-bezier(.32,.72,0,1);z-index:40;
+}
+.keypad.up{transform:none}
+.key{
+  background:#fff;border-radius:5px;box-shadow:0 1px 0 rgba(0,0,0,.28);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:'DM Sans';transition:background .1s ease,transform .1s ease;
+}
+.key .n{font-size:25px;font-weight:400;color:#000;line-height:1}
+.key .l{font-size:9px;letter-spacing:1.4px;color:#000;margin-top:2px}
+.key.blank{background:transparent;box-shadow:none}
+.key.tapped{background:#b6bac2;transform:scale(.97)}
+.homebar{position:absolute;left:50%;bottom:8px;width:140px;height:5px;margin-left:-70px;
+  border-radius:3px;background:#000;opacity:.85;z-index:50}
+
+/* S4 font size */
+#s-size,#s-q1,#s-q2,#s-remind{background:var(--neutral-50)}
+
+/* S7 reminder */
+.timecard{position:absolute;left:24px;top:363px;width:354px;height:187px;border-radius:25px;background:#fff;
+  box-shadow:0 0 4px 2px rgba(0,0,0,.05);overflow:hidden}
+.wheel{position:absolute;top:0;width:100px;height:187px;overflow:hidden}
+.wheel-inner{position:absolute;left:0;right:0;top:0;transition:transform .9s cubic-bezier(.28,.9,.3,1)}
+.wheel-item{height:77px;display:flex;align-items:center;justify-content:center;
+  font-family:'DM Sans';font-weight:700;font-size:66px;color:#000}
+.wheel-item.dim{font-weight:400;font-size:58px;color:rgba(0,0,0,.2)}
+.colon{position:absolute;left:50%;top:93px;transform:translate(-50%,-50%);
+  font-family:'DM Sans';font-size:57px;color:rgba(0,0,0,.2)}
+.infobar{position:absolute;left:24px;top:576px;width:354px;height:62px;border-radius:20px;
+  background:var(--neutral-200);display:flex;align-items:center;gap:9px;padding:0 20px;
+  font-family:'DM Sans';font-size:16px;color:var(--neutral-700);letter-spacing:-.32px}
+
+
+@media (max-height:960px){
+  body{align-items:flex-start;padding-top:10px}
+  .stage{transform:scale(.86);transform-origin:top center}
+}
+@media (max-height:840px){ .stage{transform:scale(.74)} }
+</style>
+</head>
+<body>
+
 <!-- ============================================================
      素材區 —— 要換圖只改這裡，下面的畫面會自動跟著換
      從 Figma 匯出 SVG 後，把 <symbol> 裡面的內容整段換掉即可
@@ -238,6 +480,7 @@ export const ONBOARDING_DEMO_MARKUP = `
   </symbol>
 
 </defs></svg>
+
 <div class="stage">
   <div class="phone">
     <div class="screen" id="screen">
@@ -423,5 +666,311 @@ export const ONBOARDING_DEMO_MARKUP = `
     <button id="btn-loop" class="on">🔁 循環</button>
   </div>
 </div>
+<div class="hint">H 隱藏控制列 · 空白鍵 暫停 · R 重播</div>
 
-`;
+<script>
+/* ============================================================
+   演示引擎
+   ============================================================ */
+const $  = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+
+let speed = 1, paused = false, loop = true;
+let token = {cancelled:false};
+const CANCEL = Symbol('cancel');
+
+function sleep(ms){
+  return new Promise((resolve, reject)=>{
+    const my = token;
+    let remaining = ms, last = performance.now();
+    (function tick(now){
+      if(my.cancelled) return reject(CANCEL);
+      const dt = now - last; last = now;
+      if(!paused) remaining -= dt * speed;
+      if(remaining <= 0) return resolve();
+      requestAnimationFrame(tick);
+    })(performance.now());
+  });
+}
+
+/* ---- 假游標 ---- */
+const cursor = $('#cursor'), screen = $('#screen');
+let cx = 201, cy = 700;
+function cursorTo(x, y, dur = 620){
+  cx = x; cy = y;
+  cursor.style.transitionDuration = (dur/speed) + 'ms';
+  cursor.style.transform = `translate(${x}px, ${y}px)`;
+}
+/* .stage 在視窗較矮時會被 CSS transform: scale() 縮小。
+   getBoundingClientRect() 回傳的是「縮放後」的螢幕像素，
+   但游標的 translate() 是在「縮放前」的 402×874 座標系裡算的 ——
+   不除掉這個倍率，游標就會跟按鈕差開一段距離。 */
+function stageScale(){ return screen.getBoundingClientRect().width / 402; }
+function centerOf(el){
+  const k = stageScale();
+  const r = el.getBoundingClientRect(), s = screen.getBoundingClientRect();
+  return { x: (r.left - s.left + r.width/2) / k, y: (r.top - s.top + r.height/2) / k };
+}
+async function moveTo(el, dur = 620, dx = 0, dy = 0){
+  const c = centerOf(el);
+  cursor.style.opacity = 1;
+  cursorTo(c.x + dx, c.y + dy, dur);
+  await sleep(dur);
+}
+function ripple(){
+  const d = document.createElement('div');
+  d.className = 'ripple';
+  d.style.left = cx + 'px'; d.style.top = cy + 'px';
+  screen.appendChild(d);
+  setTimeout(()=>d.remove(), 700);
+}
+/* 點一下：游標壓下 + 漣漪 + 目標元素進入 pressed */
+async function tap(el, pressClass = 'pressed'){
+  cursor.classList.add('down'); ripple();
+  el && el.classList.add(pressClass);
+  await sleep(150);
+  cursor.classList.remove('down');
+  el && el.classList.remove(pressClass);
+  await sleep(110);
+}
+async function clickOn(el, moveDur = 620, pressClass = 'pressed'){
+  await moveTo(el, moveDur);
+  await tap(el, pressClass);
+}
+
+/* ---- 畫面切換 ---- */
+let current = null;
+async function show(id, mode = 'push', dur = 520){
+  const next = $('#' + id);
+  const prevEl = current;                 // 先抓住舊畫面，別讓它被下一次指派蓋掉
+
+  next.style.transition = 'none';
+  next.classList.add('active','entering');
+  if(mode === 'push'){ next.style.opacity = 1; next.style.transform = 'translateX(402px)'; }
+  else            { next.style.opacity = 0; next.style.transform = 'none'; }
+  void next.offsetWidth;                  // 強制 reflow，讓起始狀態生效
+  next.style.transition = `opacity ${dur/speed}ms ease, transform ${dur/speed}ms cubic-bezier(.32,.72,0,1)`;
+  if(mode === 'push') next.style.transform = 'translateX(0)';
+  else                next.style.opacity = 1;
+
+  current = next;
+  await sleep(dur + 60);
+
+  if(prevEl && prevEl !== next) clearScreen(prevEl);
+  next.classList.remove('entering');
+}
+function clearScreen(el){
+  el.classList.remove('active','entering');
+  el.style.transition = ''; el.style.opacity = ''; el.style.transform = '';
+}
+function caption(t){ $('#caption').textContent = t; }
+function statusbar(on){ $('#statusbar').classList.toggle('hidden', !on); }
+
+/* ---- 進度條（跨頁共用，只在按下 Next 後才推進） ---- */
+function trackOn(on){ $('#track').classList.toggle('on', on); }
+async function advance(px){
+  const f = $('#track-fill');
+  f.style.transitionDuration = (700/speed) + 'ms';
+  f.style.width = px + 'px';
+  await sleep(260);          // 讓觀眾看到條子先動，再翻頁
+}
+
+/* ---- 時間滾輪 ---- */
+function buildWheel(el, values, centerIndex){
+  el.innerHTML = values.map((v,i)=>
+    `<div class="wheel-item${i===centerIndex?'':' dim'}">${v}</div>`).join('');
+  el.dataset.center = centerIndex;
+  el.style.transition = 'none';
+  el.style.transform = `translateY(${93 - 38.5 - centerIndex*77}px)`;
+  void el.offsetWidth;
+  el.style.transition = '';
+}
+function wheelTo(el, index){
+  [...el.children].forEach((c,i)=>c.classList.toggle('dim', i !== index));
+  el.style.transitionDuration = (900/speed) + 'ms';
+  el.style.transform = `translateY(${93 - 38.5 - index*77}px)`;
+}
+
+/* ---- 逐字輸入 ---- */
+const PHONE = '07700 900123';
+async function typePhone(){
+  const val = $('#phone-val'), ph = $('#phone-ph'), caret = $('#phone-caret');
+  ph.style.display = 'none'; caret.style.display = 'inline-block';
+  for(const ch of PHONE){
+    if(ch === ' '){ val.textContent += ' '; await sleep(80); continue; }
+    const key = $(`.key[data-k="${ch}"]`);
+    if(key){
+      const c = centerOf(key);
+      cursorTo(c.x, c.y, 210);
+      await sleep(200);
+      key.classList.add('tapped'); cursor.classList.add('down'); ripple();
+      await sleep(105);
+      key.classList.remove('tapped'); cursor.classList.remove('down');
+    }
+    val.textContent += ch;
+    await sleep(95);
+  }
+  caret.style.display = 'none';
+}
+
+/* ---- 重置 ---- */
+function reset(){
+  $$('.scr').forEach(s=>{ clearScreen(s); s.classList.remove('lit'); });
+  $$('.opt').forEach(o=>o.classList.remove('selected'));
+  $$('.sizecard').forEach(c=>c.classList.remove('selected'));
+  $$('.track-fill').forEach(f=>{ f.style.transition='none'; f.style.width='0'; void f.offsetWidth; f.style.transition=''; });
+  $('#phone-val').textContent = ''; $('#phone-ph').style.display = '';
+  $('#phone-caret').style.display = 'none';
+  $('#phone-field').classList.remove('focus');
+  $('#keypad').classList.remove('up');
+  trackOn(false); $('#track-fill').style.transition='none'; $('#track-fill').style.width='0';
+  void $('#track-fill').offsetWidth; $('#track-fill').style.transition='';
+  $('#mini-h').textContent = '06'; $('#mini-m').textContent = '00';
+  buildWheel($('#wheel-h'), ['04','05','06','07','08','09','10'], 2);
+  buildWheel($('#wheel-m'), ['00','05','10','15','20','25','30'], 0);
+  cursor.style.opacity = 0;
+  cursor.style.transition = 'none';
+  cursor.style.transform = 'translate(201px,700px)';
+  void cursor.offsetWidth; cursor.style.transition = '';
+  current = null; statusbar(false); caption('');
+}
+
+/* ============================================================
+   時間軸
+   ============================================================ */
+async function timeline(){
+
+  /* — 01 品牌 — */
+  caption('01 / 07 · 開場');
+  await show('s-logo','fade');
+  await sleep(120);
+  $('#s-logo').classList.add('lit');
+  await sleep(2300);
+
+  /* — 02 介紹 — */
+  caption('02 / 07 · 介紹');
+  statusbar(true);
+  await show('s-intro','fade', 1000);          // 整頁一起淡入
+  await sleep(1900);
+  await clickOn($('#intro-btn'), 700);
+
+  /* — 03 登入 — */
+  caption('03 / 07 · 手機號碼登入');
+  await show('s-login');
+  await sleep(700);
+  await moveTo($('#phone-field'), 640);
+  await tap(null);
+  $('#phone-field').classList.add('focus');
+  $('#keypad').classList.add('up');
+  await sleep(560);
+  await typePhone();
+  await sleep(420);
+  $('#keypad').classList.remove('up');
+  $('#phone-field').classList.remove('focus');
+  await sleep(480);
+  await clickOn($('#code-btn'), 620);
+
+  /* — 04 字級 —
+     進度條在這裡才出現，且停在 0：使用者還沒完成任何一步。 */
+  caption('04 / 07 · 選擇字級');
+  await show('s-size');
+  trackOn(true);
+  await sleep(900);
+  await clickOn($('#card-m'), 700);
+  $('#card-m').classList.add('selected');
+  await sleep(1200);
+  await clickOn($('#size-next'), 620);
+  await advance(110);                  // 選完 + 按下 Next → 才推進
+
+  /* — 05 問卷 1 — */
+  caption('05 / 07 · 使用習慣');
+  await show('s-q1');                  // 進度條維持在 110，不會歸零
+  await sleep(900);
+  await clickOn($('#q1-b'), 700);
+  $('#q1-b').classList.add('selected');
+  await sleep(1100);
+  await clickOn($('#q1-next'), 620);
+  await advance(190);
+
+  /* — 06 問卷 2（複選） — */
+  caption('06 / 07 · 設定目標');
+  await show('s-q2');
+  await sleep(700);
+  for(const id of ['#q2-c','#q2-d','#q2-e']){
+    await clickOn($(id), 560);
+    $(id).classList.add('selected');
+    await sleep(400);
+  }
+  await sleep(700);
+  await clickOn($('#q2-next'), 620);
+  await advance(270);
+
+  /* — 07 提醒時間 — */
+  caption('07 / 07 · 每日提醒');
+  await show('s-remind');
+  await sleep(800);
+
+  await moveTo($('#wheel-h').parentElement, 700);
+  await tap(null);
+  wheelTo($('#wheel-h'), 4);           // 06 → 08
+  $('#mini-h').textContent = '08';
+  await sleep(1050);
+
+  await moveTo($('#wheel-m').parentElement, 560);
+  await tap(null);
+  wheelTo($('#wheel-m'), 5);           // 00 → 25
+  $('#mini-m').textContent = '25';
+  await sleep(1250);
+
+  await clickOn($('#rm-next'), 620);
+  await advance(354);                  // 最後一步：進度條推滿
+
+  /* — 收尾：停在最後一頁，不再重播 logo — */
+  cursor.style.opacity = 0;
+  caption('');
+  await sleep(1800);
+}
+
+async function run(){
+  do{
+    reset();
+    try{ await timeline(); }
+    catch(e){ if(e === CANCEL) return; throw e; }
+    if(!loop) return setPlay(false);
+    await sleep(500).catch(()=>{});
+  } while(loop);
+}
+function restart(){
+  token.cancelled = true;
+  token = {cancelled:false};
+  paused = false; setPlayLabel();
+  setTimeout(run, 60);
+}
+
+/* ---- 控制列 ---- */
+function setPlayLabel(){ $('#btn-play').textContent = paused ? '▶ 播放' : '⏸ 暫停'; }
+function setPlay(p){ paused = p; setPlayLabel(); }
+$('#btn-play').onclick = ()=> setPlay(!paused);
+$('#btn-replay').onclick = restart;
+$('#btn-loop').onclick = e => { loop = !loop; e.currentTarget.classList.toggle('on', loop); };
+$$('.spd').forEach(b => b.onclick = e => {
+  $$('.spd').forEach(x=>x.classList.remove('on'));
+  e.currentTarget.classList.add('on');
+  speed = parseFloat(e.currentTarget.dataset.s);
+});
+addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if(k === 'h'){
+    const hidden = $('#controls').classList.toggle('hidden');
+    $('#caption').style.opacity = hidden ? 0 : 1;
+    $('.hint').style.opacity   = hidden ? 0 : 1;
+  }
+  if(k === 'r') restart();
+  if(e.code === 'Space'){ e.preventDefault(); setPlay(!paused); }
+});
+
+/* 字體載入完再開跑，避免第一輪版面跳動 */
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(()=> setTimeout(run, 250));
+</script>
+</body>
+</html>

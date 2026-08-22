@@ -10,8 +10,9 @@ import DesignChallenge from './DesignChallenge';
 import BeforeAfter from './BeforeAfter';
 import ColorPalette from './ColorPalette';
 import Typography from './Typography';
+import ProcessAnimation from './ProcessAnimation';
+import Function1 from './Function1';
 import Function2 from './Function2';
-import OnboardingDemo from './OnboardingDemo';
 import MockupFade from './MockupFade';
 import WorkFootage from './WorkFootage';
 import NextWork from './NextWork';
@@ -19,10 +20,19 @@ import NextWork from './NextWork';
 // 依 Figma node 545:47（作品頁＿suisui，總高 17899px）由上而下組裝，
 // 用 MCP 讀完整份結構後排序，不是照使用者原本給的清單（那份少列了
 // Background 跟 Cosmetic Therapy Intro 兩區，也把 Before & After 的
-// node id 弄錯了，都已經口頭確認過修正）。這一輪只做骨架：五個動畫
-// 區塊（Process Animation / Function 1 / Function 3 / Function 4 /
-// All UI Animation）先用灰色佔位塊擋位，其餘都是照 Figma 實作的真實
-// 內容。Nav / Footer 是全站共用元件，已經在 app/layout.js 掛好了。
+// node id 弄錯了，都已經口頭確認過修正）。Nav / Footer 是全站共用元件，
+// 已經在 app/layout.js 掛好了。
+//
+// 動畫區塊清單（2026-08-22 更新，spec/GOMO-規格書.md 裡沒有這份清單，
+// 這裡是唯一的記錄——已跟你回報過）：
+// - Process Animation：真實內容，見 ProcessAnimation.jsx（你做好的 UI
+//   輪播動畫，iframe 載入 public/work/sui-sui/ui-carousel/carousel.html）。
+// - Function 1：真實內容，見 Function1.jsx（含你做好的 onboarding
+//   演示動畫，見 OnboardingDemo.jsx）。
+// - Function 3 / Function 4：灰色佔位塊，等你補內容。
+// - All UI Animation：整段移除，不留佔位塊（你的指示——這區內容已經
+//   搬去 Function 1 了，跟這裡的「Setup in three questions」標題語意
+//   對得上，跟原本的 All UI Animation 佔位標籤對不上）。
 export default function SuiSuiPage() {
   useNavBehavior({ startHidden: true, fullBleedTop: true });
 
@@ -36,9 +46,7 @@ export default function SuiSuiPage() {
       <LogoOverview />
 
       {/* y=1796 — node 545:532，1450×900 */}
-      <section className="ss-section">
-        <AnimationPlaceholder label="Process Animation" w={1450} h={900} />
-      </section>
+      <ProcessAnimation />
 
       {/* y=2756 — node 545:139，讀完整結構才發現的區塊，你確認過要做 */}
       <Background />
@@ -61,9 +69,7 @@ export default function SuiSuiPage() {
       <Typography />
 
       {/* y=7558 — node 545:110，1440×918 */}
-      <section className="ss-section">
-        <AnimationPlaceholder label="Function 1" w={1440} h={918} />
-      </section>
+      <Function1 />
 
       {/* y=8620 — node 545:510，已有真實手機截圖 */}
       <Function2 />
@@ -77,12 +83,6 @@ export default function SuiSuiPage() {
       <section className="ss-section">
         <AnimationPlaceholder label="Function 4" w={1440} h={918} />
       </section>
-
-      {/* y=11818 — node 545:530，1446×924。2026-08-20：換成你做好的
-          onboarding 演示動畫，見 OnboardingDemo.jsx 檔頭說明。2026-08-21：
-          手機改固定 720px 高，不再跟著 Figma 槽位比例縮放，w/h props
-          拿掉了。 */}
-      <OnboardingDemo />
 
       {/* y≈12861/13914/14930。2026-08-17：改用 get_design_context 讀
           545:47 底下 Mockup1/2/3 的實際 x 座標（相對 1440 參考寬），不再

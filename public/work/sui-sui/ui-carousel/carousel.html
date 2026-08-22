@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>suisui — UI Carousel</title>
+<style>
+/* ============================================================
+   suisui — 水平 UI 輪播（無限無縫循環）
+
+   運作原理 —— 為什麼這個循環是「數學上」接得起來的：
+   軌道上每張畫面的位置都是 (索引 × 間距 − 位移) 取模一圈長度。
+   取模運算沒有起點也沒有終點，所以根本不存在「循環接點」，
+   自然也不會有跳動、閃爍或重置。
+
+   位移函數 x(t) = v·t − A·sin(2πt/P) 帶了一點緩動
+   （畫面接近中央時放慢、離開時加速），
+   而它的週期剛好等於「一張畫面通過的時間 P」，
+   所以每過 P 秒位移恰好等於一個間距 —— 緩動也不會破壞無縫性。
+   ============================================================ */
+:root{
+  --bg1:#f4f2f0;
+  --bg2:#e8e5e2;
+  --bezel:#101013;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{
+  background:radial-gradient(120% 90% at 50% 42%,var(--bg1) 0%,var(--bg2) 100%);
+}
+
+/* 舞台：鏡頭完全固定，只有軌道在動 */
+#stage{position:fixed;inset:0;overflow:hidden}
+
+/* 每張畫面 = 外框 + 螢幕。位置與縮放每一幀由 JS 寫進 transform。 */
+.card{
+  position:absolute;left:50%;top:50%;
+  transform-origin:50% 50%;
+  will-change:transform,opacity;
+  backface-visibility:hidden;
+}
+/* 卡片外框是白色的 —— 黑色手機外框是中央那個固定不動的，不屬於卡片 */
+.frame{
+  position:relative;height:100%;background:#fff;
+  display:flex;align-items:center;justify-content:center;
+}
+.screen{
+  position:relative;overflow:hidden;background:#fff;
+}
+/* PNG 就是最終 UI，原檔不做任何修改。
+   UI_3 的原檔外圍多了一圈陰影，這裡只用 CSS 位移把它裁出畫面外，
+   磁碟上的檔案完全沒動過。 */
+.screen img{
+  position:absolute;display:block;
+  width:var(--iw,100%);height:var(--ih,100%);
+  left:var(--ix,0);top:var(--iy,0);
+}
+/* 中央固定的手機外框：只有描邊，內部透空，永遠疊在所有卡片之上。
+   卡片滑到正中央時尺寸剛好等於它，就會「套」進這個框裡。 */
+#phoneframe{
+  position:absolute;left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  border:0 solid #0b0b0d;
+  z-index:5000;pointer-events:none;
+}
+#phoneframe .island{
+  position:absolute;left:50%;transform:translateX(-50%);
+  background:#0b0b0d;border-radius:999px;
+}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<!-- 中央固定外框（鏡頭不動，這個也不動） -->
+<div id="phoneframe"><div class="island"></div></div>
+
+<script>
+/* ============================================================
+   設定
+   ============================================================ */
+
+/* 網頁版用 WebP（解析度與原始 PNG 完全相同，只換編碼，13MB → 2.7MB）。
+   原始 PNG 保存在 Downloads/suisui-carousel/assets/ui-screens/。
+
+   ★ 搬家時唯一需要改的一行：圖片資料夾相對於這個 HTML 的路徑。
+   結尾一定要有斜線。也可以用網址參數臨時覆寫，例如 ?assets=/img/ui-screens/  */
+const ASSET_BASE = new URLSearchParams(location.search).get('assets')
+                || './ui-screens/';
+
+/* 依資料夾裡的數字順序，UI_8 不存在故跳過 */
+const ORDER = [1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12];
+const SRC   = n => `${ASSET_BASE}UI_${n}.webp`;
+
+/* 原始 PNG 的實際內容尺寸（每張都一樣） */
+const ART_W = 1206, ART_H = 2622;
+
+/* UI_3 原檔比別人大一圈（1230×2646，內容偏移 12,0）。
+   用 CSS 把多出來的陰影推到可視範圍外，原檔不動。 */
+const OUTLIER = {
+  3: { fileW: 1230, fileH: 2646, offX: 12, offY: 0 }
+};
+
+const SEC_PER_SCREEN = 2.1;   /* 一張畫面通過中央所需秒數 —— 調大就更慢 */
+const EASE           = 0.85;  /* 速度起伏幅度：0 = 等速，越大則中央停留感越強 */
+const GAP_RATIO      = 0.07;  /* 畫面之間的間隙，相對於螢幕寬 */
+const FRAME_STROKE   = 0.030; /* 中央黑框的描邊粗細，相對於螢幕寬 */
+
+/* 由「離中央幾個間距」決定縮放與明度 */
+const scaleAt   = d => 0.88 + 0.12 * Math.exp(-(d * d) / 2.2);
+const opacityAt = d => 0.78 + 0.22 * Math.exp(-(d * d) / 2.5);
+
+/* ============================================================
+   建立軌道
+   ============================================================ */
+const stage = document.getElementById('stage');
+let cards = [], N = 0, pitch = 0, lap = 0, screenW = 0;
+
+function buildCard(n){
+  const card = document.createElement('div');
+  card.className = 'card';
+
+  const frame = document.createElement('div');
+  frame.className = 'frame';
+
+  const screen = document.createElement('div');
+  screen.className = 'screen';
+
+  const img = document.createElement('img');
+  img.src = SRC(n);
+  img.alt = '';
+  img.draggable = false;
+
+  screen.appendChild(img);
+  frame.appendChild(screen);
+  card.appendChild(frame);
+  stage.appendChild(card);
+
+  return { el: card, frame, screen, img, n };
+}
+
+/* 依視窗大小決定尺寸；重覆整組素材直到寬度足以填滿畫面 —— 這也是無縫的一部分 */
+function layout(){
+  const vw = innerWidth, vh = innerHeight;
+
+  const screenH = Math.max(300, Math.min(vh * 0.80, 900));
+  screenW = screenH * (ART_W / ART_H);
+
+  const bezel  = Math.round(screenW * 0.032);
+  const radOut = Math.round(screenW * 0.125);
+  const radIn  = Math.max(0, radOut - bezel);
+
+  pitch = Math.round(screenW + bezel * 2 + screenW * GAP_RATIO);
+
+  /* 一圈至少要比視窗寬兩個間距，畫面才不會在邊緣憑空出現 */
+  const reps = Math.max(1, Math.ceil((vw + pitch * 4) / (pitch * ORDER.length)));
+  const need = ORDER.length * reps;
+
+  if(cards.length !== need){
+    stage.innerHTML = '';
+    cards = [];
+    for(let i = 0; i < need; i++) cards.push(buildCard(ORDER[i % ORDER.length]));
+  }
+  N   = cards.length;
+  lap = N * pitch;
+
+  for(const c of cards){
+    c.el.style.width  = (screenW + bezel * 2) + 'px';
+    c.el.style.height = (screenH + bezel * 2) + 'px';
+    c.frame.style.borderRadius = radOut + 'px';
+    c.frame.style.padding = bezel + 'px';
+    c.screen.style.width  = screenW + 'px';
+    c.screen.style.height = screenH + 'px';
+    c.screen.style.borderRadius = radIn + 'px';
+
+    /* 尺寸異常的那張，用 CSS 把多餘的邊推出可視範圍 */
+    const o = OUTLIER[c.n];
+    if(o){
+      c.img.style.setProperty('--iw', (100 * o.fileW / ART_W) + '%');
+      c.img.style.setProperty('--ih', (100 * o.fileH / ART_H) + '%');
+      c.img.style.setProperty('--ix', (-100 * o.offX / ART_W) + '%');
+      c.img.style.setProperty('--iy', (-100 * o.offY / ART_H) + '%');
+    }
+  }
+
+  /* 中央黑框：描邊剛好貼在「卡片放到 100% 時」的外緣 */
+  const stroke = Math.max(5, Math.round(screenW * FRAME_STROKE));
+  const pf = document.getElementById('phoneframe');
+  pf.style.borderWidth  = stroke + 'px';
+  pf.style.borderRadius = (radOut + stroke) + 'px';
+  pf.style.width        = (screenW + bezel * 2 + stroke * 2) + 'px';
+  pf.style.height       = (screenH + bezel * 2 + stroke * 2) + 'px';
+
+  const isl = pf.querySelector('.island');
+  isl.style.width  = Math.round(screenW * 0.30) + 'px';
+  isl.style.height = Math.round(screenW * 0.082) + 'px';
+  isl.style.top    = Math.round(bezel + screenW * 0.030) + 'px';
+}
+
+/* ============================================================
+   動畫
+   ============================================================ */
+let t0 = null, tPaused = 0, paused = false;
+
+/* 位移：等速前進 + 一個週期恰為 P 的正弦緩動 */
+function offsetAt(t){
+  const P = SEC_PER_SCREEN;
+  const v = pitch / P;
+  const A = EASE * v * P / (2 * Math.PI);
+  return v * t - A * Math.sin(2 * Math.PI * t / P);
+}
+
+function frame(now){
+  requestAnimationFrame(frame);
+  if(t0 === null) t0 = now;
+  if(paused){ t0 = now - tPaused * 1000; }
+  const t = paused ? tPaused : (now - t0) / 1000;
+  tPaused = t;
+
+  const off  = offsetAt(t);
+  const half = lap / 2;
+  const edge = innerWidth / 2 + pitch;
+
+  for(let i = 0; i < N; i++){
+    const c = cards[i];
+    /* 取模 —— 沒有起點也沒有終點，所以沒有接點 */
+    let x = (i * pitch - off) % lap;
+    x = ((x + half) % lap + lap) % lap - half;
+
+    if(Math.abs(x) > edge){
+      if(c.el.style.visibility !== 'hidden') c.el.style.visibility = 'hidden';
+      continue;
+    }
+    if(c.el.style.visibility === 'hidden') c.el.style.visibility = '';
+
+    const d = Math.abs(x) / pitch;
+    const s = scaleAt(d);
+
+    c.el.style.transform = `translate(-50%,-50%) translate3d(${x.toFixed(2)}px,0,0) scale(${s.toFixed(4)})`;
+    c.el.style.opacity   = opacityAt(d).toFixed(3);
+    c.el.style.zIndex    = Math.round(1000 - d * 100);
+    c.frame.style.boxShadow =
+      `0 ${(18 + 34 * (1 - d / 3)).toFixed(0)}px ${(40 + 60 * (1 - d / 3)).toFixed(0)}px ` +
+      `-${(14 + 8 * (1 - d / 3)).toFixed(0)}px rgba(28,22,20,${(0.10 + 0.26 * Math.exp(-d * d / 2)).toFixed(3)})`;
+  }
+}
+
+/* 視窗改變時保留當下時間，避免重排造成跳動 */
+let rt;
+addEventListener('resize', ()=>{
+  clearTimeout(rt);
+  rt = setTimeout(()=>{
+    const keep = tPaused;
+    layout();
+    t0 = performance.now() - keep * 1000;
+  }, 120);
+});
+
+/* 空白鍵暫停，方便截圖 */
+addEventListener('keydown', e => { if(e.code === 'Space'){ e.preventDefault(); paused = !paused; if(!paused) t0 = performance.now() - tPaused * 1000; } });
+
+/* 背景色可用網址覆寫： ?bg=%23ffffff */
+const bg = new URLSearchParams(location.search).get('bg');
+if(bg) document.body.style.background = bg;
+
+layout();
+
+/* ?t=<秒> 會凍結在指定時刻的靜止畫面。
+   用來截圖，也用來驗證循環：t 與 t + 一圈秒數 應該長得一模一樣。 */
+const frozen = new URLSearchParams(location.search).get('t');
+
+/* 等圖片解碼完再開跑，避免第一圈出現空白卡 */
+Promise.all(cards.map(c => c.img.decode().catch(()=>{}))).then(()=>{
+  if(frozen !== null){
+    paused = true; tPaused = parseFloat(frozen) || 0;
+    t0 = performance.now() - tPaused * 1000;
+    requestAnimationFrame(frame);
+  } else {
+    requestAnimationFrame(frame);
+  }
+});
+
+/* 一圈的秒數，方便外部驗證 */
+window.LAP_SECONDS = ORDER.length * SEC_PER_SCREEN;
+
+/* 外部可以直接跳到任一時刻（錄影、截圖、驗證循環用） */
+window.__seek = sec => {
+  paused = true; tPaused = sec;
+  t0 = performance.now() - sec * 1000;
+};
+</script>
+</body>
+</html>

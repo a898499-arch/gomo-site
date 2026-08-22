@@ -32,13 +32,16 @@ export default function RootLayout({ children }) {
             不影響全站的 Poppins。Lora/DM Sans 同理是 Sui-Sui 作品詳情頁 Design System —
             Typography 區塊要展示的字體本身（比照 WanderBuddy 的 Raleway/Jost 處理方式），
             頁面其餘真實內容仍用全站的 Poppins。
-            2026-08-20：Lora 加上 italic/500、DM Sans 補上 500/700——All UI Animation
-            區塊（onboardingDemo.css）需要這幾個字重/字style，原本的範圍沒有涵蓋，
-            同樣道理不用 next/font，跟 Typography 展示區塊共用同一條 link。 */}
+            2026-08-22：All UI Animation 區塊改成 iframe 嵌入原始 HTML（見
+            OnboardingDemo.jsx），那個 HTML 自己的 <head> 會載入它需要的
+            Lora/DM Sans 字重，不需要外層頁面重複載入——之前為它額外加的
+            italic/500/700 字重（2026-08-20 那輪）已經拿掉，只保留
+            Typography 展示區塊實際會用到的 Lora 400/600、DM Sans
+            200..400。 */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;800&family=Jost:wght@300;400;500;700&family=Inter:wght@400;600&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:opsz,wght@9..40,200;9..40,400;9..40,500;9..40,700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;800&family=Jost:wght@300;400;500;700&family=Inter:wght@400;600&family=Lora:wght@400;600&family=DM+Sans:opsz,wght@9..40,200..400&display=swap"
           rel="stylesheet"
         />
       </head>
