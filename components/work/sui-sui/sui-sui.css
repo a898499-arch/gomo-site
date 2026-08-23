@@ -645,10 +645,18 @@
   text-align: center;
 }
 
+/* 2026-08-22 第五輪：get_design_context 重讀 545:112 確認 gap（eyebrow→
+   標題群 6px、標題→說明 16px）本來就跟這裡的數值一致——視覺看起來太開
+   其實是「line-height 沒設」造成的，瀏覽器預設的 normal 比 Figma 的
+   leading-[40.4px] 高出不少，多出來的空白會疊加在 gap 上面。改成
+   Figma 實際的 leading 值（40.4px），换算成跟字級無關的比例
+   （40.4/24=1.6833、40.4/36=1.1222）方便 title 用 clamp() 縮放字級時
+   還能維持同一個視覺比例。 */
 .ss-fn1-eyebrow {
   margin: 0 0 6px;
   font-weight: 600;
   font-size: 24px;
+  line-height: 1.6833;
   text-transform: uppercase;
   color: #b8001f;
 }
@@ -665,6 +673,7 @@
   margin: 0;
   font-weight: 600;
   font-size: clamp(24px, 2.5vw, 36px);
+  line-height: 1.1222;
   color: #000;
 }
 
@@ -675,11 +684,11 @@
   color: #000;
 }
 
-/* 手機固定 676px 高（你的指示，不再跟著容器寬度縮放）；54px 是手機頂端
-   跟上面說明文字的距離。 */
+/* 手機固定 676px 高（你的指示，不再跟著容器寬度縮放）；24px 是說明段落
+   底部跟手機頂端的距離（原本 54px，改小）。 */
 .ss-fn1-phone-wrap {
   position: relative;
-  margin-top: 54px;
+  margin-top: 24px;
   height: 676px;
   display: flex;
   justify-content: center;
@@ -698,11 +707,22 @@
   container-type: inline-size;
 }
 
-.ss-fn2-bg {
+/* 2026-08-23 第二輪：img 是「置換元素」，CSS 規範規定它在 position:
+   absolute 底下只設 left+right（不設 width）時不會像一般 div 那樣自動撐滿
+   剩餘空間，而是退回用自己的原生尺寸——這正是背景圖延伸不到視窗右緣的
+   原因。改成外層包一個普通 div（.ss-fn2-bg-wrap）吃 left/right/height，
+   img 本身用 width:100%;height:100%;object-fit:cover 填滿那個 div，繞開
+   置換元素的定位規則。 */
+.ss-fn2-bg-wrap {
   position: absolute;
-  display: block;
-  object-fit: cover;
   pointer-events: none;
+}
+
+.ss-fn2-bg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* 2026-08-17：左對齊（Figma 原稿是靠左，不是置中）。eyebrow→標題 6px、
@@ -744,11 +764,26 @@
   color: #000;
 }
 
-/* 手機截圖本身已經含邊框/圓角，不再另外加 CSS 圓角或陰影
-   （Figma 原稿的 <img> 也是直接貼圖，沒有額外樣式）。 */
+/* 2026-08-23 第二輪：手機+badge 包成一組（.ss-fn2-group），group 本身
+   用 Figma 座標定位（原本手機自己的 left/top/width/height 搬到這裡），
+   手機圖片變成 inset:0 填滿 group，badge 改成相對 group 的偏移量——見
+   Function2.jsx 檔頭「【3】」的說明。group 同時是動畫套用的對象，
+   badge 是它的子節點，動畫會自動一起套用，不用分開處理。 */
+.ss-fn2-group {
+  position: absolute;
+}
+
+/* object-fit:cover 避免素材原生比例跟框對不上時被硬拉伸變形（見
+   Function2.jsx 檔頭「【1】」——手機3的素材 0.5088 跟框 0.5765 對不上，
+   之前沒設 object-fit 導致變形）。手機 1/2 的素材本來就跟框比例幾乎一
+   致，這裡加上是無操作，不影響原本畫面。 */
 .ss-fn2-phone {
   position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   display: block;
+  object-fit: cover;
   pointer-events: none;
 }
 

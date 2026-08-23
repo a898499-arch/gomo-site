@@ -153,6 +153,10 @@ body{
   border-radius:999px;padding:8px 10px;backdrop-filter:blur(12px);
   transition:opacity .3s ease;
 }
+/* 效能修正（已批准，純效能、不影響動畫）：這個控制列嵌入網站後一律被
+   外層裁掉、使用者永遠看不到，但 backdrop-filter:blur 還是每一幀都在
+   合成，很貴。直接 display:none 讓瀏覽器整個跳過它的繪製。 */
+.controls{display:none}
 .controls.hidden{opacity:0;pointer-events:none}
 .controls button{
   background:transparent;border:0;color:rgba(255,255,255,.82);
@@ -967,6 +971,15 @@ addEventListener('keydown', e => {
   }
   if(k === 'r') restart();
   if(e.code === 'Space'){ e.preventDefault(); setPlay(!paused); }
+});
+
+/* 效能修正（已批准，方案 A）：外層頁面用 GSAP ScrollTrigger 偵測這個
+   iframe 是否還在視窗附近，捲出去就 postMessage('pause')，捲回來就
+   postMessage('play')——只是加一個新的觸發入口，呼叫的是既有的
+   setPlay()，時序/緩動/座標完全沒動。 */
+addEventListener('message', e => {
+  if(e.data === 'pause') setPlay(true);
+  if(e.data === 'play') setPlay(false);
 });
 
 /* 字體載入完再開跑，避免第一輪版面跳動 */

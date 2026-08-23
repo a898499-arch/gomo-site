@@ -129,6 +129,7 @@ function buildCard(n){
   img.src = SRC(n);
   img.alt = '';
   img.draggable = false;
+  img.decoding = 'async'; /* 效能修正（已批准）：跟已經呼叫的 img.decode() 搭配，解碼不擋主執行緒 */
 
   screen.appendChild(img);
   frame.appendChild(screen);
@@ -226,11 +227,15 @@ function frame(now){
     let x = (i * pitch - off) % lap;
     x = ((x + half) % lap + lap) % lap - half;
 
+    /* 效能修正（已批准）：改用 display:none 而不是 visibility:hidden——
+       視窗外的卡片真的從渲染樹拿掉，瀏覽器才會跳過它們的畫圖跟圖片解碼；
+       這裡的判斷邊界（edge）完全沒動，只是換一種「藏起來」的方式，不影響
+       無縫循環的接縫。 */
     if(Math.abs(x) > edge){
-      if(c.el.style.visibility !== 'hidden') c.el.style.visibility = 'hidden';
+      if(c.el.style.display !== 'none') c.el.style.display = 'none';
       continue;
     }
-    if(c.el.style.visibility === 'hidden') c.el.style.visibility = '';
+    if(c.el.style.display === 'none') c.el.style.display = '';
 
     const d = Math.abs(x) / pitch;
     const s = scaleAt(d);
@@ -255,8 +260,25 @@ addEventListener('resize', ()=>{
   }, 120);
 });
 
+/* 暫停/恢復——抽成一個函式，跟空白鍵共用同一套邏輯（狀態機完全沒變，
+   只是原本內嵌在 keydown 裡的兩行搬出來，讓下面新增的 message 監聽器
+   也能呼叫同一段邏輯，不用另外發明一套）。 */
+function setPaused(p){
+  paused = p;
+  if(!paused) t0 = performance.now() - tPaused * 1000;
+}
+
 /* 空白鍵暫停，方便截圖 */
-addEventListener('keydown', e => { if(e.code === 'Space'){ e.preventDefault(); paused = !paused; if(!paused) t0 = performance.now() - tPaused * 1000; } });
+addEventListener('keydown', e => { if(e.code === 'Space'){ e.preventDefault(); setPaused(!paused); } });
+
+/* 效能修正（已批准，方案 A）：外層頁面用 GSAP ScrollTrigger 偵測這個
+   iframe 是否還在視窗附近，捲出去就 postMessage('pause')，捲回來就
+   postMessage('play')——只是加一個新的觸發入口，呼叫的是上面同一個
+   setPaused()，時序/緩動/座標完全沒動。 */
+addEventListener('message', e => {
+  if(e.data === 'pause') setPaused(true);
+  if(e.data === 'play') setPaused(false);
+});
 
 /* 背景色可用網址覆寫： ?bg=%23ffffff */
 const bg = new URLSearchParams(location.search).get('bg');

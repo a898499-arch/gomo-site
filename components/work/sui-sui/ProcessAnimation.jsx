@@ -1,8 +1,19 @@
 'use client';
 
+import { useLayoutEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
+
 // node 545:532（1450×900，「Process Animation」）。跟 OnboardingDemo.jsx
 // 完全比照同一個做法：iframe 直接載入原始 HTML（public/work/sui-sui/
-// ui-carousel/carousel.html），內部 CSS/JS/參數一律不改。
+// ui-carousel/carousel.html），動畫邏輯一律不改——唯二例外是效能專用、
+// 你明確批准的兩處：離螢幕的卡片改用 display:none（原本是
+// visibility:hidden），以及新增一個 message 監聽器呼叫既有的
+// setPaused()，兩者都不影響時序/緩動/座標，見該檔案內的註解）。
 //
 // 跟 OnboardingDemo 不同：這支輪播沒有固定的原生像素尺寸——carousel.html
 // 自己用 innerWidth/innerHeight 算版面（見它的 layout()），還掛了
@@ -26,11 +37,41 @@
 // 視窗寬度，不需要另外用 100vw + 負 margin 那種技巧，也不會動到上下相鄰
 // 區塊（它們各自還是包在自己的 .page-container／.ss-section-inner 裡，
 // 不受影響）。
+//
+// 2026-08-22 第五輪：效能修正（已批准，方案 A）——carousel.html 自己的
+// frame() 迴圈完全沒有暫停檢查，捲出畫面外還在跑。這裡只新增一個「偵測
+// 進出視窗、postMessage 通知」的觸發器，實際暫停/播放邏輯留在 iframe
+// 內部處理，這裡完全不碰時序。
 export default function ProcessAnimation() {
+  const frameRef = useRef(null);
+  const iframeRef = useRef(null);
+
+  useLayoutEffect(() => {
+    const frame = frameRef.current;
+    const iframe = iframeRef.current;
+    if (!frame || !iframe) return undefined;
+
+    function send(msg) {
+      iframe.contentWindow?.postMessage(msg, '*');
+    }
+
+    const st = ScrollTrigger.create({
+      trigger: frame,
+      start: 'top bottom',
+      end: 'bottom top',
+      onEnter: () => send('play'),
+      onEnterBack: () => send('play'),
+      onLeave: () => send('pause'),
+      onLeaveBack: () => send('pause'),
+    });
+    return () => st.kill();
+  }, []);
+
   return (
     <section className="ss-section">
-      <div className="ss-pa-frame" style={{ aspectRatio: '1450 / 900' }}>
+      <div ref={frameRef} className="ss-pa-frame" style={{ aspectRatio: '1450 / 900' }}>
         <iframe
+          ref={iframeRef}
           src="/work/sui-sui/ui-carousel/carousel.html"
           title="Sui-Sui UI carousel"
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block', border: 0 }}
