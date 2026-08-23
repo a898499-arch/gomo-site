@@ -52,6 +52,21 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* 2026-08-23：全站共用的水平捲軸防呆——某些區塊（例如 Sui-Sui 頁 Function 2
+   的出血合成圖）故意讓內容超出視窗右緣，不希望被裁掉，也不希望多一條
+   可以捲到那塊內容的水平捲軸。overflow-x:clip 只擋橫向捲動，不像
+   overflow:hidden 會建立新的 scroll container、影響裡面的 position:sticky
+   子元素，是專門處理這種「视觉上出血但不给捲軸」情境的做法。個別區塊
+   自己不要再各自加 overflow-x:hidden。
+   實測發現只設在 body 上沒用——真正的頁面捲動是 html（root scrolling
+   element）在管，body 的 overflow 理論上該往上傳播到 viewport，但實測
+   （window.scrollTo 之後 scrollX 真的變成非 0）這個傳播沒有發生，所以
+   html 也要明講設一次，不能只靠傳播。 */
+html,
+body {
+  overflow-x: clip;
+}
+
 ::selection {
   background: var(--accent);
   color: var(--bg);

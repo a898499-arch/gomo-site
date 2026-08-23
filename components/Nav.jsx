@@ -40,9 +40,23 @@ export default function Nav() {
     let lastScrollY = lenis.scroll;
     let accumDelta = 0;
 
+    // 2026-08-23：隱藏狀態原本用 y:'-100%'，只抵消掉 nav 自己的高度，沒有算
+    // 進 CSS 的 top:var(--nav-top-gap)（10px）——nav 沒有被 top 位移出去，
+    // 隱藏後底部永遠會留一條 10px 的殘影卡在畫面最上緣。改成跑時量
+    // nav.offsetHeight + 目前生效的 --nav-top-gap（用 getComputedStyle 讀
+    // nav 的 top 值，跟 CSS 變數保持同一個來源，不要自己猜一個數字），
+    // 隱藏時位移「高度＋間距」，才會完全移出畫面（navRect.bottom<=0）。
+    // 用函式而不是掛載時算一次存起來，是因為 nav 高度會隨斷點
+    // （900px/更小）用 media query 改變，每次真的要隱藏/顯示時才重新量，
+    // 才不會在跨斷點 resize 後卡著舊尺寸算出來的偏移量。
+    function getHiddenY() {
+      const gap = parseFloat(getComputedStyle(nav).top) || 0;
+      return -(nav.offsetHeight + gap);
+    }
+
     // 進場基準：一般頁面預設可見；startHidden 的頁面一進來就直接是隱藏狀態
     // （用 gsap.set 瞬間套用，不是動畫過去的）。
-    gsap.set(nav, { y: navHidden ? '-100%' : 0 });
+    gsap.set(nav, { y: navHidden ? getHiddenY() : 0 });
 
     function showNav() {
       if (!navHidden) return;
@@ -55,7 +69,7 @@ export default function Nav() {
       if (navHidden) return;
       navHidden = true;
       nav.style.willChange = 'transform';
-      gsap.to(nav, { y: '-100%', duration: 0.3, ease: mainEase, onComplete: () => { nav.style.willChange = ''; } });
+      gsap.to(nav, { y: getHiddenY(), duration: 0.3, ease: mainEase, onComplete: () => { nav.style.willChange = ''; } });
     }
 
     function onScroll({ scroll }) {

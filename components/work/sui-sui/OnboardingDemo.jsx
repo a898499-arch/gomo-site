@@ -46,36 +46,64 @@ const MARGIN_BOTTOM = 2;
 const IFRAME_NATIVE_W = PHONE_NATIVE_W + MARGIN_X * 2; // 426
 const STAGE_NATIVE_H = 1031; // > demo 自己 @media(max-height:960px) 的門檻，避免誤觸發內部縮小
 const TARGET_PHONE_HEIGHT = 676; // 固定目標高度（含黑色外框），不分斷點
-const SCALE = TARGET_PHONE_HEIGHT / PHONE_NATIVE_H; // 常數，不再跑時量測
+export const SCALE = TARGET_PHONE_HEIGHT / PHONE_NATIVE_H; // 常數，不再跑時量測——export 給 Function1.jsx 的除錯讀數用，不用另外猜/重算一次
 
 export default function OnboardingDemo() {
   const cropRef = useRef(null);
   const iframeRef = useRef(null);
 
-  // 垂直對齊仍然要用「掛載時 + 每次捲動後重新量測、動態校正 top」的
-  // 做法——這是另一個獨立的問題（跟上面的 scale 反覆跑掉無關）：實測
-  // 發現只要對這個 iframe 套用 CSS transform，捲動之後瀏覽器算出來的
-  // 實際渲染位置會固定偏移一段距離，不管 transform-origin 設什麼都
-  // 一樣（在全新分頁、乾淨重新整理後一樣重現，不是分頁殘留或延伸套件
-  // 雜訊）。這裡的「量測」只用來校正這個偏移量，不影響 scale/尺寸，
-  // 所以不會有跟上面同一種「熱更新期間量到過渡態」的風險——就算量到
-  // 暫時不準的值，下一次 scroll 事件就會立刻重新校正，不會卡住。
+  // 2026-08-23 第五輪：垂直對齊原本假設「.phone 在 iframe 內部的原生 top
+  // ≈0」，把這個假設直接寫死成 MARGIN_TOP=0 去算裁切框位置。這個假設在
+  // 上一輪就已經不成立了——幫 .controls 加 display:none（效能修正）之後，
+  // .stage 的 flex 內容高度從 1030.5（含 controls）掉到 936（只剩
+  // phone+gap+caption），但 iframe 原生高度 STAGE_NATIVE_H 沒有跟著改，
+  // body 的 align-items:center 用剩下的空間把變矮的 .stage 重新置中，
+  // .phone 的原生 top 因此從 ~0 變成 (1031-936)/2=47.5，而我的裁切框
+  // 還是照「top≈0」在裁，手機因此上下各被裁掉一截（你發現的那個 bug，
+  // 實測結果見附帶的回報）。
+  //
+  // 修法：不要再假設/寫死 .phone 的原生 top，改成「掛載後直接讀
+  // iframe.contentDocument 量真正的 .phone 原生 top」，把這個量到的值
+  // 餵進對齊公式。這樣以後不管 demo 內部版面再怎麼變（controls、caption
+  // 有沒有顯示、gap 改多少……），對齊永遠用「當下實際量到的位置」校正，
+  // 不會再卡在一個過時的假設值上。
   useLayoutEffect(() => {
     const iframe = iframeRef.current;
     const crop = cropRef.current;
     if (!iframe || !crop) return undefined;
 
+    let phoneNativeTop = 0; // 量到之前的暫時預設值，量到後會被覆蓋並重新 align()
+
     function align() {
       iframe.style.top = '0px';
       const cropRect = crop.getBoundingClientRect();
       const ifRect = iframe.getBoundingClientRect();
-      const desiredTop = cropRect.top + MARGIN_TOP * SCALE;
+      // 目標：讓 .phone 縮放後的位置精確落在「裁切框頂端 + MARGIN_TOP 緩衝」，
+      // 不是讓 iframe 自己的 y=0 落在那裡——兩者只有在 phoneNativeTop=0 時
+      // 才等價，不能再假設一定相等。
+      const desiredTop = cropRect.top + (MARGIN_TOP - phoneNativeTop) * SCALE;
       iframe.style.top = `${desiredTop - ifRect.top}px`;
     }
 
-    align();
+    function measurePhoneNativeTop() {
+      try {
+        const phone = iframe.contentDocument?.querySelector('.phone');
+        if (phone) {
+          phoneNativeTop = phone.getBoundingClientRect().top;
+        }
+      } catch {
+        // 理論上同源一定讀得到，這裡只是防禦性寫法，讀不到就維持 0
+      }
+      align();
+    }
+
+    measurePhoneNativeTop();
+    iframe.addEventListener('load', measurePhoneNativeTop);
     window.addEventListener('scroll', align, { passive: true });
-    return () => window.removeEventListener('scroll', align);
+    return () => {
+      iframe.removeEventListener('load', measurePhoneNativeTop);
+      window.removeEventListener('scroll', align);
+    };
   }, []);
 
   // 效能修正（已批准，方案 A）：iframe 內部一直跑自己的 RAF 迴圈，不管

@@ -694,43 +694,30 @@
   justify-content: center;
 }
 
-/* ---------- Function 2（node 545:510，1507×961） ---------- */
-.ss-fn2-frame {
+/* ---------- Function 2（node 545:510，見 Function2.jsx 檔頭完整說明）
+   2026-08-23 第五輪：文字對不齊導覽列 logo 的原因——.ss-fn2-content 原本
+   自己用 margin-left:var(--page-gutter) 算左緣位置，但導覽列的 logo
+   實際位置是「.page-container 的內容區左緣」，兩者只有在視窗寬度
+   ≤1440px 時數值才會剛好一樣；一旦視窗超過 1440px（例如你自己的
+   1710px 螢幕），.page-container 的 max-width:1440px + margin-inline:
+   auto 會讓它整個置中、左右各多出 (視窗寬-1440)/2 的外距，這段外距
+   margin-left:var(--page-gutter) 完全沒算到，所以文字比 logo 更靠左。
+   改成直接把 .ss-fn2-content 包在 .page-container 裡面（複用導覽列自己
+   的 class，不是另外算數值），兩者的左緣定義保證同源，不會再對不齊。
+   .page-container 本身沒有 overflow:hidden，包在裡面的內容一樣能視覺
+   上出血超出它自己的框；水平捲軸統一交給 body 的 overflow-x:clip 處理
+   （見 app/globals.css），不是這裡。 ---------- */
+.ss-fn2-content {
   position: relative;
-  width: 100%;
-  /* 2026-08-17：文字字級改用 cqw（見下面 eyebrow/title/desc），跟著這個
-     框自己的寬度等比縮放，不要用 vw——這個框的寬度是 page-container
-     的 100%（比 Figma 原生 1507px 框窄，約 90%），如果字級繼續用 vw
-     算（綁定整個 viewport 寬度，不是這個框的寬度），文字會比框自己
-     縮小的比例還大，导致文字區塊比 Figma 配置的高度還高，往下溢出
-     蓋到下面的 badge。 */
-  container-type: inline-size;
+  transform-origin: 0 0; /* 從左上角縮放，不要用預設的正中心 */
 }
 
-/* 2026-08-23 第二輪：img 是「置換元素」，CSS 規範規定它在 position:
-   absolute 底下只設 left+right（不設 width）時不會像一般 div 那樣自動撐滿
-   剩餘空間，而是退回用自己的原生尺寸——這正是背景圖延伸不到視窗右緣的
-   原因。改成外層包一個普通 div（.ss-fn2-bg-wrap）吃 left/right/height，
-   img 本身用 width:100%;height:100%;object-fit:cover 填滿那個 div，繞開
-   置換元素的定位規則。 */
-.ss-fn2-bg-wrap {
-  position: absolute;
-  pointer-events: none;
-}
-
-.ss-fn2-bg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* 2026-08-17：左對齊（Figma 原稿是靠左，不是置中）。eyebrow→標題 6px、
-   標題→說明 16px，兩段不同間距，所以不用單一 flex gap，改用逐一
-   margin-top。 */
+/* 左對齊（Figma 原稿是靠左，不是置中）。eyebrow→標題 6px、標題→說明
+   16px，兩段不同間距，所以不用單一 flex gap，改用逐一 margin-top。
+   字級直接用 Figma 原生 px（24/36/20），整組 transform:scale() 時
+   會自動跟著縮小，不需要再疊一層 cqw/clamp。 */
 .ss-fn2-text {
   position: absolute;
-  left: 0;
   text-align: left;
   display: flex;
   flex-direction: column;
@@ -740,7 +727,8 @@
 .ss-fn2-eyebrow {
   margin: 0;
   font-weight: 600;
-  font-size: 1.5926cqw;
+  font-size: 24px;
+  line-height: 40.4px;
   text-transform: uppercase;
   color: #b8001f;
 }
@@ -748,35 +736,30 @@
 .ss-fn2-title {
   margin: 6px 0 0;
   font-weight: 600;
-  font-size: 2.3888cqw;
+  font-size: 36px;
+  line-height: 40.4px;
   color: #000;
 }
 
 .ss-fn2-desc {
   margin: 16px 0 0;
   width: 100%;
-  font-size: 1.3271cqw;
-  /* 2026-08-17：瀏覽器算出來的 line-height:normal 比 Figma 的
-     leading-normal 略高，3 行文字疊加下來會多出約 10px，剛好頂到下面
-     的 badge。改用明確的 1.2，跟 Figma 的字重/字級更貼近，實測不再
-     重疊。 */
+  font-size: 20px;
   line-height: 1.2;
   color: #000;
 }
 
-/* 2026-08-23 第二輪：手機+badge 包成一組（.ss-fn2-group），group 本身
-   用 Figma 座標定位（原本手機自己的 left/top/width/height 搬到這裡），
-   手機圖片變成 inset:0 填滿 group，badge 改成相對 group 的偏移量——見
-   Function2.jsx 檔頭「【3】」的說明。group 同時是動畫套用的對象，
-   badge 是它的子節點，動畫會自動一起套用，不用分開處理。 */
+/* 手機+badge 包成一組（.ss-fn2-group），group 本身用 Figma 座標定位，
+   手機圖片變成 inset:0 填滿 group，badge 改成相對 group 的絕對 px
+   偏移量——見 Function2.jsx 檔頭「PHONES」表。group 同時是動畫套用的
+   對象，badge 是它的子節點，動畫會自動一起套用，不用分開處理。 */
 .ss-fn2-group {
   position: absolute;
 }
 
-/* object-fit:cover 避免素材原生比例跟框對不上時被硬拉伸變形（見
-   Function2.jsx 檔頭「【1】」——手機3的素材 0.5088 跟框 0.5765 對不上，
-   之前沒設 object-fit 導致變形）。手機 1/2 的素材本來就跟框比例幾乎一
-   致，這裡加上是無操作，不影響原本畫面。 */
+/* object-fit:cover 避免素材原生比例跟框對不上時被硬拉伸變形——手機3的
+   素材原生比例 0.5088 跟框 0.5765 對不上，沒設 object-fit 會被拉伸。
+   手機 1/2 的素材本來就跟框比例幾乎一致，這裡加上是無操作。 */
 .ss-fn2-phone {
   position: absolute;
   inset: 0;
@@ -787,21 +770,18 @@
   pointer-events: none;
 }
 
-/* 2026-08-17：跟文字同一個問題——badge 寬度用 pctW 跟著框縮放，但字級/
-   高度/內距原本是固定 px，在較窄的 1155px 沒有一起縮小，文字就撐爆
-   膠囊、被裁切。改用 cqw 讓字級/高度/內距全部跟著框等比縮放。 */
 .ss-fn2-badge {
   position: absolute;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 2.1235cqw;
+  height: 32px;
   border-radius: 50px;
   background: #cb000f;
   color: #fff;
   text-align: center;
   white-space: nowrap;
-  padding-inline: 0.5308cqw;
+  padding-inline: 8px;
 }
 
 /* ---------- Mockup 1/2/3（各自用 Figma 實際 x 座標定位，不是統一置中；
