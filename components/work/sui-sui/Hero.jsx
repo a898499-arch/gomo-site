@@ -84,41 +84,54 @@ export default function Hero() {
       const logo = root.querySelector('[data-hero-logo]');
       const plate = root.querySelector('[data-logo-part="plate"]');
       const rose = root.querySelector('[data-logo-part="rose"]');
-      const word = root.querySelectorAll('[data-logo-part="wordmark"]');
       const track = trackRef.current;
       const lora = root.querySelector('[data-type-lora]');
       const dm = root.querySelector('[data-type-dm]');
 
-      // ── 2. 中央 logo：紅底方塊 → 白玫瑰 → suisui 字標，無限循環。
+      // ── 2. 中央 logo 循環：
+      //      1) 紅底方塊 ＋ 白玫瑰 同時淡入
+      //      2) suisui 六個字母由左到右逐一淡入
+      //      3) 停一拍
+      //      4) 全部淡出，回到 1，無限循環
       //      只動 opacity，不用 stroke-dashoffset 描邊（那會 repaint）。
-      //      兩個 sui 字標當一組同時處理。
       //
-      //      循環方式（你選的）：整組淡出重來，但淡出／淡入重疊，面板全空
-      //      的時間壓到約 0.15s——不是明顯斷一拍。時間軸長 6.55s，
-      //      repeatDelay 0.15s 就是那個空檔，一輪合計 6.7s。
+      //      ⚠️ 字母不能照 DOM 順序 stagger——每個 sui 群組裡 <path> 的
+      //      DOM 順序是 i, u, s（由右到左），跟視覺順序相反。這裡不把順序
+      //      寫死，改成執行期用 getBoundingClientRect().left 由小到大排序，
+      //      日後換了 SVG 也不會錯。
+      //      （用 getBBox() 驗證過目前的六個字母：群組1 s@0 / u@54.3 /
+      //       i@124.9，群組2 同樣的局部座標再 +157；寬度 54.1 / 70.3 / 25.7
+      //       也佐證了字母身分——i 最窄。）
       //
       //      ⚠️ logo 的淡入原本寫在下面的進場時間軸裡，已經移除——同一個
       //      元素不能兩邊控制。現在進場只負責九個格子，logo 內部由這條
       //      循環時間軸全權處理。
+      const letters = [...root.querySelectorAll('[data-logo-letter]')].sort(
+        (a, b) => a.getBoundingClientRect().left - b.getBoundingClientRect().left
+      );
+
       let logoTl = null;
       if (reduce) {
         // reduced motion：直接顯示完整 logo，不循環
         gsap.set(logo, { opacity: 1 });
-        gsap.set([plate, rose, ...word], { opacity: 1 });
+        gsap.set([plate, rose, ...letters], { opacity: 1 });
       } else {
         gsap.set(logo, { opacity: 1 });
-        gsap.set([plate, rose, ...word], { opacity: 0, willChange: 'opacity' });
+        gsap.set([plate, rose, ...letters], { opacity: 0, willChange: 'opacity' });
 
         // 同步建立（理由同下面字體卡那段：非同步建立會逃出 gsap.context）
         logoTl = gsap
           .timeline({ repeat: -1, repeatDelay: 0.15, paused: true, defaults: { ease: mainEase } })
-          .to(plate, { opacity: 1, duration: 0.5 }, 0)
-          .to(rose, { opacity: 1, duration: 0.5 }, 0.4)
-          .to(word, { opacity: 1, duration: 0.6 }, 0.9)
-          // 停留 4.0s（1.5 → 5.5）
-          .to(word, { opacity: 0, duration: 0.45, ease: outEase }, 5.5)
-          .to(rose, { opacity: 0, duration: 0.45, ease: outEase }, 5.8)
-          .to(plate, { opacity: 0, duration: 0.45, ease: outEase }, 6.1);
+          // 1) 紅底 ＋ 玫瑰 同時
+          .to([plate, rose], { opacity: 1, duration: 0.5 }, 0)
+          // 2) 六個字母由左到右，逐一淡入（0.4 起，每個間隔 0.12）
+          .to(letters, { opacity: 1, duration: 0.34, stagger: 0.12 }, 0.4)
+          // 最後一個字母在 0.4 + 0.12×5 + 0.34 = 1.34 結束
+          // 3) 停一拍：1.34 → 4.84
+          // 4) 全部淡出。用 ease-in（見 outEase 註解），否則面板「看起來
+          //    全空」的時間會被 ease-out 的尾巴拉長一倍。
+          .to([plate, rose, ...letters], { opacity: 0, duration: 0.45, ease: outEase }, 4.84);
+        // 時間軸長 5.29s + repeatDelay 0.15s = 一輪 5.44s
       }
 
       // ── 1. 進場：各格 opacity + translateY 依序 stagger ──
