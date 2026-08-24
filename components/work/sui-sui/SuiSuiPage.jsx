@@ -13,6 +13,7 @@ import Typography from './Typography';
 import ProcessAnimation from './ProcessAnimation';
 import Function1 from './Function1';
 import Function2 from './Function2';
+import Hero from './Hero';
 import Function4 from './Function4';
 import HandWarmUp from '@/components/HandWarmUp/HandWarmUp';
 import MockupFade from './MockupFade';
@@ -43,9 +44,11 @@ export default function SuiSuiPage() {
 
   return (
     <div className="ss-case">
-      {/* y=116～1086，970px 高。沒有專屬 Figma node，純粹是 Nav 底到
-          Logo & Overview 頂的空隙，你指定要用灰色佔位塊擋這一整片。 */}
-      <AnimationPlaceholder label="Hero" height={970} />
+      {/* y=116～1086，970px 高 = 16 + 736 + 218。內容是新檔
+          j4saimg2oJWL5tUkBh5Bww 的 node 2472:1023「Frame 50」（1064×736）。
+          舊註解說「沒有專屬 Figma node」是對舊檔 web-ui_clean 而言，新檔
+          有這一區，見 Hero.jsx 檔頭。 */}
+      <Hero />
 
       {/* y=1086 */}
       <LogoOverview />

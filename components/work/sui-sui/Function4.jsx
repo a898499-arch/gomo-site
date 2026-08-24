@@ -34,17 +34,27 @@ export default function Function4() {
       </div>
 
       {/* 依規格書 §3.5：lazy load、提供 srcset、WebP、有意義的 alt。
-          原始素材 Shot.png 是 4800×3600／16.2MB，不能直接上線；壓縮時先把
-          alpha ≤10 的抖動雜訊歸零（508 萬個像素，占畫布 29%，肉眼不可見卻
-          吃掉大半編碼預算），同尺寸同畫質從 1860KB 降到 683KB。
-          ⚠️ §3.5 另有「解碼後寬度上限 1600px」，但這張在 1440 視窗下的顯示
-          寬度就是 1622px（Figma 2450:1018 的原始尺寸），2x 必然超過；已回報，
-          等你裁示。srcset 讓非 Retina 裝置只會下載 198KB 的那張。 */}
+          來源 public/work/sui-sui/Shot.png（3200×2400／8.2MB，未進版控，
+          見 .gitignore）。
+
+          ⚠️⚠️ 壓縮時「絕對不要」對 alpha 通道做任何前處理。
+          2026-08-24 我曾把 alpha ≤10 的像素歸零，當成抖動雜訊砍掉，檔案
+          確實從 1860KB 降到 683KB——但那些不是雜訊，是陰影最外圈的柔邊。
+          結果 alpha 直方圖在 1–60 區間出現 19 個像素數為 0 的值
+          （1,5,7,11,15,18,21,24,28,31,34,37,39,44,46,50,53,56,58），
+          柔和漸層被量化成階梯，陰影糊成一坨。
+          正確做法（現行）：不做任何 alpha 前處理，webp 的 alphaQuality:100
+          （alpha 無損），RGB quality:85。驗收方式是實跑 alpha 直方圖，
+          確認 1–60 區間沒有任何一個值的像素數是 0。
+
+          尺寸：顯示寬度是 Figma 的 80%（1622 × 0.8 = 1297.6px），所以
+          2x = 2595px，取 2400w（1.42MB，在 1.5MB 預算內）、1x = 1298w。
+          width/height 保留 1622×1217 只作為長寬比提示，實際尺寸由 CSS 決定。 */}
       <img
         className="ss-fn4-shot"
         src="/work/sui-sui/shot.webp"
-        srcSet="/work/sui-sui/shot.webp 1622w, /work/sui-sui/shot@2x.webp 3244w"
-        sizes="min(112.639vw, 1622px)"
+        srcSet="/work/sui-sui/shot.webp 1298w, /work/sui-sui/shot@2x.webp 2400w"
+        sizes="min(90.1112vw, 1297.6px)"
         width={1622}
         height={1217}
         loading="lazy"

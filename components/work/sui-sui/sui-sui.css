@@ -723,15 +723,27 @@
 
 .ss-fn4-shot {
   display: block;
-  width: min(112.639vw, 1622px);
+  width: min(90.1112vw, 1297.6px);
   height: auto;
   max-width: none;
-  /* 圖比容器寬，margin-inline:auto 會被解析成 0（規範如此），整張會貼左緣，
-     所以左邊距要自己算：容器中線 - 圖的半寬 + Figma 的 1px 偏移
-     （2450:1018 是 left:calc(50%+1px)，不是正中央）。811 = 1622/2。 */
-  margin-inline: calc(50% - min(56.3195vw, 811px) + 1px) 0;
-  margin-top: max(-13.7361vw, -197.8px);
-  margin-bottom: max(-6.2778vw, -90.4px);
+  /* 2026-08-24：顯示尺寸縮到 Figma 的 80%（你的指示）。
+     1622 × 0.8 = 1297.6px，112.639vw × 0.8 = 90.1112vw。
+     縮完之後圖比視窗窄了（90.11vw < 100vw），不再出血，左邊距因此變正值。
+     半寬 811 → 648.8；56.3195vw → 45.0556vw。
+     +1px 是 Figma 2450:1018 的 left:calc(50%+1px) 偏移，不隨比例縮
+     （縮了是 0.8px，沒有意義）。 */
+  margin-inline: calc(50% - min(45.0556vw, 648.8px) + 1px) 0;
+  /* margin-top：公式是「margin-top = 想要的間距 − 圖片上方透明高度」。
+     圖片上方透明高度隨圖等比縮：209.8 × 0.8 = 167.84px。
+     這裡選擇「維持 12px 的說明段落→手機頂端間距」（Figma 原值），
+     所以 12 − 167.84 = −155.84px → /1440 = −10.8222vw。
+     ⚠️ 另一個做法是連間距一起縮成 9.6px（margin-top −158.24px），
+     兩者只差 2.4px。採用前者的理由：這個間距是「文字與圖」的關係，
+     不是圖片內部的屬性，圖縮小不該讓它更貼近文字。
+     margin-bottom 則相反——它抵銷的是圖片內部下方的純透明區，
+     完全隨圖縮：90.4 × 0.8 = 72.32px，6.2778vw × 0.8 = 5.0222vw。 */
+  margin-top: max(-10.8222vw, -155.84px);
+  margin-bottom: max(-5.0222vw, -72.32px);
 }
 
 /* 手機固定 676px 高（你的指示，不再跟著容器寬度縮放）；24px 是說明段落
@@ -941,4 +953,236 @@
 
 @media (max-width: 600px) {
   .ss-next-grid { grid-template-columns: 1fr; }
+}
+
+/* ====================================================================
+   Hero — 九宮格式品牌板拼貼
+   Figma：檔案 j4saimg2oJWL5tUkBh5Bww，node 2472:1023「Frame 50」
+          x=188 y=132，1064×736，夾在 navi（0–116）與 logo&overview（1086）之間。
+          左右各留 188px，剛好置中。
+
+   座標表（原點 = Frame 50 左上角，單位 px，1440 基準，全部照 Figma 原值）：
+     照片1 梳妝台   2374:595   x=0    y=0    346×216
+     照片2 眼影盤   2441:1012  x=359  y=0    346×216
+       └ 圈選橢圓   2441:993   x=501  y=81   67.021×66.954  rotate 17.64°
+       └ 提示膠囊   2441:997   x=518  y=157  180.727×28     radius 51
+     照片3 床上手機 2374:594   x=718  y=0    346×286
+     logo 面板      2374:578   x=0    y=229  705×258  bg #99191d  radius 20
+       └ lockup     2374:580+  x=100  y=291  463.578×134
+     色票           2374:613   x=718  y=300  346×187  radius 20
+       └ 四段 x 偏移 0.25/86.25/173.25/260.25，寬 86/87/87/87
+     照片4 花瓣     2387:616   x=0    y=501  346×235
+     字體卡         2374:574   x=359  y=501  242×235  bg #c90000  radius 20
+       └ "Lora"     2374:596   x=393  y=517  Lora 38px  #f5f5f5
+       └ "Aa"       2374:597   x=393  y=542  Lora 148px #f5f5f5
+     UI 條          2374:573   x=612  y=501  452×235  bg #ffcbd4  radius 20
+
+   欄距多為 13px，但字體卡→UI 條只有 11px；第三欄照片高 286 而同列另外
+   兩張是 216；色票 y=300 而 logo 面板 y=229。這些不規則是設計本身，
+   不要整成規則格。
+
+   縮放：整塊 transform:scale（scale = min(100vw,1440)/1440，由 Hero.jsx
+   量 window.innerWidth 設定，比照 Function 2）。內部座標一律不動。
+   ==================================================================== */
+.ss-hero {
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden; /* 進場的 translateY 不要撐出捲軸 */
+  /* 高度與上留白一律用 CSS 算，首次繪製就是最終值。
+     ⚠️ 別改回用 JS（useLayoutEffect）設——那樣首幀是 736px、腳本跑完才
+     變 1086px，量到的 CLS 會從 0.01 掉到 0.11，超過規格書 §8 的 <0.1。
+     132/1440 = 9.1667vw（nav 116 + 間隙 16）
+     1086/1440 = 75.4167vw（132 + 看板 736 + 到下一區 218） */
+  padding-top: min(9.1667vw, 132px);
+  height: min(75.4167vw, 1086px);
+}
+
+.ss-hero-board {
+  position: relative;
+  margin-inline: auto;
+  transform-origin: top center;
+}
+
+.ss-hero-cell {
+  position: absolute;
+  border-radius: 20px;
+}
+
+.ss-hero-photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+/* ---------- 第一列 ---------- */
+.ss-hero-p1 { left: 0;   top: 0; width: 346px; height: 216px; }
+.ss-hero-p2 { left: 359px; top: 0; width: 346px; height: 216px; }
+.ss-hero-p3 { left: 718px; top: 0; width: 346px; height: 286px; }
+
+.ss-hero-p2-ring {
+  position: absolute;
+  left: 142px;   /* 501 − 359 */
+  top: 81px;
+  width: 67.021px;
+  height: 66.954px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* 67.021×66.954 是旋轉後的外接框，所以旋轉掛在 svg 上、定位框不轉 */
+.ss-hero-p2-ring svg {
+  display: block;
+  width: 64.3828px;
+  height: 63.2806px;
+  overflow: visible;
+  transform: rotate(17.64deg);
+}
+
+/* Figma 2441:999：漸層底 + mix-blend-screen + 外光暈。文字 2441:1001 是
+   DM Sans 9px / #3a3a3a / 字距 -0.27px。 */
+.ss-hero-p2-badge {
+  position: absolute;
+  left: 159px;   /* 518 − 359 */
+  top: 157px;
+  width: 180.727px;
+  height: 28px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* 底層才套 mix-blend-mode:screen —— 在 Figma 裡混合的是 2441:999 這個
+   背景節點，文字 2441:1001 是它的兄弟節點沒有被混合。兩者若合成一層，
+   #3a3a3a 的深灰文字會被 screen 整個洗白。 */
+.ss-hero-p2-badge-bg {
+  position: absolute;
+  inset: 0;
+  border-radius: 51px;
+  mix-blend-mode: screen;
+  box-shadow: 0 0 13px 0 rgba(249, 205, 211, 0.4);
+  background-image: linear-gradient(
+    -0.268deg,
+    rgba(255, 255, 255, 0.92) 23.264%,
+    rgba(255, 255, 255, 0.92) 78.973%,
+    rgba(153, 153, 153, 0.92) 150.89%
+  );
+}
+.ss-hero-p2-badge-text {
+  position: relative;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 9px;
+  letter-spacing: -0.27px;
+  color: #3a3a3a;
+  white-space: nowrap;
+}
+
+/* ---------- 第二列 ---------- */
+.ss-hero-logopanel {
+  left: 0;
+  top: 229px;
+  width: 705px;
+  height: 258px;
+  background: #99191d;
+}
+
+.ss-hero-logo {
+  position: absolute;
+  left: 100px;
+  top: 62px;   /* 291 − 229 */
+  width: 463.578px;
+  height: 134px;
+  display: block;
+}
+
+.ss-hero-swatches {
+  left: 718px;
+  top: 300px;
+  width: 346px;
+  height: 187px;
+  overflow: hidden;
+  display: flex;
+}
+.ss-hero-swatches > span { display: block; height: 100%; }
+.ss-hero-swatches > span:nth-child(1) { width: 86px; }
+.ss-hero-swatches > span:nth-child(2) { width: 87px; }
+.ss-hero-swatches > span:nth-child(3) { width: 87px; }
+.ss-hero-swatches > span:nth-child(4) { width: 87px; }
+
+/* ---------- 第三列 ---------- */
+.ss-hero-p4 { left: 0; top: 501px; width: 346px; height: 235px; }
+
+.ss-hero-typecard {
+  left: 359px;
+  top: 501px;
+  width: 242px;
+  height: 235px;
+  background: #c90000;
+  overflow: hidden;
+}
+
+/* Lora 版與 DM Sans 版疊在同一格，只用 opacity 交叉淡入 */
+.ss-hero-type {
+  position: absolute;
+  inset: 0;
+  color: #f5f5f5;
+  font-family: 'Lora', serif;
+}
+.ss-hero-type--dm { font-family: 'DM Sans', sans-serif; }
+
+.ss-hero-type-name {
+  position: absolute;
+  left: 34px;   /* 393 − 359 */
+  top: 16px;    /* 517 − 501 */
+  margin: 0;
+  font-size: 38px;
+  font-weight: 400;
+  line-height: normal;
+  white-space: nowrap;
+}
+.ss-hero-type-aa {
+  position: absolute;
+  left: 34px;
+  top: 41px;    /* 542 − 501 */
+  margin: 0;
+  font-size: 148px;
+  font-weight: 400;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+/* UI 條：Figma 這一格原本是靜態截圖 2450:1020，依你的指示改成 marquee。
+   底色是 Figma 讀到的粉紅 #ffcbd4。 */
+.ss-hero-uistrip {
+  left: 612px;
+  top: 501px;
+  width: 452px;
+  height: 235px;
+  background: #ffcbd4;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.ss-hero-marquee {
+  display: flex;
+  flex: 0 0 auto;
+  padding-left: 8px;
+}
+.ss-hero-marquee img {
+  display: block;
+  flex: 0 0 auto;
+  width: 95px;
+  height: 207px;
+  margin-right: 8px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* 進場直接顯示、marquee 停住、字體卡固定停在 DM Sans——三者都在
+     Hero.jsx 裡用 matchMedia 分支處理（GSAP 設的是 inline style，
+     CSS 蓋不掉），這裡只保險把 transform 歸零。 */
+  .ss-hero-marquee { transform: none !important; }
 }
