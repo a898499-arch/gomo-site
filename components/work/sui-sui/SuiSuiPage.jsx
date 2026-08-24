@@ -13,6 +13,8 @@ import Typography from './Typography';
 import ProcessAnimation from './ProcessAnimation';
 import Function1 from './Function1';
 import Function2 from './Function2';
+import Function4 from './Function4';
+import HandWarmUp from '@/components/HandWarmUp/HandWarmUp';
 import MockupFade from './MockupFade';
 import WorkFootage from './WorkFootage';
 import NextWork from './NextWork';
@@ -29,7 +31,10 @@ import NextWork from './NextWork';
 //   輪播動畫，iframe 載入 public/work/sui-sui/ui-carousel/carousel.html）。
 // - Function 1：真實內容，見 Function1.jsx（含你做好的 onboarding
 //   演示動畫，見 OnboardingDemo.jsx）。
-// - Function 3 / Function 4：灰色佔位塊，等你補內容。
+// - Function 3：真實內容，見 components/HandWarmUp/HandWarmUp.jsx（你
+//   做好的 self-contained 元件，素材在 public/web-assets/）。
+// - Function 4：真實內容，見 Function4.jsx（Figma 匯出的手機拼貼圖
+//   public/work/sui-sui/shot.webp / shot@2x.webp）。
 // - All UI Animation：整段移除，不留佔位塊（你的指示——這區內容已經
 //   搬去 Function 1 了，跟這裡的「Setup in three questions」標題語意
 //   對得上，跟原本的 All UI Animation 佔位標籤對不上）。
@@ -74,15 +79,15 @@ export default function SuiSuiPage() {
       {/* y=8620 — node 545:510，已有真實手機截圖 */}
       <Function2 />
 
-      {/* y=9687 — node 545:127，1440×907 */}
-      <section className="ss-section">
-        <AnimationPlaceholder label="Function 3" w={1440} h={907} />
-      </section>
+      {/* y=9687 — node 545:127，1440×907，「Hand warm-up」。2026-08-24：
+          換成你做好的 self-contained 元件（components/HandWarmUp/），素材
+          在 public/web-assets/。元件自己已經有 <section> 外框跟標題區，
+          不用再另外包一層 .ss-section。 */}
+      <HandWarmUp assets="/web-assets" />
 
-      {/* y=10751 — node 545:118，1440×918 */}
-      <section className="ss-section">
-        <AnimationPlaceholder label="Function 4" w={1440} h={918} />
-      </section>
+      {/* y=10751 — node 2198:5191（新檔 j4saimg2oJWL5tUkBh5Bww），1440×918。
+          舊檔的 545:118 已不存在，見 Function4.jsx 檔頭。 */}
+      <Function4 />
 
       {/* y≈12861/13914/14930。2026-08-17：改用 get_design_context 讀
           545:47 底下 Mockup1/2/3 的實際 x 座標（相對 1440 參考寬），不再

@@ -36,12 +36,15 @@ export default function RootLayout({ children }) {
             OnboardingDemo.jsx），那個 HTML 自己的 <head> 會載入它需要的
             Lora/DM Sans 字重，不需要外層頁面重複載入——之前為它額外加的
             italic/500/700 字重（2026-08-20 那輪）已經拿掉，只保留
-            Typography 展示區塊實際會用到的 Lora 400/600、DM Sans
-            200..400。 */}
+            Typography 展示區塊實際會用到的 Lora 400/600。
+            2026-08-24：Function 3（components/HandWarmUp/）的 .num 用
+            DM Sans font-weight:500，原本的 DM Sans 範圍只到 400，補上
+            200..500。這個元件是直接內嵌的 React 元件（不是 iframe），
+            沒有自己的 <head>，字體要靠外層頁面載入。 */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;800&family=Jost:wght@300;400;500;700&family=Inter:wght@400;600&family=Lora:wght@400;600&family=DM+Sans:opsz,wght@9..40,200..400&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;800&family=Jost:wght@300;400;500;700&family=Inter:wght@400;600&family=Lora:wght@400;600&family=DM+Sans:opsz,wght@9..40,200..500&display=swap"
           rel="stylesheet"
         />
       </head>

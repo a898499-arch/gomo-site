@@ -652,10 +652,17 @@
    Figma 實際的 leading 值（40.4px），换算成跟字級無關的比例
    （40.4/24=1.6833、40.4/36=1.1222）方便 title 用 clamp() 縮放字級時
    還能維持同一個視覺比例。 */
+/* 2026-08-24：eyebrow 原本是固定 24px，是這三行裡唯一沒跟著視窗縮放的
+   一行（title/desc 都有 clamp），所以在 1440px 以下會比 Function 2 的
+   eyebrow 大——Function 2 是整組寫死 24/36/20px 再靠外層 transform:
+   scale(min(100vw,1440)/1440) 縮放，三行一起縮。改成跟同組 title/desc
+   同一套 clamp 寫法（24/1440=1.6667vw），1440px 維持 24px 不變，往下
+   縮的曲線就跟 Function 2 完全重合（1155px 時兩邊都是 19.25px）。
+   line-height 維持 1.6833（=40.4/24）不用動，比例本來就跟著字級走。 */
 .ss-fn1-eyebrow {
   margin: 0 0 6px;
   font-weight: 600;
-  font-size: 24px;
+  font-size: clamp(16px, 1.6667vw, 24px);
   line-height: 1.6833;
   text-transform: uppercase;
   color: #b8001f;
@@ -682,6 +689,49 @@
   font-weight: 400;
   font-size: clamp(16px, 1.3889vw, 20px);
   color: #000;
+}
+
+/* ---------- Function 4（node 2198:5191，檔案 j4saimg2oJWL5tUkBh5Bww）
+   2026-08-24。標題沿用上面的 .ss-fn1-*，這裡只寫圖片定位。
+
+   Figma 量到的值（1440 參考寬，原點 = function 4 frame 左上 = 標題頂端）：
+     Shot 1 圖框 2450:1018   w=1622  h=1216  置中 calc(50%+1px)  top=-35
+     圖框比例 1622/1216 = 1.3339，跟素材 4800×3600（1.3333）吻合，沒裁切
+     素材裡「手機實體」（alpha>200 實測）在圖框內的位置：
+       top=209.8  高=793.8   left=172.7  寬=1274.3
+     → 手機頂端相對 frame = -35 + 209.8 = 174.8
+
+   為什麼要用負的 margin-top：圖框上緣到手機頂端有 209.8px 是透明的，
+   直接接在標題後面會多出將近 200px 空白。標題三行在 1440 下的高度是
+   40.4+6+40.4+16+60 = 162.8，要讓手機頂端落在 174.8 就需要
+     margin-top = 174.8 - 209.8 - 162.8 = -197.8px
+   （也就是 Figma 的 top:-35 減掉標題高度，兩邊算出來一樣）。
+   換成不綁死字級的比例：-197.8/1440 = -13.7361vw；用 max() 讓它在
+   1440 以上停住，跟寬度的 min() 上限同一個轉折點。
+
+   寬度 1622/1440 = 112.639vw，同樣在 1440 封頂。出血超出視窗的部分交給
+   body 的 overflow-x:clip（見 app/globals.css），這裡不加 overflow
+   ——跟 Function 2 同一個做法。
+
+   margin-bottom：圖框下緣到陰影最底（alpha>8 實測 y=3332/3600）之間還有
+   90.4px 純透明，扣掉才不會在區塊底部多出一塊空白。
+     -90.4/1440 = -6.2778vw ---------- */
+.ss-fn4-heading {
+  position: relative;
+  z-index: 1; /* 圖片用負 margin 疊上來，標題要保持可選取／可點 */
+}
+
+.ss-fn4-shot {
+  display: block;
+  width: min(112.639vw, 1622px);
+  height: auto;
+  max-width: none;
+  /* 圖比容器寬，margin-inline:auto 會被解析成 0（規範如此），整張會貼左緣，
+     所以左邊距要自己算：容器中線 - 圖的半寬 + Figma 的 1px 偏移
+     （2450:1018 是 left:calc(50%+1px)，不是正中央）。811 = 1622/2。 */
+  margin-inline: calc(50% - min(56.3195vw, 811px) + 1px) 0;
+  margin-top: max(-13.7361vw, -197.8px);
+  margin-bottom: max(-6.2778vw, -90.4px);
 }
 
 /* 手機固定 676px 高（你的指示，不再跟著容器寬度縮放）；24px 是說明段落
