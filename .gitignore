@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# 效能追蹤檔（Chrome DevTools Performance 匯出，單檔可達數百 MB）
+perf-scenario1-bench-dolly.json
+
+# 大張原始素材：上線用的是壓過的衍生檔（shot.webp / shot@2x.webp），
+# 原檔不進版控
+public/work/sui-sui/Shot.png
+
+# 本機工作筆記／暫存
+Untitled
+_to_delete/
