@@ -1,0 +1,26 @@
+<svg width="56" height="44" viewBox="0 0 56 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g filter="url(#filter0_n_615_3)">
+<path d="M30.4231 7.17884C35.3783 0.292448 41.9389 -0.443061 44.9006 0.17396C62.3285 -0.83143 54.1174 14.837 46.9953 24.8917C44.9006 37.4597 37.3596 36.6222 32.7512 36.2033C28.1428 35.7843 28.1428 39.1359 20.6018 42.4874C15.5921 44.7139 12.354 39.5832 10.8401 35.2999C10.4074 34.0758 8.97845 33.3925 7.69553 33.5919C4.48947 34.0903 0.732611 33.1495 0.0744351 31.1759C-0.463208 29.563 2.01776 27.3032 4.10178 25.8234C4.96095 25.2133 5.50853 24.2457 5.56467 23.1935C6.3467 8.52974 17.3593 7.4037 25.1457 9.19544C27.129 9.65182 29.2343 8.83059 30.4231 7.17884ZM33.1701 20.2833C28.841 20.2834 20.518 21.2051 21.8586 24.8917C23.1993 28.578 28.8409 25.8692 31.4944 24.0538C33.8406 22.7346 33.5892 20.9905 33.1701 20.2833Z" fill="#FF000C"/>
+</g>
+<defs>
+<filter id="filter0_n_615_3" x="0" y="0" width="55.2911" height="43.0256" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feTurbulence type="fractalNoise" baseFrequency="0.66666668653488159 0.66666668653488159" stitchTiles="stitch" numOctaves="3" result="noise" seed="495" />
+<feComponentTransfer in="noise" result="coloredNoise1">
+<feFuncR type="linear" slope="2" intercept="-0.5" />
+<feFuncG type="linear" slope="2" intercept="-0.5" />
+<feFuncB type="linear" slope="2" intercept="-0.5" />
+<feFuncA type="discrete" tableValues="1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 "/>
+</feComponentTransfer>
+<feComposite operator="in" in2="shape" in="coloredNoise1" result="noise1Clipped" />
+<feComponentTransfer in="noise1Clipped" result="color1">
+<feFuncA type="table" tableValues="0 0.15" />
+</feComponentTransfer>
+<feMerge result="effect1_noise_615_3">
+<feMergeNode in="shape" />
+<feMergeNode in="color1" />
+</feMerge>
+</filter>
+</defs>
+</svg>
