@@ -40,6 +40,7 @@ const OVERSHOOT = 4; // §6.1：超過最終 Y 位置 4px 再回穩（有重量�
 const PART_X = 97; // §6.1：logo 出現時兩張板凳各向外滑開約 97px（Figma 實測）
 const MIN_COUNT_MS = 2500; // §6.1：最短 2.5 秒，從 PHASE 2 起算
 const STALL_CEILING = 96; // §6.1：資產沒到齊就停在 95–97 附近，不再往上
+const DIGIT_SHIFT_DUR = 0.15; // 位數改變時重新置中的補間長度（你指定 150ms）
 
 /**
  * 三段式 ease（§6.1 節奏）：0→60 輕快、60→90 明顯變慢、90→100 最慢。
@@ -69,6 +70,7 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg }) {
   const logoRef = useRef(null);
   const counterRef = useRef(null);
   const numRef = useRef(null);
+  const pctRef = useRef(null);
 
   // PHASE 3 之後會用到：Loading 靜止狀態的 transform，存起來供推軌起點使用
   const loadingXform = useRef({ left: null, right: null });
@@ -105,6 +107,7 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg }) {
       const startCounter = () => {
         const t0 = performance.now(); // ⚠️ 從 PHASE 2 起算，不是從 t=0
         let displayed = 0;
+        let prevLen = 1; // 目前顯示的位數，用來偵測 9→10、99→100
         let assetsReady = false;
         let raf = 0;
 
@@ -138,7 +141,37 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg }) {
           // 這裡用 Math.min 而不是直接指派，reduced-motion 的線性路徑才不會
           // 出現「99 → 100 → 被壓成 96」的可見遞減。
           if (displayed < target) displayed = Math.min(displayed + 1, target);
-          renderDigits(numRef.current, displayed);
+
+          // 位數改變（9→10、99→100）時，整串寬度會跳一級，因為群組是置中
+          // 對齊，數字與 % 會各自往外瞬移 ±11.52px。這裡改成 FLIP 補間：
+          // 量測前後位置差 → 套上反向 translateX → 150ms 補間回 0。
+          // 只動 transform，不新增 layout/paint（量測只在位數改變的那兩幀
+          // 各發生一次，不是每幀）。
+          // 數字字形本身仍然沒有任何過場動畫（§6.1 明文禁止），動的只有
+          // 「整串因為變寬而重新置中」這件事。
+          const len = String(displayed).length;
+          if (len !== prevLen) {
+            const numEl = numRef.current;
+            const pctEl = pctRef.current;
+            const beforeNum = numEl.getBoundingClientRect().left;
+            const beforePct = pctEl.getBoundingClientRect().left;
+            renderDigits(numEl, displayed);
+            const afterNum = numEl.getBoundingClientRect().left;
+            const afterPct = pctEl.getBoundingClientRect().left;
+            gsap.fromTo(
+              numEl,
+              { x: beforeNum - afterNum },
+              { x: 0, duration: DIGIT_SHIFT_DUR, ease: mainEase, overwrite: true }
+            );
+            gsap.fromTo(
+              pctEl,
+              { x: beforePct - afterPct },
+              { x: 0, duration: DIGIT_SHIFT_DUR, ease: mainEase, overwrite: true }
+            );
+            prevLen = len;
+          } else {
+            renderDigits(numRef.current, displayed);
+          }
 
           if (displayed >= 100) {
             // PHASE 3 的接點：下一輪在這裡啟動推軌。
@@ -316,7 +349,9 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg }) {
             <span className="loading-digit" style={{ display: 'none' }} />
             <span className="loading-digit">0</span>
           </span>
-          <span className="loading-pct">%</span>
+          <span className="loading-pct" ref={pctRef}>
+            %
+          </span>
         </p>
       </div>
     </div>
