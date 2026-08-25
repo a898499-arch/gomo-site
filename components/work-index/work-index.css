@@ -1,0 +1,294 @@
+/* ====================================================================
+   作品分類頁 /work（規格書 §6.5）
+   Figma：node 3:281「作品分類頁」，檔案 5HAqwzDuPvXLvX0WG6VPfP
+   版面與互動以 prototypes/work.html 為準（你的指示），Figma 用來取數值。
+
+   ⚠️ 字體全站統一 Poppins（你的指示）。Figma 的頁籤用的是 Karla，
+   但 Karla 全站沒有載入（app/layout.js 只有 next/font 的 Poppins），
+   為了一個頁籤多拉一支字體不划算，也會跟其餘所有文字不一致。
+   ==================================================================== */
+
+.work-outer {
+  padding-bottom: 96px;
+}
+
+/* ---------- 簡介區 ---------- */
+/* Figma 實測（node 3:281）：標題 top=201 / height=52；bio top=273 /
+   height=140；頁籤 top=486。
+   .page-content 的 padding-top 是 calc(116px + --nav-top-gap) = 126px，
+   所以 work-intro 的 padding-top = 201 - 126 = 75px。
+   標題→bio 間距 = 273 - (201+52) = 20px；
+   bio→頁籤 間距 = 486 - (273+140) = 73px（= padding-bottom）。 */
+.work-intro {
+  padding: 75px 0 73px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 901px; /* Figma node 3:283 的文字框寬度 */
+}
+
+.work-intro-heading {
+  margin: 0;
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(24px, 2.5vw, 36px);
+  line-height: 1.45; /* Figma：行框高 52px = 36 × 1.45 */
+  letter-spacing: -0.18px;
+  text-transform: capitalize;
+  color: var(--ink);
+}
+
+.work-intro-bio {
+  margin: 0;
+  font-weight: 300;
+  font-size: clamp(17px, 1.6667vw, 24px);
+  letter-spacing: -0.12px;
+  line-height: 1.45;
+  color: #0b0b0b; /* Figma 3:283 實測，比 --ink 深，刻意不共用變數 */
+}
+
+/* 遮罩式逐行揭露用：外層裁切、內層位移 */
+.reveal-mask {
+  display: block;
+  overflow: hidden;
+}
+.reveal-inner {
+  display: block;
+}
+
+/* ---------- 篩選頁籤 ---------- */
+/* Figma 實測：頁籤文字底部到 grid 頂端總距 54px（486+46 → 586）。
+   分隔線本身在 Figma 稿上沒有獨立節點，內部 17/1/36 的切分是延用原型的
+   比例假設，不是逐項量測值——只有「總和 54px」是實測。 */
+.work-tabs-wrap {
+  padding-bottom: 17px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 36px;
+}
+
+.work-tabs {
+  display: flex;
+  gap: 40px; /* Figma 3:378 */
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.work-tab {
+  position: relative;
+  display: inline-block;
+  padding: 0;
+  text-decoration: none;
+  cursor: pointer;
+  font-size: clamp(18px, 2.2222vw, 32px); /* Figma 32px */
+  letter-spacing: -0.16px;
+  line-height: 1.45;
+  font-weight: 400;
+  color: var(--work-muted); /* Figma #747474 */
+  transition: color 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* hover / focus 底線擦除。規格書 §6.5 原本沒有，是後來補的；沿用全站
+   ::after + scaleX 的手法。只有未選中的頁籤會有反應。 */
+.work-tab::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.work-tab:not([aria-selected='true']):hover,
+.work-tab:not([aria-selected='true']):focus-visible {
+  color: var(--accent);
+}
+
+.work-tab:not([aria-selected='true']):hover::after,
+.work-tab:not([aria-selected='true']):focus-visible::after {
+  transform: scaleX(1);
+}
+
+.work-tab[aria-selected='true'] {
+  color: var(--accent); /* Figma #c90000 */
+  font-weight: 700;
+}
+
+/* ---------- grid ---------- */
+.work-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 21px; /* Figma：731 - (38+672) = 21 */
+  row-gap: 95px; /* 原型值（Figma 反推約 86px，依你指示以原型為準） */
+}
+
+.work-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--ink-muted);
+  font-size: 20px;
+  padding: 64px 0;
+  word-break: break-word;
+}
+.work-empty[hidden] {
+  display: none;
+}
+
+/* ---------- 卡片 ---------- */
+.work-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ⚠️ 必要，不可刪：篩選是靠切換 hidden 屬性做的，但瀏覽器預設的
+   [hidden]{display:none} 是 UA 樣式，優先權低於上面 .work-card 的
+   display:block，不補這條的話 hidden 會完全沒作用、卡片照樣顯示。
+   （prototypes/work.html 也有同樣的疏漏，只是它的 personal 分頁本來就
+   永遠是空的，看不出差別。） */
+.work-card[hidden] {
+  display: none;
+}
+
+/* cover 沒有圖時就是這塊灰底（works.json 目前 12 筆 cover 全為空）。
+   規格書 §6.5 明文指定的 fallback 手法，跟 §6.3 Gallery 佔位同一個灰。 */
+.work-card-cover {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 672 / 415; /* Figma mask-size */
+  background: #d9d9d9;
+  overflow: hidden;
+}
+
+.work-card-cover img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* hover 只有兩件事：圖在框內放大、標題右移。不灰階、不陰影、不位移整張卡 */
+@media (hover: hover) {
+  .work-card:hover .work-card-cover img,
+  .work-card:focus-visible .work-card-cover img {
+    transform: scale(1.03);
+  }
+  .work-card:hover .work-card-title,
+  .work-card:focus-visible .work-card-title {
+    transform: translateX(4px);
+  }
+}
+
+.work-card:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.work-card-title {
+  margin: 16px 0 0;
+  font-weight: 400; /* Figma 實測 Regular，不是 600 */
+  font-size: clamp(22px, 2.2222vw, 32px);
+  color: var(--ink);
+  transition: transform 300ms ease-out;
+}
+
+.work-card-desc {
+  margin: 4px 0 0;
+  font-weight: 400;
+  font-size: clamp(17px, 1.6667vw, 24px);
+  line-height: 22px; /* Figma 3:285 */
+  color: var(--work-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.work-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 32px;
+  padding: 0;
+  list-style: none;
+}
+
+/* Figma 實測：膠囊固定高 32px、文字 line-height 22px、邊框 1px
+   → 上下內距 (32-22-2)/2 = 4px；左右內距由膠囊 left=39 / 文字 left=61
+   反推 ≈ 21px。圓角 Figma 是 70px，這裡用 999px——膠囊高 32px，兩者
+   渲染結果完全相同。
+   邊框色用 --tag-border(#5B5B5B)，不可換成 --rule：Figma 實測明顯更深，
+   而且 --rule 另有他用（頁腳分隔線等），改了會牽動別處。 */
+.work-card-tag {
+  border: 1px solid var(--tag-border);
+  border-radius: 999px;
+  padding: 4px 21px;
+  font-size: clamp(16px, 1.3889vw, 20px);
+  letter-spacing: -0.43px;
+  line-height: 22px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* ---------- 螢幕閱讀器公告 ---------- */
+.work-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- RWD（規格書 §6.5）---------- */
+@media (max-width: 900px) {
+  .work-grid {
+    column-gap: 16px;
+    row-gap: 64px;
+  }
+}
+
+@media (max-width: 600px) {
+  .work-grid {
+    grid-template-columns: 1fr;
+    row-gap: 48px;
+  }
+  /* 手機：頁籤可水平捲動、不換行、不擠壓 */
+  .work-tabs-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .work-tabs {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
+}
+
+/* ---------- reduced motion ---------- */
+/* 進場／篩選的動效在 WorkIndex.jsx 裡用 matchMedia 分支處理（GSAP 設的是
+   inline style，CSS 蓋不掉）；這裡負責把 CSS 自己的 transition 關掉。 */
+@media (prefers-reduced-motion: reduce) {
+  .work-intro-heading,
+  .work-intro-bio,
+  .work-tab,
+  .work-card {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .reveal-inner {
+    transform: none !important;
+  }
+  .work-card-cover img,
+  .work-card-title {
+    transition: none !important;
+  }
+  .work-tab,
+  .work-tab::after {
+    transition-duration: 150ms !important;
+  }
+}
