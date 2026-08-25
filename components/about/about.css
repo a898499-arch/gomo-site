@@ -1,0 +1,327 @@
+/* ====================================================================
+   About Me /about（規格書 §6.6）
+   Figma：node 3:432「about me」，檔案 5HAqwzDuPvXLvX0WG6VPfP
+   版面參考 prototypes/about.html，數值取自 Figma。
+
+   ⚠️ 左緣一律對齊全站的 .page-container / --page-gutter，不照抄 Figma 的
+   絕對 x。Figma 稿上各區左緣本身就不一致（肖像 114.82、Employment 膠囊
+   127、條目文字 134、About 膠囊 512、bio 517、Awards 膠囊 512、獎項
+   519），視為設計稿誤差；全站左緣一致比複製這份不一致更重要——跟 §6.5
+   作品分類頁同一個裁示。§6.6 唯一明文要求的對齊是「bio 右緣對齊導覽列
+   最右一項」，用 page-container 就自動成立，不需要第二個寫死的數值。
+   ==================================================================== */
+
+/* ---------- 上區：肖像 + About ---------- */
+.about-hero {
+  display: grid;
+  /* 肖像欄寬 = Figma 照片節點 3:473 的實際寬 301.235px（原型寫 311px，
+     差約 10px，這裡改用 Figma 值）。
+     間距 = Figma About 膠囊左緣 512 − 照片右緣 (114.82+301.235=416.06)
+     = 95.94px，換算 95.94/1440 = 6.6625vw。 */
+  grid-template-columns: minmax(200px, 301.235px) 1fr;
+  gap: clamp(32px, 6.6625vw, 95.94px);
+  align-items: start;
+  padding: 64px 0 48px;
+}
+
+/* §6.6：紅色虛線描邊已移除（Figma 稿裡還有，規格書明文要求拿掉），
+   肖像只剩照片本身。進場的淡入＋縮放保留，寫在 About.jsx。 */
+.about-portrait {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 301.235 / 410.683; /* Figma 3:473 */
+}
+
+.about-portrait-photo {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.about-portrait-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 膠囊標籤（About / Employment / Education / Awards 共用）
+   Figma 3:449 / 3:450 / 3:466 / 3:468 全都是 213×53、radius 70、1px 黑框、
+   無填色，文字 24px Poppins Regular。radius 用 999px，膠囊高 53px 時與
+   70px 渲染結果相同。 */
+.about-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 213px;
+  height: 53px;
+  border: 1px solid var(--footer-black);
+  border-radius: 999px;
+  font-weight: 400;
+  font-size: clamp(18px, 1.6667vw, 24px);
+  color: var(--footer-black);
+}
+
+.about-intro {
+  display: flex;
+  flex-direction: column;
+  /* Figma：About 膠囊底 (256+53=309) 到 bio 頂 333 = 24px */
+  gap: 24px;
+  /* 目測對齊較高的肖像，Figma 沒有這個值 */
+  padding-top: 16px;
+}
+
+.about-bio {
+  /* 不設獨立 max-width：Figma 的 863px 會讓右緣比導覽列右緣短約 95px。
+     這裡讓 bio 填滿自己的 grid 欄，而該欄本來就由 page-container /
+     --page-gutter 定寬，右緣自動與導覽列一致。 */
+  font-size: clamp(16px, 1.3889vw, 20px);
+  font-weight: 300; /* §6.6 指定改細 */
+  line-height: 1.45;
+  letter-spacing: -0.1px; /* Figma 3:435 */
+  color: var(--footer-black);
+}
+.about-bio p {
+  margin: 0;
+}
+.about-bio p + p {
+  margin-top: 1.45em;
+}
+
+/* ---------- 下區：Employment/Education（左） + Awards（右） ---------- */
+.about-details {
+  display: grid;
+  /* 比例取自 Figma 的兩欄實際內容寬：左欄文字框 134→598 約 464px、
+     右欄 519→1330 約 811px，約當 1 : 1.8。 */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.8fr);
+  gap: clamp(32px, 6vw, 87px);
+  /* Figma：bio 底 (333+232=565) 到 Employment 膠囊頂 720 = 155px，
+     其中 48px 由 .about-hero 的 padding-bottom 負擔，這裡補其餘 107px。 */
+  padding: 107px 0 48px;
+}
+
+.about-col-left {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.about-group {
+  display: flex;
+  flex-direction: column;
+  gap: 27px;
+}
+
+.about-entries {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 31px; /* Figma：條目間距 95–96px 扣掉條目自身高度 */
+}
+
+.about-entry {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.entry-year {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 300;
+  letter-spacing: -0.08px;
+  color: #1e1e1e; /* Figma 3:438 */
+}
+
+.entry-title {
+  margin: 0;
+  font-size: clamp(16px, 1.3889vw, 20px);
+  font-weight: 400;
+  letter-spacing: -0.43px;
+  color: var(--footer-black);
+}
+
+.entry-sub {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 300;
+  letter-spacing: -0.08px;
+  color: #5b5b5b; /* Figma 3:437，跟 --ink-muted(#6B6B6B) 不同，刻意不共用 */
+}
+
+.about-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.about-awards {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 26px; /* Figma：獎項列間距 48px 扣掉行高 */
+}
+
+/* §6.6 版面 bug 修正（Figma 稿最後一列「…Hitachi Cooling & Heating
+   Taiwan」與右側「Silver Award」重疊）：
+   做法是「結果欄固定寬 + flex-shrink:0，名稱欄吃剩下的空間」。
+   這樣每一列名稱的可用寬度都是 (列寬 − 24 間距 − 結果欄寬)，是同一個值，
+   所有列共用同一個右邊界，名稱過長就換行、不截斷、不重疊。
+
+   ⚠️ 不要改回 prototypes/about.html 的 `.award-name { flex: 0 0 600px }`：
+   600px 是寫死值，1440px 時右欄約 818px 放得下，但 1155px 時右欄只剩約
+   657px，600+24+結果寬 會超過欄寬而溢出／重疊，違反 §6.6 驗收第 1 條
+   「所有斷點皆不重疊」。
+   也不要改回 `.award-name { flex: 1 1 auto }` 搭 justify-content:
+   space-between——那樣名稱會長到「填滿該列自己結果文字之後剩下的空間」，
+   每列右邊界隨該列結果長度浮動，換行點會參差不齊。 */
+.award-row {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 24px; /* §6.6：兩者之間至少 24px */
+}
+
+.award-name {
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: clamp(16px, 1.3889vw, 20px);
+  font-weight: 400;
+  letter-spacing: -0.43px;
+  color: var(--footer-black);
+}
+
+.award-result {
+  margin: 0;
+  /* 固定寬 + 不收縮。
+     ⚠️ 這個值必須 ≥ 最長結果文字的實際寬度。flex-basis 只是「假想尺寸」，
+     flex item 的 min-width:auto 不允許縮到內容寬以下——原本設 150px 時
+     「Bronze Medal Award」實測 159.6px 撐不下，那一列就自己漲到 159.6，
+     害該列名稱欄少 9.6px、換行邊界跟其他列不一致。164px 是最長結果
+     159.6px 加一點字體度量的餘裕。 */
+  flex: 0 0 164px;
+  font-size: 16px;
+  font-weight: 300;
+  letter-spacing: -0.08px;
+  color: var(--footer-black);
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* ---------- See More Detail ---------- */
+.about-more-detail-wrap {
+  display: flex;
+  justify-content: flex-end;
+  padding: 24px 0 80px;
+}
+
+.about-more-detail {
+  color: var(--footer-black);
+  text-decoration: none;
+  font-size: clamp(24px, 2.5vw, 36px);
+  font-weight: 500;
+  letter-spacing: -0.18px; /* Figma 3:469 */
+  transition: color 300ms ease-out;
+}
+
+/* hover 文字轉紅；底線用 .link-underline 的 ::after，其 background 是
+   currentColor，會自動跟著變紅，不需要另外處理。 */
+.about-more-detail:hover,
+.about-more-detail:focus-visible {
+  color: var(--accent);
+}
+
+/* 文字垂直遮罩交換，與 §6.4 頁腳 CV Download 同一套技法（各自的 class，
+   機制與時間刻意相同）。高度用 em，跟著自己的字級走。 */
+.amd-text-wrap {
+  display: inline-grid;
+  overflow: hidden;
+  height: 1.45em;
+}
+.amd-text-default,
+.amd-text-hover {
+  grid-area: 1 / 1;
+  white-space: nowrap;
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.amd-text-hover {
+  transform: translateY(100%);
+}
+.about-more-detail:hover .amd-text-default,
+.about-more-detail:focus-visible .amd-text-default {
+  transform: translateY(-100%);
+}
+.about-more-detail:hover .amd-text-hover,
+.about-more-detail:focus-visible .amd-text-hover {
+  transform: translateY(0);
+}
+
+/* ---------- RWD（§6.6。Figma 只有 1440 一個 frame，斷點是規格文字）---------- */
+@media (max-width: 900px) {
+  /* 平板：肖像與 About 維持左右並排、肖像縮小；下區改單欄堆疊 */
+  .about-hero {
+    grid-template-columns: minmax(160px, 240px) 1fr;
+    gap: 32px;
+  }
+  .about-details {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+}
+
+@media (max-width: 600px) {
+  /* 手機：全部單欄，肖像置中且縮小 */
+  .about-hero {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+  .about-portrait {
+    width: 60vw;
+    max-width: 260px;
+  }
+  .about-intro {
+    padding-top: 24px;
+    align-items: flex-start;
+    width: 100%;
+  }
+  .about-more-detail-wrap {
+    justify-content: flex-start;
+  }
+
+  /* Awards 改成每筆兩行（名稱一行、結果一行），避免擠壓。
+     Employment / Education 維持原本三行結構，年份不省略。 */
+  .award-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .award-result {
+    flex: 0 0 auto;
+    text-align: left;
+  }
+}
+
+/* ---------- reduced motion ---------- */
+/* §6.6：跳過所有進場。GSAP 設的是 inline style，CSS 蓋不掉，所以進場
+   分支在 About.jsx 用 matchMedia 處理；這裡只關掉 CSS 自己的 transition
+   並保底把 transform/opacity 歸位。 */
+@media (prefers-reduced-motion: reduce) {
+  .about-portrait,
+  .about-portrait-photo,
+  .about-pill,
+  .about-bio p,
+  .about-entry,
+  .award-row,
+  .about-more-detail-wrap {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .about-more-detail,
+  .amd-text-default,
+  .amd-text-hover {
+    transition-duration: 150ms !important;
+  }
+}
