@@ -1,0 +1,202 @@
+/* ====================================================================
+   首頁 Loading → Hero 舞台（規格書 §6.1）
+   這一輪只做 PHASE 1（組裝）與 PHASE 2（計數器）。
+   PHASE 3（FLIP 推軌）與 PHASE 4（Hero 內容）下一輪再做。
+
+   ⚠️ 架構關鍵，改動前務必讀懂：
+   §6.1 核心概念要求「全程單一 DOM 結構，SVG 元素永不 unmount」。
+   做法是——.bench 這兩個節點的 CSS 寬高與 left/top 一律寫「Hero 的最終
+   值」，Loading 階段看到的小板凳是掛在同一個節點上的
+   transform: translate(x,y) scale(s)，那組數值在執行期由 .loading-slot-*
+   的 getBoundingClientRect() 與板凳自身的 rect 相除算出來（見
+   HomeStage.jsx 的 measureLoadingTransform）。
+   於是 PHASE 3 的推軌只是把那個 transform 動畫回 translate(0,0) scale(1)
+   ——不換 class、不換 SVG、不卸載重建。
+   .loading-slot-* 是空的定位參考框，不渲染任何內容，只提供幾何來源。
+
+   如果反過來做成「Loading 用小 SVG、Hero 換成大 SVG」，PHASE 3 就會變成
+   卸載重建，§6.1 驗收第 4 條（任一幀暫停都看得到中間尺寸）與第 5 條
+   （無白閃、無可見頁面切換）會直接失敗。
+   ==================================================================== */
+
+.home-stage {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  overflow: hidden;
+  /* 蓋住 layout.js 的 Nav / Footer。
+     ⚠️ 必須高於 .site-nav 的 z-index:1000——導覽列是 position:fixed 且
+     z-index 1000，設成 100 的話它會浮在 Loading 畫面上方（實測過）。
+     §6.1 的 PHASE 3 要到 +400ms 才讓導覽列進場，在那之前不能露出。
+     PHASE 3 實作時，這一層要跟著推軌一起降下去／淡出。 */
+  z-index: 1100;
+}
+
+/* ---------- 板凳 ---------- */
+.bench-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+}
+
+.bench {
+  position: absolute;
+  /* transform-origin 必須是 0 0：measureLoadingTransform 算的是
+     「左上角對左上角」的位移，原點若在中心，translate 的值就對不上。 */
+  transform-origin: 0 0;
+  /* will-change 只在推軌階段（PHASE 3）掛上，之後移除——規格書 §6.1
+     技術要求。PHASE 1 的落地與 PHASE 2 的漂移幅度都很小，不需要。 */
+  will-change: auto;
+  opacity: 0; /* PHASE 1 落地時才淡入 */
+}
+
+.bench svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Hero 尺寸與位置（Figma「首頁1」1440×900 frame）
+   stool_1 node 3:178：x=818.59 y=542.32，253.346×258.9
+   stool_2 node 3:217：x=363    y=526   ，277.932×274.893
+   left 用百分比讓它跟著舞台寬度縮放，top 用絕對值（Figma 的 y 是相對
+   900px 高的 frame，不是相對視窗高度）。 */
+.bench-right {
+  width: 253.346px;
+  height: 258.9px;
+  left: 56.85%;
+  top: 542px;
+}
+
+.bench-left {
+  width: 277.932px;
+  height: 274.893px;
+  left: 25.2%;
+  top: 526px;
+}
+
+/* Loading 階段的定位參考框（空的，不渲染內容）
+   Figma「loading1」node 19:8（1440×900 frame）：
+     左（stool_2）x=595 y=404   w=120.957 h=119.482
+     右（stool_1）x=734 y=411.375 w=110.631 h=112.844
+   frame 中心 = 720。兩張板凳是「底部對齊」——底緣落在 523.48 / 524.22，
+   相差 0.7px 的共同地平線，不是垂直置中，所以 top 各自設定，不共用
+   translateY(-50%)。
+     左 left:  720 - (595 + 120.957)              = -4.04
+     右 left:  734 - 720                          = +14.00
+     左 top:   (404 + 119.482 - 450) - 119.482    = -46.00
+     右 top:   (411.375 + 112.844 - 450) - 112.844 = -38.63
+   （450 = frame 半高，也就是「50%」那條線） */
+.loading-slot {
+  position: absolute;
+  z-index: 10;
+  pointer-events: none;
+  visibility: hidden; /* 只當量測用的幾何來源，不顯示 */
+}
+
+.loading-slot-left {
+  left: calc(50% - 4.04px);
+  top: calc(50% - 46px);
+  width: 120.96px;
+  height: 119.48px;
+  transform: translateX(-100%);
+}
+
+.loading-slot-right {
+  left: calc(50% + 14px);
+  top: calc(50% - 38.63px);
+  width: 110.63px;
+  height: 112.84px;
+}
+
+/* ---------- Loading UI（logo + 計數器）----------
+   Figma「loading2」node 19:44（1440×900 frame）：
+     小 logo y=375 h=124；「10%」文字 y=509 h=59
+     → 兩者間距 10px
+   整個 logo+間距+計數器的區塊「不是」畫面正中——它自己的中心比 frame
+   真正的中點低 21.52px（跟板凳一樣是偏下錨定，不是置中）。 */
+.loading-ui {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, calc(-50% + 21.52px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.loading-logo {
+  width: 123px;
+  height: 124px;
+  opacity: 0;
+  transform-origin: 50% 50%;
+}
+
+.loading-logo svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* 計數器（Figma node 19:44 的「10%」文字） */
+.loading-counter {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 36px;
+  color: #353535;
+  letter-spacing: -0.54px;
+  line-height: 1.64;
+  /* §6.1 排版要求：沒有這行，數字在 9→10→100 時會左右抖動。
+     下在父層，數字與 % 都繼承。 */
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+/* ⚠️⚠️ 讀這段再改：§6.1 要求「套 font-variant-numeric: tabular-nums，
+   沒有這行數字在 9→10→100 時會明顯抖動」，但那個前提在本專案不成立——
+   實測 Poppins（next/font 從 Google Fonts 載入的那份）**沒有 tnum
+   等寬數字特性**，tabular-nums 與 normal 產生的字寬完全相同：
+     0=22.54  1=12.06  2=20.23  3=20.85  4=22.76
+     5=22.47  6=22.58  7=19.63  8=22.43  9=22.32   （36px + 字距 -0.54px）
+   「1」比「4」窄 10.7px。所以光靠 tabular-nums，計數過程中每換一個數字
+   整串寬度就變，% 會一直左右跳（實測有 61 種不同位置）。
+
+   這裡改成自己做等寬字符格：每個數字獨立一格、固定寬度、格內置中，
+   等於手動實作 tabular figures。0.64em @36px = 23.04px，容得下最寬的
+   「4」(22.76px)。父層的 tabular-nums 保留著——換字體後若有 tnum 就會
+   自動生效，兩者不衝突。 */
+.loading-num {
+  display: inline-flex;
+}
+
+.loading-digit {
+  display: inline-block;
+  width: 0.64em;
+  text-align: center;
+}
+
+/* §6.1：「% 符號必須完全不動」——它不參與任何動畫，也不隨數字位數位移
+   （位移由父層 flex 統一處理）。 */
+.loading-pct {
+  display: inline-block;
+}
+
+/* ---------- reduced motion ---------- */
+/* §6.1：完全跳過 loading 組裝與推軌，顯示靜態 loading 狀態，
+   但計數器仍然計數（計數是資訊，不是裝飾），改為固定線性速度，
+   最短 2.5 秒的下限維持不變。
+   進場的 opacity/transform 由 HomeStage.jsx 用 matchMedia 分支直接設成
+   最終值（GSAP 寫的是 inline style，CSS 蓋不掉），這裡只保底。 */
+@media (prefers-reduced-motion: reduce) {
+  .bench,
+  .loading-logo,
+  .loading-counter {
+    opacity: 1;
+  }
+}
