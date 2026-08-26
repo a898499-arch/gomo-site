@@ -495,14 +495,25 @@
 
   /* height = growth distance + hold distance + 100vh (the sticky viewport itself, per the
      containerHeight = pinnedDistance + 100vh identity already established for this section).
-     Growth distance shortened 320vh->180vh (2026-08-09, "捲動距離太長"); hold stays 150vh (deliberate
-     dwell time on the video). All of Stage B's internal timings (t1/t2 in applyStageB) are already
-     expressed as FRACTIONS of the growth phase, not absolute vh, so this change needs no threshold
-     recalculation there — see the JS growth/hold breakdown comment near the ScrollTrigger setup for
-     the full old-p/new-p absolute-scroll conversion table. */
+     Growth distance shortened TWICE, both times "捲動距離太長":
+       2026-08-09  320vh -> 180vh
+       2026-08-25  180vh -> 120vh  (cut by a third; now 37.5% of the original 320vh)
+     Hold is untouched both times and stays 150vh (deliberate dwell time on the video).
+
+     All of Stage B's internal timings (t1/t2 in applyStageB) are expressed as FRACTIONS of the
+     growth phase, not absolute vh, so neither change needs a threshold recalculation there.
+     The normalisation that makes this true is one line in ptwLoop():
+         growthP = clamp01(rawSelfProgress * (growth + hold) / growth)
+     — rawSelfProgress spans the whole pinned range, and that factor rescales it so growthP hits
+     exactly 1.0 at the end of the growth distance whatever that distance is.
+
+     ⚠️ Because `growth` is the DENOMINATOR there, ptwGrowthHold() in the JS must be edited in
+     lockstep with these three CSS heights. Leave it stale and the normalisation divides by the old
+     number: the frame would finish growing well past the growth distance and eat into the hold.
+     See the JS growth/hold breakdown comment near the ScrollTrigger setup. */
   .ptw-outer {
     position: relative;
-    height: 430vh; /* 180vh growth (shortened, faster pacing accepted as tradeoff) + 150vh hold + 100vh viewport */
+    height: 370vh; /* 120vh growth (shortened twice, faster pacing accepted as tradeoff) + 150vh hold + 100vh viewport */
   }
 
   .ptw-stage {
@@ -667,13 +678,13 @@
 
   /* ---------- RWD (§6.2 七) ---------- */
   @media (max-width: 900px) {
-    .ptw-outer { height: 366vh; } /* 146vh growth (180/320 ratio of the old 260vh) + 120vh hold (unchanged) + 100vh */
+    .ptw-outer { height: 317vh; } /* 97vh growth (2026-08-25: 146 cut by a third; 146 itself was the 180/320 ratio of the original 260vh) + 120vh hold (unchanged both times) + 100vh */
     /* tablet: three most prominent figures stay, rest hide */
     .ptw-fig-dw2, .ptw-fig-dw3, .ptw-fig-grass, .ptw-fig-red { display: none; }
   }
 
   @media (max-width: 600px) {
-    .ptw-outer { height: 265vh; } /* 90vh growth (180/320 ratio of the old 160vh) + 75vh hold (unchanged) + 100vh */
+    .ptw-outer { height: 235vh; } /* 60vh growth (2026-08-25: 90 cut by a third; 90 itself was the 180/320 ratio of the original 160vh) + 75vh hold (unchanged both times) + 100vh */
     /* mobile: only two figures, moved above/below the frame rather than around it (§6.2 七) */
     .ptw-fig-dw5, .ptw-fig-orange, .ptw-fig-pink, .ptw-fig-yellow, .ptw-fig-leaf { display: none; }
     .ptw-fig-dw31 { left: 30%; top: -18%; width: 40%; height: auto; }
@@ -1355,17 +1366,17 @@
         <div class="ptw-viewport" id="ptw-viewport">
           <div class="ptw-visual" id="ptw-visual">
 
-            <div class="ptw-fig ptw-fig-dw3" data-fig="dw3"><img src="../assets/svg/dance%20woman_3.png" alt="" aria-hidden="true"></div>
-            <div class="ptw-fig ptw-fig-dw31" data-fig="dw31"><img src="../assets/svg/dance%20woman_3-1.png" alt="" aria-hidden="true"></div>
+            <div class="ptw-fig ptw-fig-dw3" data-fig="dw3"><img src="../assets/svg/dance%20woman_3.svg" alt="" aria-hidden="true"></div>
+            <div class="ptw-fig ptw-fig-dw31" data-fig="dw31"><img src="../assets/svg/dance%20woman_3-1.svg" alt="" aria-hidden="true"></div>
             <div class="ptw-fig ptw-fig-grass" data-fig="grass"><img src="../assets/svg/grass.png" alt="" aria-hidden="true"></div>
-            <div class="ptw-fig ptw-fig-red" data-fig="red"><img src="../assets/svg/flower_red.png" alt="" aria-hidden="true"></div>
-            <div class="ptw-fig ptw-fig-dw1" data-fig="dw1"><img src="../assets/svg/dance%20woman_1.png" alt="" aria-hidden="true"></div>
-            <div class="ptw-fig ptw-fig-dw2" data-fig="dw2"><img src="../assets/svg/dance%20woman_2.png" alt="" aria-hidden="true"></div>
-            <div class="ptw-fig ptw-fig-dw5" data-fig="dw5"><img src="../assets/svg/dance%20woman_5.png" alt="" aria-hidden="true"></div>
-            <div class="ptw-fig ptw-fig-orange" data-fig="orange"><img src="../assets/svg/flower_orange.png" alt="" aria-hidden="true"></div>
-            <div class="ptw-fig ptw-fig-pink" data-fig="pink"><img src="../assets/svg/flower_pink.png" alt="" aria-hidden="true"></div>
-            <div class="ptw-fig ptw-fig-yellow" data-fig="yellow"><img src="../assets/svg/flower_yellow.png" alt="" aria-hidden="true"></div>
-            <div class="ptw-fig ptw-fig-leaf" data-fig="leaf"><img src="../assets/svg/leave_blue.png" alt="" aria-hidden="true"></div>
+            <div class="ptw-fig ptw-fig-red" data-fig="red"><img src="../assets/svg/flower_red.svg" alt="" aria-hidden="true"></div>
+            <div class="ptw-fig ptw-fig-dw1" data-fig="dw1"><img src="../assets/svg/dance%20woman_1.svg" alt="" aria-hidden="true"></div>
+            <div class="ptw-fig ptw-fig-dw2" data-fig="dw2"><img src="../assets/svg/dance%20woman_2.svg" alt="" aria-hidden="true"></div>
+            <div class="ptw-fig ptw-fig-dw5" data-fig="dw5"><img src="../assets/svg/dance%20woman_5.svg" alt="" aria-hidden="true"></div>
+            <div class="ptw-fig ptw-fig-orange" data-fig="orange"><img src="../assets/svg/flower_orange.svg" alt="" aria-hidden="true"></div>
+            <div class="ptw-fig ptw-fig-pink" data-fig="pink"><img src="../assets/svg/flower_pink.svg" alt="" aria-hidden="true"></div>
+            <div class="ptw-fig ptw-fig-yellow" data-fig="yellow"><img src="../assets/svg/flower_yellow.svg" alt="" aria-hidden="true"></div>
+            <div class="ptw-fig ptw-fig-leaf" data-fig="leaf"><img src="../assets/svg/leave_blue.svg" alt="" aria-hidden="true"></div>
 
             <h2 class="ptw-title" id="ptw-title">
               <span class="reveal-mask"><span class="reveal-inner">I design across <em>health</em> and the <em>environment</em>,</span></span>
@@ -1671,14 +1682,23 @@
 
   /* growth/hold split, in vh, per breakpoint. Declared out here (not inside the Section 2 IIFE) so the
      scroll-to-next-section button further down can also read it, to compute the hold-start anchor.
-     "growth" shortened 2026-08-09 (320/260/160 -> 180/146/90, desktop given directly, tablet/mobile
-     scaled by the same 180/320 ratio); "hold" stays unchanged (150/120/75 — deliberate dwell time on
-     the video). Matches the .ptw-outer heights set in CSS:
-       desktop: 180 + 150 + 100 = 430vh   tablet: 146 + 120 + 100 = 366vh   mobile: 90 + 75 + 100 = 265vh */
+     "growth" has been shortened twice, both times "捲動距離太長":
+       2026-08-09  320/260/160 -> 180/146/90   (desktop given directly, tablet/mobile scaled by 180/320)
+       2026-08-25  180/146/90  -> 120/97/60    (each cut by a third; desktop now 37.5% of the original)
+     "hold" stays unchanged through both (150/120/75 — deliberate dwell time on the video).
+
+     ⚠️ These numbers are DUPLICATED in the .ptw-outer heights in CSS and must be edited together:
+       desktop: 120 + 150 + 100 = 370vh   tablet: 97 + 120 + 100 = 317vh   mobile: 60 + 75 + 100 = 235vh
+     `growth` is the denominator in ptwLoop's growthP normalisation, so a stale value here does not
+     merely mistime things — it divides by a distance that no longer exists, and the frame finishes
+     growing past the growth phase, eating into the hold.
+
+     Stage B's own t1/t2 thresholds need no recalculation for either change: growthP is normalised
+     against `growth`, so 0.30 / 0.08 / 0.85 are fractions of whatever the growth distance is. */
   function ptwGrowthHold() {
-    if (window.innerWidth <= 600) return { growth: 90, hold: 75 };
-    if (window.innerWidth <= 900) return { growth: 146, hold: 120 };
-    return { growth: 180, hold: 150 };
+    if (window.innerWidth <= 600) return { growth: 60, hold: 75 };
+    if (window.innerWidth <= 900) return { growth: 97, hold: 120 };
+    return { growth: 120, hold: 150 };
   }
 
   /* Gallery card height (§6.3 十, 2026-08-09): fit "title block + one row of cards" into exactly
