@@ -1,0 +1,290 @@
+/* ====================================================================
+   AERO V 作品詳情頁
+   Figma 檔 5HAqwzDuPvXLvX0WG6VPfP，整頁 frame node 796:705（1440×10266）
+
+   命名空間一律 .av-*，比照 Sui-Sui 的 .ss-* 與 WanderBuddy 的 .wb-*，
+   三頁互不干擾。字體維持全站的 Poppins；唯一的例外是「AERO V」字標，
+   那是 Skia Light 匯出的 inline SVG 外框字，不是文字（見 Wordmark.jsx）。
+
+   這一輪只做 hero（796:884）與 logo& overview（796:714）兩區，其餘十區
+   分輪做——順序記在 AeroVPage.jsx 的註解裡。
+   ==================================================================== */
+
+.av-case {
+  display: flex;
+  flex-direction: column;
+}
+
+.av-section {
+  padding-block: clamp(48px, 6vw, 96px);
+}
+
+/* hero 之後的第一個區塊，上緣間距單獨指定。
+   ⚠️ 這是刻意偏離 Figma，不是還原度問題。之後疊圖比對看到與 Figma 差
+   50px 不要當成 bug 改回去。Figma 稿也會同步更新。
+
+   調整沿革（Figma 原值 160px，node 796:884 底 y=966 → 796:714 頂 y=1126）：
+     2026-08-26  160px → 280px  依指示（hero 接標題卡處太擠）
+     2026-08-26  280px → 210px  依指示（280 又太寬），現行值
+   （使用者第二次的指示文字寫的是「從 Figma 的 280px 改成 210px…太擠」，
+    但 Figma 是 160 不是 280，且 280→210 是變窄不是變寬——判定為複製上一
+    則訊息時的筆誤，這裡照事實記錄，已回報。）
+
+   再記一筆，免得有人以為原本就是 160：這一段間距原先根本沒有單獨指定，
+   走的是 .av-section 的通用節奏 clamp(48px, 6vw, 96px)，實測 1440px 時
+   86.4px、1155px 時 69.3px——本來就比 Figma 的 160px 少 73.6／90.7px
+   （漏對 Figma，不是設計稿的問題）。所以第一次調整實際上是 86.4 → 280。 */
+.av-section--after-hero {
+  padding-top: 210px;
+}
+
+/* Figma 的內容欄是 1160 寬、擺在 1440 頁面的 x=150（右邊剩 130，左右不
+   對稱，視為設計稿誤差，這裡改為置中）。
+   ⚠️ max-width 是 1160 + 2×--page-gutter，不是 1160：全站 globals.css 有
+   `box-sizing: border-box`，max-width 量的是「含 padding 的外框」。寫 1160
+   的話內容欄只剩 1160 − 2×40 = 1080，整個區塊會窄 80px（實測過）。 */
+.av-overview-inner {
+  max-width: calc(1160px + var(--page-gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--page-gutter);
+}
+
+/* ==================== HERO（node 796:884，1440×966）==================== */
+
+/* ⚠️ 固定長寬比是這一區的關鍵：照片與兩段字標的相對位置必須鎖死，
+   1155px 與 1440px 只能是同一張構圖等比縮放。所以整區用
+   aspect-ratio: 1440/966，字標全部用百分比定位，沒有任何絕對 px。
+   改成固定高度或讓字標用 px 定位，窄視窗就會錯位。 */
+.av-hero {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1440 / 966;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.av-hero-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 字標。顏色 #5B5B5B 取自 Figma node 796:886 / 796:887 的 text fill；
+   SVG 內的 path 是 fill="currentColor"，所以由這裡的 color 決定。 */
+.av-hero-word {
+  position: absolute;
+  height: auto;
+  color: #5b5b5b;
+  pointer-events: none;
+}
+
+/* 百分比的推導 —— 用的是「墨跡座標」不是 Figma 文字框座標。
+   文字節點 796:886 是 x=324 y=335 275×165（165 = 114px × 行高 1.45），
+   但匯出的 SVG 只含實際筆畫、是 269×79。墨跡的絕對座標是從匯出 SVG 內
+   那層整頁背景矩形的 transform 反推的：translate(-323.777, -372.462)
+   ⇒ 墨跡左上角在頁面座標 (323.777, 372.462)。
+     left  = 323.777 / 1440 = 22.4845%
+     top   = 372.462 /  966 = 38.5571%
+     width = 269     / 1440 = 18.6806%   （高度由 viewBox 比例自動得出） */
+.av-hero-word--aero {
+  left: 22.4845%;
+  top: 38.5571%;
+  width: 18.6806%;
+}
+
+/* 同上，796:887 的 transform 是 translate(-930.722, -373.687)，
+   墨跡 71×77（文字框 71×165）：
+     left  = 930.722 / 1440 = 64.6335%
+     top   = 373.687 /  966 = 38.6839%
+     width = 71      / 1440 =  4.9306% */
+.av-hero-word--v {
+  left: 64.6335%;
+  top: 38.6839%;
+  width: 4.9306%;
+}
+
+/* ============ LOGO & OVERVIEW（node 796:714，1160×501）============ */
+
+/* Figma 的標題欄 796:715 是 x=32 w=1077（中心 570.5），比 1160 容器的
+   中心 580 偏左 9.5px；下面的 meta 列 796:719 也帶同一個 9.5px 偏移。
+   整個區塊是置中構圖，9.5px 是設計稿的繪製誤差，這裡改為真正置中——
+   跟 §6.5 作品分類頁、§6.6 About 兩處對「Figma 左緣不一致」的既有裁示
+   同一個處理方式。已回報過這個數字。 */
+/* ⚠️ 必須是 flex column + gap，不可以改回「各項自己下 margin」：
+   Figma 的 Frame 16 本身就是 flex column gap:11。用 margin 的話，標題
+   <h1> 的 margin-bottom(16.45) 與 <p> 的 margin-top(11) 是相鄰兄弟，會
+   **邊界塌陷**成 max(16.45, 11)=16.45 而不是相加，副標以下每一項都會
+   往上跑 11px（實測過）。flex 容器的子項不塌陷，gap 是實打實的間距。 */
+.av-overview-head {
+  max-width: 1077px;
+  margin-inline: auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+/* 標題（796:716）。外框字，實際顏色 #353535 取自 Figma text fill。
+   上下的 margin 是在補「墨跡 ≠ 文字框」的差：文字框 338×92，墨跡
+   338×67 且從框頂往下 8.55px 開始（8.55 = 1134.55 − 1126）。
+     margin-top    = 8.55                （框頂 → 墨跡頂）
+     margin-bottom = 92 − 8.55 − 67 = 16.45（墨跡底 → 框底）
+   兩者加上墨跡 67 剛好還原成 Figma 的 92px 文字框，於是下面 11px 的
+   標準行距（.av-overview-head 的 flex gap:11px）不需要為了這一項另外調整。 */
+.av-overview-title {
+  margin: 8.55px 0 16.45px;
+  color: #353535;
+}
+
+.av-overview-title-mark {
+  display: block;
+  width: min(338px, 62%);
+  height: auto;
+  margin-inline: auto;
+}
+
+/* 796:717：24px Poppins Italic、#717171、字距 -0.12px、行高 1.45
+   （1.45 × 24 = 34.8 ≈ Figma 實測高 35）。
+   與上一項的 11px 間距由 .av-overview-head 的 flex gap 提供。 */
+.av-overview-subtitle {
+  margin: 0;
+  font-size: clamp(18px, 1.6667vw, 24px);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.45;
+  letter-spacing: -0.12px;
+  color: #717171;
+}
+
+/* 796:718：18px Poppins Regular、#353535、字距 -0.09px、行高 1.5。
+   Figma 實測高 54 = 2 行 × 27px。寬度交給 .av-overview-head 的 1077px，
+   讓瀏覽器在同樣的欄寬下自然換行，斷行位置才會跟 Figma 一致。
+   與上一項的 11px 間距由 .av-overview-head 的 flex gap 提供。 */
+.av-overview-body {
+  margin: 0;
+  font-size: clamp(15px, 1.25vw, 18px);
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: -0.09px;
+  color: #353535;
+}
+
+/* 得獎標章（796:727，422.45×64.34）。Figma：描述文字框底 y=203 →
+   標章頂 y=255，相距 52px。 */
+.av-overview-awards {
+  margin-top: 52px;
+  display: flex;
+  justify-content: center;
+}
+
+.av-overview-awards-img {
+  display: block;
+  width: min(422.45px, 70%);
+  height: auto;
+}
+
+/* 分隔線（796:726「Vector 99」，1160×0，y=342）。
+   ⚠️ 寬度刻意「不」用 Figma 的 1160：改用跟導覽列同一個 .page-container
+   （同一個 --page-gutter），讓左右緣對齊導覽列 logo 左緣與 Contact Me
+   右緣。這是 Sui-Sui 與 WanderBuddy 兩頁已經套用並確認過的做法，三頁
+   保持一致比各自照抄 Figma 的寬度重要。差異數字已回報。
+   間距：標章底 y=319.34 → 線 y=342，相距 22.66px。 */
+.av-overview-divider-row {
+  margin-top: 22.66px;
+}
+
+.av-overview-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--rule);
+}
+
+/* Type / Category / Tool 三欄（796:719 標籤列 + 796:723/724/725 值）。
+   Figma 的三個「值」中心在 1160 容器內的 262.5 / 580.5 / 891.5；三個
+   「標籤」中心是 262.5 / 573.5 / 881.5——標籤與值本身就沒對齊（差 7 與
+   10px），顯然是繪製誤差，實際意圖是三等分置中的三欄。
+   這裡用 944px 寬的三等分 grid，欄中心落在 265.33 / 580 / 894.67，
+   與 Figma「值」的中心相差 +2.83 / −0.5 / +3.17px，都在 8px 內。
+   做法與 .ss-overview-meta（928px）相同。
+   間距：線 y=342 → 標籤頂 y=388，相距 46px。 */
+.av-overview-meta {
+  margin: 46px auto 0;
+  max-width: 944px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  justify-items: center;
+}
+
+.av-overview-meta-item {
+  text-align: center;
+}
+
+/* 796:720/721/722：16px Poppins Regular、#747474。
+   ⚠️ 行高用 28.4px 不是 1.5（=24px）：Figma 三個標籤的框高不一致——
+   Category(796:721) 是 29 高、行高 28.4，Type/Tool(796:720/722) 是 24 高
+   但 y 各自往下偏 2.5，也就是「24 的字置中在 29 的列」，等同於行高 28.4。
+   下面的 27px 間距是從 Figma 的標籤列底 y=417（=388+29）量的，標籤若只有
+   24 高，值列就會整排上移 4.1px（實測過）。 */
+.av-overview-meta-label {
+  display: block;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 28.4px;
+  letter-spacing: -0.08px;
+  color: #747474;
+}
+
+/* 796:723/724/725：20px Poppins SemiBold、#353535、行高 28.4px。
+   間距：標籤底 y=417 → 值頂 y=444，相距 27px。<dd> 預設有左邊界，清掉。 */
+.av-overview-meta-value {
+  margin: 27px 0 0;
+  font-size: clamp(17px, 1.3889vw, 20px);
+  font-weight: 600;
+  line-height: 28.4px;
+  color: #353535;
+}
+
+/* ---------- RWD ---------- */
+/* Figma 只有 1440 一個 frame，以下斷點是我依全站既有斷點（900 / 600，
+   見 §6.6 與 Sui-Sui）訂的，Figma 沒有對應稿，是假設值。 */
+@media (max-width: 900px) {
+  .av-overview-meta {
+    max-width: 100%;
+  }
+  .av-overview-title-mark {
+    width: min(338px, 72%);
+  }
+  .av-overview-awards-img {
+    width: min(422.45px, 82%);
+  }
+}
+
+@media (max-width: 600px) {
+  /* 三欄在手機上擠不下，改單欄堆疊 */
+  .av-overview-meta {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .av-overview-meta-value {
+    margin-top: 8px;
+  }
+  .av-overview-title-mark {
+    width: 82%;
+  }
+  .av-overview-awards-img {
+    width: 92%;
+  }
+}
+
+/* ---------- reduced motion ---------- */
+/* 進場動效由 useStandardEntrance 用 matchMedia 分支處理（GSAP 寫的是
+   inline style，CSS 蓋不掉）；這裡只保底把 transform/opacity 歸位。 */
+@media (prefers-reduced-motion: reduce) {
+  .av-entrance-item {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
