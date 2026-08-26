@@ -3,7 +3,7 @@
 import { useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { mainEase } from '@/lib/ease';
-import { useNavBehavior } from '@/components/NavBehaviorProvider';
+import { useNavBehavior, useNavBehaviorConfig } from '@/components/NavBehaviorProvider';
 import './home-stage.css';
 
 /**
@@ -42,6 +42,18 @@ const MIN_COUNT_MS = 2500; // §6.1：最短 2.5 秒，從 PHASE 2 起算
 const STALL_CEILING = 96; // §6.1：資產沒到齊就停在 95–97 附近，不再往上
 const DIGIT_SHIFT_DUR = 0.15; // 位數改變時重新置中的補間長度（你指定 150ms）
 
+// PHASE 3 時間軸（§6.1，單位秒）
+const P3 = {
+  uiOutDur: 0.35, // 3.1 計數器與大 logo 淡出 + scale(0.92)
+  dolly: 1.3, // 3.2 推軌 1300ms（手機縮短為 1000ms，見 §6.1 RWD）
+  dollyMobile: 1.0,
+  benchLag: 0.08, // 右板凳晚 80ms
+  zDrop: 0.35, // 舞台 z-index 降階，讓導覽列能浮上來
+  zAfter: 999, // 降到 999：高於頁腳(auto)、低於導覽列(1000)
+  navIn: 0.4, // 3.3 導覽列進場
+  reducedFade: 0.3, // reduced motion：直接 300ms 交叉淡入
+};
+
 /**
  * 三段式 ease（§6.1 節奏）：0→60 輕快、60→90 明顯變慢、90→100 最慢。
  * 回傳 0–1 的 progress，乘 100 後 floor 成顯示值。
@@ -58,9 +70,19 @@ function counterEase(t) {
 }
 
 export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg }) {
-  // Loading 是滿版畫布，蓋掉導覽列預留的空間；導覽列本身先隱藏，
-  // PHASE 3 的 +400ms 才讓它進場。
-  useNavBehavior({ startHidden: true, fullBleedTop: true });
+  // 首頁是滿版 Hero：不要 .page-content 的 126px 上留白、導覽列背景透明。
+  // 這兩件事由最外層 <div> 的 data-nav-bleed 屬性 + globals.css 的 :has()
+  // 規則處理，「不」走這個 hook——走 hook 的話 SSR 的 HTML 不帶那個 class，
+  // hydration 後才翻，整頁會往上跳 126px（實測 CLS 0.0867）。
+  //
+  // 這裡只留 deferIntro：導覽列的 logo 與連結先隱藏，等 PHASE 3 的 +400ms
+  // 由 playNavIntro() 叫進場。
+  //
+  // ⚠️ 刻意不用 startHidden：那是「整條 bar 移出畫面再滑回來」，但 §6.1
+  // PHASE 3.3 要的是「小 logo 在左上角原地淡入 + 上升 12px」——bar 本身
+  // 從頭就在 y:0，只是內容透明，加上 Loading 舞台蓋著所以看不見。
+  useNavBehavior({ deferIntro: true });
+  const { playNavIntro } = useNavBehaviorConfig();
 
   const rootRef = useRef(null);
   const benchLeftRef = useRef(null);
@@ -102,6 +124,97 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg }) {
       const L = measure(bl, slotLeftRef.current);
       const R = measure(br, slotRightRef.current);
       loadingXform.current = { left: L, right: R };
+
+      // ── PHASE 3 轉場：Loading 變成 Hero ─────────────────────────
+      // §6.1：一次連續的攝影機推軌，不是換頁。不可淡出到空白、不可白閃、
+      // 不可路由切換——觀者視線全程不能失去板凳。
+      //
+      // ⚠️ 板凳用的是「與 Loading 完全相同的 SVG 元素」。推軌就是把
+      // loadingXform 那組 transform 動畫回 (0,0,1)——同一個 DOM 節點、
+      // 同一個 transform 屬性的連續補間。不 unmount、不交叉淡入、不寫死
+      // 放大倍率（倍率由 measure() 在執行期用 getBoundingClientRect 量
+      // loading slot 與 hero 尺寸算出，任一邊改了都會自動正確）。
+      const runTransition = () => {
+        const stage = rootRef.current;
+
+        // ⚠️ 先殺掉 PHASE 2 的板凳漂移。那是 repeat:-1 + yoyo 的無限補間，
+        // 動的也是 y——不殺的話會跟推軌搶同一個屬性，推軌設的 y:0 會被漂移
+        // 一直覆寫回去，板凳最後停在「漂移基準」而不是 Hero 位置。
+        // 實測過：不殺時左板凳結束於 y=-153（Hero 目標是 0），整整高了 153px。
+        gsap.killTweensOf([bl, br]);
+        const dollyDur = window.matchMedia('(max-width: 600px)').matches
+          ? P3.dollyMobile // §6.1 RWD：手機推軌縮短為 1000ms
+          : P3.dolly;
+
+        // reduced motion：完全跳過推軌，直接 300ms 交叉淡入到 Hero 最終狀態
+        if (reduce) {
+          gsap.to([logo, counter], { opacity: 0, duration: P3.reducedFade, ease: mainEase });
+          gsap.to([bl, br], {
+            x: 0,
+            y: 0,
+            scale: 1,
+            duration: P3.reducedFade,
+            ease: mainEase,
+            onComplete: () => {
+              stage.style.zIndex = String(P3.zAfter);
+              document.documentElement.style.overflow = '';
+            },
+          });
+          playNavIntro();
+          return;
+        }
+
+        // §6.1 技術要求：will-change: transform 只在推軌階段掛著，之後移除
+        gsap.set([bl, br], { willChange: 'transform' });
+
+        const tl = gsap.timeline();
+
+        // 3.1 Loading UI 退場（0 → 350ms）。板凳完全不理會這件事，
+        //     它們已經開始移動了。
+        //     掛 will-change 是為了 AC 第 12 條——計數器是文字，不提升成
+        //     合成層的話 opacity 淡出會逐幀 repaint，推軌期間就不是「只有
+        //     composite」。實測沒掛時推軌窗口內有 28 次 Paint。
+        gsap.set([logo, counter], { willChange: 'transform, opacity' });
+        tl.to(
+          [logo, counter],
+          {
+            opacity: 0,
+            scale: 0.92,
+            duration: P3.uiOutDur,
+            ease: mainEase,
+            onComplete: () => gsap.set([logo, counter], { willChange: 'auto' }),
+          },
+          0
+        );
+
+        // 3.2 板凳推軌（0 → 1300ms）。左板凳領先、右板凳晚 80ms，
+        //     不要像一整塊剛體在動。
+        tl.to(bl, { x: 0, y: 0, scale: 1, duration: dollyDur, ease: mainEase }, 0);
+        tl.to(br, { x: 0, y: 0, scale: 1, duration: dollyDur, ease: mainEase }, P3.benchLag);
+
+        // 舞台降階，導覽列才能浮上來。此時 Loading UI 已經淡完，
+        // 導覽列內容也還是透明的（deferIntro），不會有東西突然冒出來。
+        //
+        // ⚠️ 只降到 999，不可降到 0。.footer-frame 是 position:relative /
+        // z-index:auto，跟 z-index:0 同層且在 DOM 中較後面——舞台降到 0 的
+        // 話頁腳會整個蓋上來，板凳被頁腳文字擋住，直接違反 §6.1「觀者的
+        // 視線全程不能失去板凳」。實測過，推軌 500ms 處畫面會露出整個
+        // 頁腳。999 剛好高於頁腳、低於導覽列的 1000。
+        tl.call(() => { stage.style.zIndex = String(P3.zAfter); }, null, P3.zDrop);
+
+        // 3.3 導覽列到位（400 → 900ms）。板凳還在移動的同時。
+        tl.call(() => playNavIntro(), null, P3.navIn);
+
+        // 推軌結束才解鎖捲動，中途不會被捲動打斷
+        tl.call(
+          () => {
+            gsap.set([bl, br], { willChange: 'auto' });
+            document.documentElement.style.overflow = '';
+          },
+          null,
+          P3.benchLag + dollyDur
+        );
+      };
 
       // ── PHASE 2 計數器 ───────────────────────────────────────────
       const startCounter = () => {
@@ -174,9 +287,7 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg }) {
           }
 
           if (displayed >= 100) {
-            // PHASE 3 的接點：下一輪在這裡啟動推軌。
-            // 這一輪先把捲動解鎖，不然頁面會永遠鎖著。
-            document.documentElement.style.overflow = '';
+            runTransition(); // PHASE 3
             return;
           }
           raf = requestAnimationFrame(tick);
@@ -305,7 +416,9 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg }) {
   }, []);
 
   return (
-    <div className="home-stage" ref={rootRef}>
+    // data-nav-bleed：滿版頁面標記。必須留在最外層元素上——globals.css 用
+    // `.page-content:has(> [data-nav-bleed])` 選它（直接子層）。
+    <div className="home-stage" data-nav-bleed ref={rootRef}>
       <div className="bench-stage">
         {/* ⚠️ 這兩個節點永不 unmount——PHASE 3 直接對它們做 transform。
             dangerouslySetInnerHTML 的內容是專案自己的靜態 SVG 資產。 */}

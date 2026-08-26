@@ -22,10 +22,16 @@ import NextWork from './NextWork';
 export default function WanderBuddyPage() {
   // 滿版 Hero 頁面：導覽列進頁時先隱藏，往下滾再往上滾才叫出來，見
   // components/Nav.jsx 上方註解與 NavBehaviorProvider。
-  useNavBehavior({ startHidden: true, fullBleedTop: true });
+  // 滿版 Hero（不留 126px 上留白、導覽列背景透明）改由下面 <div> 的
+  // data-nav-bleed + globals.css 的 :has() 規則處理，不再走這個 hook——
+  // 走 hook 是 hydration 之後才生效，整頁會往上跳 126px（實測 CLS 0.0875）。
+  // startHidden 留著：那是捲動方向的 JS 邏輯，只改 transform，不造成位移。
+  // 這一輪只動這一行與下面的屬性，頁面的視覺與動效完全沒碰。
+  useNavBehavior({ startHidden: true });
 
   return (
-    <div className="wb-case">
+    // data-nav-bleed 必須留在最外層（globals.css 用直接子層選擇器選它）
+    <div className="wb-case" data-nav-bleed>
       {/* y=116 — Hero 用元件本身內建的動畫，不另外加進場效果 */}
       <Hero />
 

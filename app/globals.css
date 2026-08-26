@@ -81,11 +81,42 @@ body {
   padding-top: calc(116px + var(--nav-top-gap)); /* 讓內容不被 fixed nav 蓋住 */
 }
 
-/* 滿版 Hero 頁面（見 NavBehaviorProvider 的 fullBleedTop）：不留這塊空間，
-   Hero 直接從 y=0 開始；導覽列是 position:fixed，滑出時本來就會浮在
-   內容上面，不需要額外的 padding-top 幫忙讓位 */
-.page-content--bleed {
+/* ==================== 滿版 Hero 頁面（data-nav-bleed）====================
+   首頁、/work/sui-sui、/work/wanderbuddy 的 Hero 要從 y=0 開始，不留上面
+   那塊給固定導覽列的空間，導覽列直接浮在 Hero 上、背景透明。
+
+   ⚠️⚠️ 這裡「必須」是純 CSS，不可以改回用 JS 在 hydration 之後翻 class。
+   舊做法是 NavBehaviorProvider 的 fullBleedTop flag → PageContent 加
+   .page-content--bleed。問題是 SSR 輸出的 HTML 沒有那個 class，瀏覽器先
+   用 126px 的 padding 排一次版、畫出來，effect 執行後才變 0，底下所有內容
+   往上跳 126px。實測三頁都因此吃到 CLS：
+     /                 0.0867（DIV.footer-frame  126→0 @449ms）
+     /work/sui-sui     0.0875（SECTION.ss-hero   126→0 @481ms）
+     /work/wanderbuddy 0.0875（DIV.wb-scrim      126→0 @711ms）
+   改成 :has() 之後，這件事在「第一次 style resolution」就決定了，比第一次
+   paint 還早——不是把位移藏起來讓它不計入 CLS，是位移根本不會發生。
+
+   為什麼用 DOM 標記而不是 route group：「滿版」是頁面元件的性質，不是路由
+   的性質。/work/[slug] 這一條路由底下 sui-sui 與 wanderbuddy 是滿版、其他
+   slug 的空殼不是，一條動態路由沒辦法同時屬於兩個 route group。標記跟著
+   元件走就沒有這個問題。
+
+   新增滿版頁面時：在該頁元件的「最外層」元素加 data-nav-bleed 即可，
+   兩條規則都靠它，不需要動 JS。忘記加的後果只是多 126px 上留白，看得出來。
+
+   :has() 是 Baseline（Chrome 105 / Safari 15.4 / Firefox 121）。更舊的
+   瀏覽器會在這三頁多 126px 留白——內容往下推，不破版。 */
+
+/* 1) 不留導覽列的空間 */
+.page-content:has(> [data-nav-bleed]) {
   padding-top: 0;
+}
+
+/* 2) 導覽列不要不透明的米色底（疊在 Hero 上面會很突兀）。
+      .site-nav 是 .page-content 的兄弟，不是子孫，所以從共同祖先 body 選。
+      特異度 (0,2,1) 高於下面 .site-nav 的 (0,1,0)，順序無關也蓋得過。 */
+body:has(.page-content > [data-nav-bleed]) .site-nav {
+  background: transparent;
 }
 
 .page-container {
@@ -106,11 +137,8 @@ body {
   transform: translateY(0);
 }
 
-/* 滿版 Hero 頁面（見 NavBehaviorProvider 的 fullBleedTop）：導覽列疊在
-   Hero 上面時不要不透明的米色底，讓 Hero 內容透出來 */
-.site-nav--transparent {
-  background: transparent;
-}
+/* 導覽列的透明背景見上面 .page-content 那段的 data-nav-bleed 規則——
+   刻意跟 padding-top 綁在同一個標記上，兩者是同一件事的兩面。 */
 
 .nav-inner {
   height: 100%;

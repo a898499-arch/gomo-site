@@ -4,7 +4,6 @@ import './globals.css';
 import { LenisProvider } from '@/components/LenisProvider';
 import { NavBehaviorProvider } from '@/components/NavBehaviorProvider';
 import Nav from '@/components/Nav';
-import PageContent from '@/components/PageContent';
 import Footer from '@/components/Footer';
 
 // latin-ext 子集是必要的：全站文案有台語羅馬字（例如 "lāi-té-tsē"）跟法文借字（Dècor Hoüse）
@@ -52,7 +51,13 @@ export default function RootLayout({ children }) {
         <LenisProvider>
           <NavBehaviorProvider>
             <Nav />
-            <PageContent>{children}</PageContent>
+            {/* 滿版 Hero 頁面（首頁 / sui-sui / wanderbuddy）不需要這層的
+                padding-top。判斷完全交給 globals.css 的
+                `.page-content:has(> [data-nav-bleed])`，因為那是純 CSS、
+                第一次排版就生效；用 context 在 hydration 之後翻 class 會
+                造成 126px 的 layout shift（詳見 globals.css 該段註解）。
+                所以這裡是死的 className，不要再包成 client component。 */}
+            <main className="page-content">{children}</main>
             <Footer />
           </NavBehaviorProvider>
         </LenisProvider>

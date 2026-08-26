@@ -40,10 +40,16 @@ import NextWork from './NextWork';
 //   搬去 Function 1 了，跟這裡的「Setup in three questions」標題語意
 //   對得上，跟原本的 All UI Animation 佔位標籤對不上）。
 export default function SuiSuiPage() {
-  useNavBehavior({ startHidden: true, fullBleedTop: true });
+  // 滿版 Hero（不留 126px 上留白、導覽列背景透明）改由下面 <div> 的
+  // data-nav-bleed + globals.css 的 :has() 規則處理，不再走這個 hook——
+  // 走 hook 是 hydration 之後才生效，整頁會往上跳 126px（實測 CLS 0.0875）。
+  // startHidden 留著：那是捲動方向的 JS 邏輯，CSS 表達不了，而且只改
+  // transform，不造成位移。
+  useNavBehavior({ startHidden: true });
 
   return (
-    <div className="ss-case">
+    // data-nav-bleed 必須留在最外層（globals.css 用直接子層選擇器選它）
+    <div className="ss-case" data-nav-bleed>
       {/* y=116～1086，970px 高 = 16 + 736 + 218。內容是新檔
           j4saimg2oJWL5tUkBh5Bww 的 node 2472:1023「Frame 50」（1064×736）。
           舊註解說「沒有專屬 Figma node」是對舊檔 web-ui_clean 而言，新檔
