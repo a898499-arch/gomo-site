@@ -1,0 +1,77 @@
+/* Next Work —— 數值全部照抄 sui-sui.css 的 .ss-next-*，只換 class 前綴。
+   換前綴的原因見 NextWork.jsx 檔頭：ss- 那組住在 sui-sui.css，只有
+   SuiSuiPage 會載入。 */
+
+.work-next {
+  padding-block: clamp(48px, 6vw, 96px);
+}
+
+.work-next-title {
+  margin: 0 0 40px;
+  font-weight: 500;
+  font-size: 32px;
+  letter-spacing: -0.16px;
+  color: #353535;
+}
+
+/* Figma：兩張封面各 672×415，x=0 與 x=693 → 欄距 21 */
+.work-next-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 21px;
+  row-gap: 48px;
+}
+
+.work-next-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* works.json 的 cover 目前是空字串（使用者說之後自己填），
+   所以先出 #d9d9d9 的佔位框，跟 sui-sui / wanderbuddy 現況一致。 */
+.work-next-card-cover {
+  width: 100%;
+  aspect-ratio: 672 / 415;
+  background: #d9d9d9;
+  border-radius: 4px;
+}
+
+.work-next-card-title {
+  margin: 16px 0 0;
+  font-weight: 400;
+  font-size: clamp(22px, 2.2222vw, 32px);
+  color: var(--ink);
+}
+
+.work-next-card-desc {
+  margin: 4px 0 0;
+  font-weight: 400;
+  font-size: clamp(16px, 1.4vw, 20px);
+  line-height: 22px;
+  color: var(--work-muted, #747474);
+}
+
+.work-next-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.work-next-card-tag {
+  border: 1px solid #5b5b5b;
+  border-radius: 999px;
+  padding: 4px 21px;
+  font-size: 16px;
+  color: var(--ink);
+  line-height: 22px;
+}
+
+@media (max-width: 600px) {
+  .work-next-grid {
+    grid-template-columns: 1fr;
+  }
+}

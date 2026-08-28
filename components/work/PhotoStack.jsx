@@ -1,6 +1,7 @@
 'use client';
 
 import { useStandardEntrance } from '@/lib/useStandardEntrance';
+import NextWork from './NextWork';
 import './photo-stack.css';
 
 // 「照片依序排列」型作品頁的共用版面。目前 /work/mvs 與 /work/blossom-care
@@ -19,23 +20,45 @@ import './photo-stack.css';
 // ⚠️ 每張照片各自掛一個 ScrollTrigger，不是整疊共用一個。整疊共用的話，
 // 容器頂端一進視窗就會把 10~11 張全部一起播完，捲到下面時早就播完了，
 // 等於只有第一張看得到進場。所以拆成 PhotoStackItem，一張一個觸發點。
-export default function PhotoStack({ base, photos }) {
+export default function PhotoStack({ base, photos, slug }) {
   return (
-    <div className="page-container">
-      <div className="work-photo-stack">
-        {photos.map((p, i) => (
-          <PhotoStackItem
-            key={p.file}
-            base={base}
-            file={p.file}
-            alt={p.alt}
-            // 第一張在首屏，不能 lazy（會延遲 LCP）；其餘全部 lazy，
-            // 這也是整頁下載量能壓下來的關鍵。
-            eager={i === 0}
-          />
-        ))}
+    <>
+      <div className="page-container">
+        <div className="work-photo-stack">
+          {photos.map((p, i) => (
+            <PhotoStackItem
+              key={p.file}
+              base={base}
+              file={p.file}
+              alt={p.alt}
+              // 第一張在首屏，不能 lazy（會延遲 LCP）；其餘全部 lazy，
+              // 這也是整頁下載量能壓下來的關鍵。
+              eager={i === 0}
+            />
+          ))}
+        </div>
+
+        {/* 純文字副本（CLAUDE.md 對匯出圖的無障礙補償）。
+            這些板子整面都是文字，只靠 alt 讀不完；但使用者 2026-08-28 裁示
+            **只做重點段落**——每張抓標題加一句核心敘述，不做 21 張的逐字轉錄。
+            放在照片之後而不是逐張穿插：螢幕閱讀器會先聽完每張的 alt，再一次
+            聽完整份摘要，比在圖與文之間來回跳更好懂。
+            .visually-hidden 是絕對定位，不佔 flex 版面、不會多出一個 gap。 */}
+        <div className="visually-hidden">
+          <h2>圖片內容摘要</h2>
+          <dl>
+            {photos.map((p) => (
+              <div key={p.file}>
+                <dt>{p.heading}</dt>
+                <dd>{p.summary}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
       </div>
-    </div>
+
+      <NextWork currentSlug={slug} />
+    </>
   );
 }
 
