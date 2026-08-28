@@ -785,3 +785,309 @@
   .av-sketch-frame { grid-template-columns: 1fr; }
   .av-sketch-cell--model { grid-row: auto; }
 }
+
+/* ============ FEATURES（node 796:938，1360.62×736.65）============
+   Figma 位置 x=40 y=5446。寬度幾乎正好是 .page-container 的內容寬（1360），
+   所以用 .page-container，做法同 SOLUTION / From Sketch。
+   整框鎖 aspect-ratio、字級用 cqw，1155 / 1440 / 1920 只會是同一張構圖等比縮放。
+
+   ⚠️ 區塊間距刻意偏離 Figma（依「通用節奏」指示）：Figma 是 senorio 底→
+   FEATURES 頂 89px，這裡是 .av-section 的 clamp(48px,6vw,96px) 上下相加 =
+   172.8px（1440 時），差 +83.8px。之後疊圖不要當成 bug。 */
+.av-feat-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1360.62 / 736.65;
+  container-type: inline-size;
+}
+
+/* 796:945 — 24px Poppins SemiBold #5B5B5B uppercase，行高 40.4，x=0 y=0 */
+.av-feat-eyebrow {
+  position: absolute;
+  left: 0;
+  top: 0;
+  margin: 0;
+  font-size: 1.7639cqw; /* 24 / 1360.62 */
+  font-weight: 600;
+  line-height: 1.6833; /* 40.4 / 24 */
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #5b5b5b;
+}
+
+/* 四張卡 y=97 高 639。Figma 的 x 是 0 / 341 / 685 / 1028，間距 8/11/10 —— 不
+   平均，平均值應是 (1360.62 − 4×333)/3 = 9.54。判定為繪製誤差，改用四等分
+   grid + gap 9.54，每張卡與 Figma 差 ≤1.6px（已回報）。 */
+.av-feat-cards {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 13.1683%; /* 97 / 736.65 */
+  height: 86.7440%; /* 639 / 736.65 */
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.7011cqw; /* 9.54 / 1360.62 */
+}
+
+/* ⚠️ overflow:hidden 不只是為了圓角 —— 箭頭是**被卡片裁掉的**：紅箭頭群組
+   796:953 的框是 x 79→399，超出卡 1 右緣 333，放大 Figma 截圖確認第三支箭頭
+   確實被切斷。拿掉這行箭頭就會溢出到卡片之間的縫隙。
+   底色 #EDECEE 取自 Figma 796:939/943/944 的 fill，**不可省略**：卡 1、卡 2
+   的照片整體只有 90% 不透明（實測中央區最大 alpha 229），底色會透出來。 */
+.av-feat-card {
+  position: relative;
+  background: #edecee;
+  border-radius: 1.4699cqw; /* 20 / 1360.62 */
+  overflow: hidden;
+}
+
+/* 照片佔卡片上緣 524 / 639。圓角交給卡片的 overflow 裁，這一層不必再寫。 */
+.av-feat-photo {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 81.9718%; /* 524 / 639 */
+}
+
+.av-feat-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.av-feat-arrow {
+  position: absolute;
+  display: block;
+}
+
+/* 卡 1（Figma 卡 x=0，照片框 y=97..621）。百分比分母是 333 × 524。 */
+.av-feat-arrow--features1-arrow-red {
+  left: 23.7237%; /* 79 / 333 */
+  top: 15.8397%; /* (180 − 97) / 524 */
+  width: 96.0961%; /* 320 / 333 */
+  height: 18.2706%; /* 95.7379 / 524 */
+}
+
+.av-feat-arrow--features1-arrow-blue {
+  left: 34.5345%; /* 115 / 333 */
+  top: 34.1603%; /* (276 − 97) / 524 */
+  width: 81.6817%; /* 272 / 333 */
+  height: 10.8779%; /* 57 / 524 */
+}
+
+/* 卡 2（Figma 卡 x=341）。兩支箭頭在 Figma 各帶 scaleX(-1) 與 −8.47° 旋轉，
+   匯出的 SVG 已經把 transform 烤進路徑（匯出尺寸等於旋轉後的 AABB），
+   所以這裡不需要任何 CSS transform。 */
+.av-feat-arrow--features2-arrow-up {
+  left: 66.9039%; /* (563.79 − 341) / 333 */
+  top: 32.6336%; /* (268 − 97) / 524 */
+  width: 7.1441%; /* 23.79 / 333 */
+  height: 10.3206%; /* 54.08 / 524 */
+}
+
+.av-feat-arrow--features2-arrow-down {
+  left: 37.2372%; /* (465 − 341) / 333 */
+  top: 74.1870%; /* (485.74 − 97) / 524 */
+  width: 66.1355%; /* 220.2312 / 333 */
+  height: 23.5853%; /* 123.5869 / 524 */
+}
+
+/* 標題與內文：Figma 給的 left 值全是**置中**的產物（實測四張卡的文字中心與
+   卡片中心只差 0.6～3.9px），照抄 left 反而會錯，因為實際渲染的字寬跟 Figma
+   的量測不一樣。所以只保留垂直座標，水平用 text-align:center。
+   卡片座標系：照片底 524、標題框 550→578、內文框 578→606、卡片底 639。 */
+.av-feat-title,
+.av-feat-body {
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: 0;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* 796:946 等 — 24px Poppins Medium #3F62DE，行高 27.4 */
+.av-feat-title {
+  top: 86.0720%; /* 550 / 639 */
+  font-size: 1.7639cqw; /* 24 / 1360.62 */
+  font-weight: 500;
+  line-height: 1.1417; /* 27.4 / 24 */
+  color: #3f62de;
+}
+
+/* 796:947 等 — 18px Poppins Light #000000，行高 27.4 */
+.av-feat-body {
+  top: 90.4538%; /* 578 / 639 */
+  font-size: 1.3229cqw; /* 18 / 1360.62 */
+  font-weight: 300;
+  line-height: 1.5222; /* 27.4 / 18 */
+  color: #000000;
+}
+
+/* ============ DIMENSIONS（node 796:907，1178×691）============
+   Figma 位置 x=40 y=6430。
+
+   ⚠️ 靠左對齊、不置中：Figma 是 x=40 寬 1178，右邊留了 222px 空白（FEATURES
+   是 x=40 寬 1360.62、左右對稱）。這裡照 Figma 靠左＝內容欄的 86.6176%。
+   全頁唯一非置中的區塊，判斷不出是刻意還是繪製疏漏，已回報。
+   要改成置中只要加一行 margin-inline: auto。
+
+   ⚠️ 區塊間距刻意偏離 Figma：Figma 是 FEATURES 底→Dimensions 頂 247.35px，
+   這裡是通用節奏 172.8px（1440 時），差 −74.55px。 */
+.av-dim-frame {
+  position: relative;
+  width: 86.6176%; /* 1178 / 1360 */
+  aspect-ratio: 1178 / 691;
+  container-type: inline-size;
+}
+
+/* 796:908「stool structure」x=491 y=0 379×681。去背 PNG，底下不墊底色。 */
+.av-dim-render {
+  position: absolute;
+  left: 41.6808%; /* 491 / 1178 */
+  top: 0;
+  width: 32.1732%; /* 379 / 1178 */
+  height: 98.5528%; /* 681 / 691 */
+  display: block;
+}
+
+/* 10 條引線共用一個 viewBox（＝整區座標系），端點必然互相對齊。
+   preserveAspectRatio:none —— 外框已經鎖了同樣的長寬比，不會變形，
+   但可以保證端點座標精確落位、不被 meet 的 letterbox 推移。 */
+.av-dim-leaders {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* 十個標籤 — 20px Poppins Regular #5B5B5B，行高 40.4（文字框高 41） */
+.av-dim-label {
+  position: absolute;
+  font-size: 1.6978cqw; /* 20 / 1178 */
+  font-weight: 400;
+  line-height: 2.02; /* 40.4 / 20 */
+  white-space: nowrap;
+  color: #5b5b5b;
+}
+
+/* 左側四個：右緣釘在「引線起點 − Figma 間距」，字寬變動也不會撞到線 */
+.av-dim-label--right-aligned {
+  text-align: right;
+}
+
+.av-dim-label--cushion { right: 73.5993%; top: 13.1693%; } /* 右緣 311＝線 319 − 8；y=91 */
+.av-dim-label--fan     { right: 70.2886%; top: 25.1809%; } /* 右緣 350＝線 360 − 10；y=174 */
+.av-dim-label--bracing { right: 72.9202%; top: 41.1002%; } /* 右緣 319＝線 326 − 7；y=284 */
+.av-dim-label--base    { right: 72.9202%; top: 55.8611%; } /* 右緣 319＝線 331 − 12；y=386 */
+
+/* 右側六個：照 Figma 的 left */
+.av-dim-label--power-hub { left: 77.5891%; top: 12.3010%; } /* x=914 y=85 */
+.av-dim-label--lever     { left: 77.5891%; top: 19.2475%; } /* x=914 y=133 */
+.av-dim-label--column    { left: 77.6740%; top: 35.6006%; } /* x=915 y=246 */
+.av-dim-label--hepa      { left: 77.6740%; top: 46.3097%; } /* x=915 y=320 */
+.av-dim-label--canister  { left: 77.6740%; top: 61.7945%; } /* x=915 y=427 */
+.av-dim-label--intake    { left: 77.6740%; top: 88.7120%; } /* x=915 y=613 */
+
+/* 796:935 — 22px Poppins Medium #353535，行高 40.4，x=0 y=540 */
+.av-dim-title {
+  position: absolute;
+  left: 0;
+  top: 78.1476%; /* 540 / 691 */
+  margin: 0;
+  font-size: 1.8676cqw; /* 22 / 1178 */
+  font-weight: 500;
+  line-height: 1.8364; /* 40.4 / 22 */
+  color: #353535;
+}
+
+/* 796:936 — 18px Poppins Light #353535，行高 27.4，x=0 y=581 寬 494。
+   494px 配 18px 字約 49 字元／行，在 65–75 的上限以下，不需另外收窄。 */
+.av-dim-body {
+  position: absolute;
+  left: 0;
+  top: 84.0810%; /* 581 / 691 */
+  width: 41.9355%; /* 494 / 1178 */
+  margin: 0;
+  font-size: 1.5280cqw; /* 18 / 1178 */
+  font-weight: 300;
+  line-height: 1.5222; /* 27.4 / 18 */
+  color: #353535;
+}
+
+/* ---------- RWD（Figma 只有 1440 一個 frame，以下是假設值）----------
+   ≥901px：維持 Figma 的絕對版面等比縮放（1155 / 1440 / 1920 都走這條）。
+   ≤900px：解除長寬比鎖定改流式 —— 理由同 SOLUTION，cqw 字級在窄視窗會把
+   18px 內文縮到 8px 級別，無法閱讀。Dimensions 的引線在窄視窗下沒有意義
+   （標籤已經不在渲染圖兩側），整張 SVG 直接隱藏，標籤改為條列。 */
+@media (max-width: 900px) {
+  .av-feat-frame {
+    aspect-ratio: auto;
+    container-type: normal;
+  }
+  .av-feat-eyebrow {
+    position: static;
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+  .av-feat-cards {
+    position: static;
+    height: auto;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .av-feat-card {
+    border-radius: 14px;
+    aspect-ratio: 333 / 639;
+  }
+  .av-feat-title { font-size: clamp(17px, 2.6vw, 22px); }
+  .av-feat-body  { font-size: clamp(12px, 1.9vw, 16px); white-space: normal; }
+
+  .av-dim-frame {
+    width: 100%;
+    aspect-ratio: auto;
+    container-type: normal;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .av-dim-render {
+    position: static;
+    width: min(379px, 70%);
+    height: auto;
+    margin-inline: auto;
+  }
+  /* 引線在堆疊版面沒有指向對象，隱藏 */
+  .av-dim-leaders { display: none; }
+  .av-dim-label {
+    position: static;
+    right: auto;
+    left: auto;
+    top: auto;
+    text-align: left;
+    font-size: clamp(14px, 2.1vw, 18px);
+    line-height: 1.6;
+  }
+  .av-dim-title {
+    position: static;
+    font-size: clamp(18px, 2.6vw, 22px);
+    margin-top: 12px;
+  }
+  .av-dim-body {
+    position: static;
+    width: 100%;
+    max-width: 60ch;
+    font-size: clamp(14px, 2vw, 18px);
+  }
+}
+
+@media (max-width: 600px) {
+  /* 四張卡在手機改單欄 */
+  .av-feat-cards { grid-template-columns: 1fr; }
+}

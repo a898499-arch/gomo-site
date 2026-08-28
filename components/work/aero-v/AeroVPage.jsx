@@ -8,6 +8,8 @@ import Background from './Background';
 import Solution from './Solution';
 import SketchToPrototype from './SketchToPrototype';
 import Senorio from './Senorio';
+import Features from './Features';
+import Dimensions from './Dimensions';
 
 // AERO V 作品詳情頁。依 Figma node 796:705「作品頁＿aero v」（1440×10266）
 // 由上而下組裝，區塊順序與 y 座標是用 MCP 讀完整份結構後排出來的。
@@ -47,10 +49,15 @@ export default function AeroVPage() {
       {/* y=4527 — node 796:903，1237×830。單純一張大圖。 */}
       <Senorio />
 
-      {/* 以下六區分輪做，順序已由 796:705 的完整結構確認。每輪只要在這裡
+      {/* y=5446 — node 796:938，1360.62×736.65。四張卡＋疊加箭頭。 */}
+      <Features />
+
+      {/* y=6430 — node 796:907，1178×691。渲染圖＋10 標籤＋10 條引線。
+          ⚠️ 這一區在 Figma 是靠左（x=40 寬 1178，右邊留 222px），不是置中。 */}
+      <Dimensions />
+
+      {/* 以下四區分輪做，順序已由 796:705 的完整結構確認。每輪只要在這裡
           補一個元件、把對應那行註解換成元件即可，不需要重讀 Figma 排序：
-            y=5446  FEATURES                          796:938  1360×737
-            y=6430  Dimensions                        796:907  1178×691
             y=7350  airflow                           796:784  1280×658
             y=8144  senorio2                          796:905  1237×830
             y=9309  work footage                      796:738  1160×206
