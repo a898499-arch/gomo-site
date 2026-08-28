@@ -4,14 +4,26 @@ import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { mainEase } from '@/lib/ease';
 
+// ─────────── 節奏參數：要調速度改這裡就好 ───────────
+// 三格的錯開值由 CYCLE_MS 自動推算，改 CYCLE_MS 三等分會自己跟著對，
+// 不必另外動 SketchToPrototype.jsx。
+export const CYCLE_MS = 3000; // 一張圖的完整週期（靜止 + 淡入）
+export const FADE_MS = 600; // 交叉淡入時長
+export const STAGGER_MS = CYCLE_MS / 3; // 三格錯開，維持精準三等分
+// ⚠️ CYCLE_MS 的下限是 2700：最大的 phase 是 2 × CYCLE/3，必須小於
+// 「靜止時間 − will-change 預熱 0.3s」＝ CYCLE − FADE − 0.3。低於 2700 時
+// 下面的 seek 會越過預熱點——已經有補掛的保險（見 scheduleStep 末段），
+// 所以不會壞，只是最左邊那格的第一輪少了預熱。
+// ────────────────────────────────────────────────
+
 // 照片輪播的單格。From Sketch to Working Prototype（node 796:888）底下的
 // 三格各用一個，只差 phase。抽成獨立元件是因為三格邏輯完全相同。
 //
-// 節奏（使用者 2026-08-28 指定，選項「甲」）：
-//   靜止 4.0s + 交叉淡入 0.6s = 一段 4.6s
+// 節奏（使用者 2026-08-28 第二輪指定，嫌原本 4.6s 太慢）：
+//   靜止 2.4s + 交叉淡入 0.6s = 一段 3.0s，錯開 1.0s
 // 600ms 交叉淡入與規格書 §6.2 影片輪播同值（規格書 573 行），全站一致。
-// ⚠️ 但 §6.2 的停留是 **5 秒**，這裡的 4 秒是使用者這一輪指定的偏離值，
-// 不是照抄規格書，也不是誤讀。
+// ⚠️ 但 §6.2 的停留是 **5 秒**，這裡的 2.4 秒是使用者指定的偏離值，
+// 不是照抄規格書，也不是誤讀。（第一輪是 4.0 秒，這一輪再往下調。）
 // 淡入的緩動 §6.2 沒有規定 —— 用全站主曲線 mainEase 是我的假設。
 //
 // ── 為什麼是「疊著淡入」而不是「A 淡出 + B 淡入」 ──
@@ -20,11 +32,11 @@ import { mainEase } from '@/lib/ease';
 // 規格書 §6.2 的原文就是「兩個 <video> **疊著**淡入」，同一個做法。
 //
 // ── 為什麼不用 repeat:-1 的循環 timeline ──
-// 三張照片配兩層，要 6 段才會回到初始狀態，週期 27.6s 的 timeline 理論上
+// 三張照片配兩層，要 6 段才會回到初始狀態，一個 6×CYCLE_MS 的 timeline 理論上
 // 接得起來；但 GSAP 在 repeat 邊界會把 timeline 倒帶重演，倒帶時可能把剛
 // 淡入完的那層 opacity 打回 0，造成一次閃爍。改成「每段一個一次性 timeline、
 // onComplete 時排下一段」：沒有倒帶、沒有 repeat 語意，行為完全可預期，
-// pause()/play() 也原地保留播放頭。每 4.6s 建一個 timeline 的成本可忽略。
+// pause()/play() 也原地保留播放頭。每 CYCLE_MS 建一個 timeline 的成本可忽略。
 //
 // ── 只動 opacity ──
 // 兩層都是 absolute + inset:0，換 src 不影響版面。角色互換時要動的
@@ -58,8 +70,9 @@ export default function PhotoCycler({
     // reduced-motion：不建 timeline、後層永遠不掛 src，只留第一張。
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
 
-    const HOLD = 4;
-    const FADE = 0.6;
+    // GSAP 吃秒，上面的常數是毫秒，在這裡換算一次
+    const FADE = FADE_MS / 1000;
+    const HOLD = (CYCLE_MS - FADE_MS) / 1000; // 靜止時間
     const WARM = 0.3; // 淡入前多久掛 will-change
     const n = photos.length;
 
@@ -110,9 +123,15 @@ export default function PhotoCycler({
 
       tlRef.current = tl;
       // 錯開：只有第一段帶 seek，把播放頭直接種在 phase 秒。
-      // phase 最大 2.667 < HOLD − WARM = 3.7，所以這個 seek 不會跨過上面
-      // 那個 call()，也不會跨過 tween，沒有任何 callback 被略過的問題。
-      if (seek) tl.time(seek);
+      // CYCLE_MS=3000 時 phase 最大 2.0 < HOLD − WARM = 2.1，seek 不會跨過
+      // 上面那個 call()，也不會跨過 tween，沒有 callback 被略過的問題。
+      // ⚠️ 但這個餘裕只有 0.1s：CYCLE_MS 一旦調到 2700 以下就會跨過去
+      // （gsap 的 time() 預設 suppressEvents，call() 會被靜靜略過），
+      // 所以補一道保險，讓 CYCLE_MS 可以放心往下調。
+      if (seek) {
+        tl.time(seek);
+        if (seek >= HOLD - WARM) incoming.style.willChange = 'opacity';
+      }
       if (playingRef.current) tl.play();
     }
 

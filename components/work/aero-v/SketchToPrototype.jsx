@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useStandardEntrance } from '@/lib/useStandardEntrance';
-import PhotoCycler from './PhotoCycler';
+import PhotoCycler, { STAGGER_MS } from './PhotoCycler';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
@@ -24,14 +24,15 @@ if (typeof window !== 'undefined') {
 //
 // ── 為什麼 ScrollTrigger 與 visibilitychange 掛在這一層、不是每格各掛 ──
 // 三格各自掛觸發器的話，捲動時三個觸發點的判定可能差幾個 frame，暫停／恢復
-// 幾次之後 1.333s 的錯開就會被磨掉、三格慢慢對齊，那正是要避免的結果。
+// 幾次之後那 1s 的錯開就會被磨掉、三格慢慢對齊，那正是要避免的結果。
 // 這裡持有唯一一個 playing 布林值往下傳，三格必定同進同出，錯開永遠不變。
 //
 // ── 錯開的順序 ──
 // ⚠️ 不能用「由左到右」：3d 與 prototype 的 x 相同（都是 561），左到右會讓
 // 這兩格同時換。改用閱讀順序 3d → prototype → model。
 // PhotoCycler 的 phase 是「播放頭種在第幾秒」，越大越先換，所以第 i 格給
-// (格數 − 1 − i) × 4/3。
+// (格數 − 1 − i) × STAGGER_MS。錯開值不在這裡寫死——STAGGER_MS 是
+// PhotoCycler.jsx 由 CYCLE_MS ÷ 3 推算的，那邊調速度這裡會自動跟上。
 export default function SketchToPrototype() {
   const entranceRef = useStandardEntrance('.av-entrance-item');
   const frameRef = useRef(null);
@@ -88,7 +89,7 @@ export default function SketchToPrototype() {
               key={cell.key}
               className={`av-sketch-cell av-sketch-cell--${cell.key}`}
               photos={cell.photos}
-              phase={((CELLS.length - 1 - i) * 4) / 3}
+              phase={((CELLS.length - 1 - i) * STAGGER_MS) / 1000}
               playing={playing}
             />
           ))}
