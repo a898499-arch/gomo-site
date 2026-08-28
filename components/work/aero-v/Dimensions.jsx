@@ -2,13 +2,24 @@
 
 import { useStandardEntrance } from '@/lib/useStandardEntrance';
 
-// Figma node 796:907「Dimensions」，1178×691，位於整頁 frame 796:705 的
+// Figma node 796:907「Dimensions」，1360×691，位於整頁 frame 796:705 的
 // x=40 y=6430。
 //
-// ⚠️ 靠左對齊、不置中：Figma 是 x=40 寬 1178，右邊留了 222px 空白（其他區塊
-// 例如 FEATURES 是 x=40 寬 1360.62、左右對稱）。這裡照 Figma 靠左，佔內容欄
-// 的 1178/1360 = 86.6176%。這是全頁唯一一個非置中的區塊，我判斷不出是刻意
-// 還是繪製疏漏，已回報。要改置中的話加一行 margin-inline:auto 即可。
+// 2026-08-28 使用者在 Figma 改版，這一輪跟著改的東西：
+//   · 整區 1178 → 1360 寬，也就是**與內容欄同寬**。原本「靠左、右邊留
+//     222px」的不對稱消失了，CSS 的 86.6176% 一併拿掉。
+//   · 渲染圖 x=491 → 571，並換成另一張（Figma 裡帶 −167.88° 旋轉 + 垂直翻轉
+//     的新算圖），所以 stool-structure.webp 重新匯出過。
+//   · 十個標籤與十條引線全部重排（y 座標沒變，只有 x 變）。
+//   · 標題 y=540 → 511，內文 y=581 → 552、欄寬 494 → 483。
+//
+// ⚠️ 渲染圖的匯出方式（踩過坑，換圖時要照做）：
+// 不能用 download_assets —— 它會把整頁的 #F5F5F5 底色烤進去（實測整張匯出的
+// alpha 全部是 255），貼到米色頁面上就是一塊灰板。get_screenshot 保留透明，
+// 但**不會放大**，只給得到 1x。所以現在這張是「3x 的 download_assets 匯出圖
+// ÷ 已知平底色 245 反算 alpha」合成的：alpha 取自 1x 的 get_screenshot 放大，
+// RGB 用 fg = (composite − 245×(1−a)) / a 還原。合成結果在米色底上沒有灰框
+// 也沒有光暈。Figma 裡的 Rectangle 258 只是遮罩底，設計上沒有灰色板。
 //
 // ── 10 個標籤、10 條引線 ──
 // （原指示寫「12 個標籤、11 條引線」，實際清點是 10 / 10：796:919–927 是 9 個
@@ -16,9 +27,9 @@ import { useStandardEntrance } from '@/lib/useStandardEntrance';
 //
 // 關鍵結構：**每條引線的 y 恰好等於它那個標籤文字框的垂直中心**，10 條全部
 // 吻合在 0.5px 內（例如 Seat Cushion 文字框 y=91 高 41 → 中心 111.5，
-// 線 796:919 的 y=111）。所以標籤與引線是同一組座標，不會各自漂移。
+// 線 796:919 的 y=111）。改版後這個關係依然成立，已重新逐條核對。
 //
-// 10 條線畫在**同一張 inline SVG** 裡，viewBox 就是整區的 1178×691 座標系。
+// 10 條線畫在**同一張 inline SVG** 裡，viewBox 就是整區的 1360×691 座標系。
 // 拆成 10 個各自定位的元素會有 10 次對不準的機會；共用一個 viewBox 則端點
 // 必然互相對齊，而且渲染圖也用同一套百分比定位，端點與零件的關係被鎖死。
 // 標籤是獨立的 <div>（文字要可選取），不進 SVG。
@@ -35,9 +46,9 @@ export default function Dimensions() {
     <section className="av-section" ref={ref}>
       <div className="page-container">
         <div className="av-dim-frame av-entrance-item">
-          {/* 796:908「stool structure」x=491 y=0 379×681。
-              ⚠️ 去背 PNG（46.9% 全透明、48.4% 半透明的柔邊陰影），
-              底下不要墊底色。來源 1137×2043 正好是 3.00x。 */}
+          {/* 796:908「stool structure」x=571 y=0 379×681。
+              ⚠️ 去背圖，底下不要墊底色。來源 1137×2043 正好是 3.00x，
+              但那張匯出圖的底色是烤進去的，已用反算 alpha 去掉（見檔頭）。 */}
           <img
             className="av-dim-render"
             src="/work/aero-v/stool-structure.webp"
@@ -54,7 +65,7 @@ export default function Dimensions() {
               判斷是設計稿的疏漏，但照原樣還原並在此標註。 */}
           <svg
             className="av-dim-leaders"
-            viewBox="0 0 1178 691"
+            viewBox="0 0 1360 691"
             preserveAspectRatio="none"
             aria-hidden="true"
             focusable="false"
@@ -64,13 +75,13 @@ export default function Dimensions() {
                 <line key={id} x1={x1} y1={y1} x2={x2} y2={y2} />
               ))}
             </g>
-            {/* 796:937「Vector 199」x=692 y=128 207×28 —— 唯一一條有折彎的。
-                路徑照匯出檔原樣：先 45° 下斜 27.5px，再水平 179.5px。
+            {/* 796:937「Vector 199」x=780 y=128 230×28 —— 唯一一條有折彎的。
+                路徑照匯出檔原樣（改版後重抓）：先 45° 下斜 28px，再水平 199.4px。
                 ⚠️ fill="none" 不可省略：<path> 的 fill 預設是黑色，少了這個屬性
                 這條折線會被填成一個黑色實心三角形（實際踩過）。另外九條是
                 <line>，沒有可填的封閉區域，所以不受影響。 */}
             <path
-              d="M692.18 128.18L719.68 156.18H899.18"
+              d="M780.17 128.18L810.72 156.18H1010.17"
               fill="none"
               stroke="#6E6E6E"
               strokeWidth="0.5"
@@ -106,34 +117,34 @@ export default function Dimensions() {
   );
 }
 
-// [x1, y1, x2, y2, node id]，座標就是 796:907 的 1178×691 空間，直接照抄 metadata。
+// [x1, y1, x2, y2, node id]，座標就是 796:907 的 1360×691 空間，直接照抄 metadata。
 // 每條的 y 都等於對應標籤文字框的垂直中心。
 const LEADERS = [
-  [319, 111, 522, 111, '796:919'], // Seat Cushion
-  [360, 195, 623, 195, '796:923'], // Aero-induction Fan
-  [326, 305, 658, 305, '796:920'], // Flow-Stabilizing Bracing
-  [331, 407, 663, 407, '796:921'], // Five-Star Base
-  [626, 105, 899, 105, '796:922'], // Modular Power Hub
-  [658, 267, 900, 267, '796:924'], // Coaxial Structural Column
-  [684, 341, 905, 341, '796:925'], // HEPA Purification Core
-  [738, 448, 905, 448, '796:926'], // Hair Collection Canister
-  [761, 634, 905, 634, '796:927'], // Omni-Directional Intake
+  [399, 111, 602, 111, '796:919'], // Seat Cushion
+  [440, 195, 703, 195, '796:923'], // Aero-induction Fan
+  [406, 305, 738, 305, '796:920'], // Flow-Stabilizing Bracing
+  [411, 407, 743, 407, '796:921'], // Five-Star Base
+  [706, 105, 1010, 105, '796:922'], // Modular Power Hub
+  [742, 267, 1011, 267, '796:924'], // Coaxial Structural Column
+  [771, 341, 1017, 341, '796:925'], // HEPA Purification Core
+  [831, 448, 1017, 448, '796:926'], // Hair Collection Canister
+  [856, 634, 1017, 634, '796:927'], // Omni-Directional Intake
 ];
 
-// 右側六個：left 定位（Figma x = 914 / 915）
+// 右側六個：left 定位（Figma x = 1034 / 1035）
 const LABELS_RIGHT = [
-  { key: 'power-hub', text: 'Modular Power Hub' }, // 796:916 x=914 y=85
-  { key: 'lever', text: 'Height Adjustment Lever' }, // 796:917 x=914 y=133
-  { key: 'column', text: 'Coaxial Structural Column' }, // 796:928 x=915 y=246
-  { key: 'hepa', text: 'HEPA Purification Core' }, // 796:930 x=915 y=320
-  { key: 'canister', text: 'Hair Collection Canister' }, // 796:934 x=915 y=427
-  { key: 'intake', text: 'Omni-Directional Intake' }, // 796:933 x=915 y=613
+  { key: 'power-hub', text: 'Modular Power Hub' }, // 796:916 x=1034 y=85
+  { key: 'lever', text: 'Height Adjustment Lever' }, // 796:917 x=1034 y=133
+  { key: 'column', text: 'Coaxial Structural Column' }, // 796:928 x=1035 y=246
+  { key: 'hepa', text: 'HEPA Purification Core' }, // 796:930 x=1035 y=320
+  { key: 'canister', text: 'Hair Collection Canister' }, // 796:934 x=1035 y=427
+  { key: 'intake', text: 'Omni-Directional Intake' }, // 796:933 x=1035 y=613
 ];
 
 // 左側四個：右對齊定位（右緣＝引線起點 − Figma 間距 8 / 10 / 7 / 12）
 const LABELS_LEFT = [
-  { key: 'cushion', text: 'Seat Cushion' }, // 796:918 y=91，線 319
-  { key: 'fan', text: 'Aero-induction Fan' }, // 796:929 y=174，線 360
-  { key: 'bracing', text: 'Flow-Stabilizing Bracing' }, // 796:931 y=284，線 326
-  { key: 'base', text: 'Five-Star Base' }, // 796:932 y=386，線 331
+  { key: 'cushion', text: 'Seat Cushion' }, // 796:918 y=91，線 399
+  { key: 'fan', text: 'Aero-induction Fan' }, // 796:929 y=174，線 440
+  { key: 'bracing', text: 'Flow-Stabilizing Bracing' }, // 796:931 y=284，線 406
+  { key: 'base', text: 'Five-Star Base' }, // 796:932 y=386，線 411
 ];
