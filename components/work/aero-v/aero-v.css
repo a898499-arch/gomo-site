@@ -302,9 +302,17 @@
 }
 
 /* ==================== BACKGROUND（node 796:766，1440×978）====================
-   滿版出血。比照 ProcessAnimation.jsx：不包在 .page-container 裡即可——
-   .av-section／.av-case／.page-content 都沒有水平內距，直接當 <section> 的
-   子元素就天生撐滿視窗寬，不需要 100vw + 負 margin（那招會產生水平捲軸）。
+   ⚠️ 2026-08-28：改為與 SOLUTION 共用同一份寬度規則，**不再滿版出血**。
+   兩區都包在 .page-container 裡（max-width:1440 + padding-inline:
+   var(--page-gutter)），所以之後改寬度只要改 .page-container，兩區自動同步
+   ——這正是使用者要的效果。1440 時 1440→1360，1920 時 1600→1360。
+
+   還原成滿版出血只要兩步：
+     1. Background.jsx 把外面那層 <div className="page-container"> 拿掉
+     2. 下面 .av-bg-frame 加回 max-width: var(--site-max); margin-inline: auto;
+   已回報過才改：Figma 稿本身就是不同寬度（796:766 是 1440＝整頁寬，
+   796:743 是 1359），而且這張圖是為出血而做的——alpha 從頂端 0 漸變到約 80%
+   高度的 255、左右緣最大值 255，內縮之後下半部左右兩側會切出硬邊。
 
    ⚠️ 區塊間距刻意偏離 Figma：Figma 是 logo&overview 底→background 頂 94px、
    background 底→SOLUTION 頂 55px；這裡兩處都採用 .av-section 的通用節奏
@@ -315,22 +323,16 @@
 
    ⚠️ 不要在這一層或父層墊背景色：bg-background.webp 的頂端淡出是真的透明
    （alpha 0→255 的漸層），底下必須是頁面底色才對。 */
-.av-bg {
-  /* 出血層不吃 .av-section 的水平內距（它本來就沒有），這裡只是把語意寫明 */
-  padding-inline: 0;
-}
-
-/* 超寬螢幕封頂：見 globals.css 的 --site-max。1920 時原本會撐到 1920，
-   照片放大失真且比 1360 的文字欄寬 41%。 */
+/* 寬度已由外層的 .page-container 決定，這一層不再需要任何寬度規則。
+   ⚠️ 不要在這一層或父層墊背景色：bg-background.webp 的頂端淡出是真的透明，
+   底下必須是頁面底色才對（理由見上面的區塊註解）。 */
 .av-bg-frame {
   position: relative;
   width: 100%;
   aspect-ratio: 1440 / 978;
   /* 讓底下所有 cqw 以「這個框的寬度」為基準，文字與圖片嚴格等比縮放。
-     用 cqw 而不是 vw：這一區雖然目前等於視窗寬，但若日後包進容器就會失準。 */
+     用 cqw 而不是 vw 正是為了這一刻——現在框寬已經不等於視窗寬了。 */
   container-type: inline-size;
-  max-width: var(--site-max);
-  margin-inline: auto;
 }
 
 .av-bg-photo {
@@ -461,6 +463,11 @@
 .av-sol-row {
   position: relative;
   width: 100%;
+  /* ⚠️ 這行是進場需要的，不是版面需要的：照片是 absolute + inset:0，標準進場
+     的 translateY(24px) 會讓它在動畫期間往下探出 24px、蓋到下一排。裁掉之後
+     只會在頂端短暫露出 24px 的頁面底色，跟全站其他圖片的進場一致。
+     兩排的文字都在框內（最低的 goal 標語在 23.977%），不會被裁到。 */
+  overflow: hidden;
 }
 
 /* 796:744「Group 36971」1357.06×405.29 */

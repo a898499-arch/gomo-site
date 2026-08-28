@@ -4,10 +4,18 @@ import { useStandardEntrance } from '@/lib/useStandardEntrance';
 
 // Figma node 796:766「background」，1440×978，位於整頁 frame 796:705 的 y=1721。
 //
-// 滿版出血。做法比照 ProcessAnimation.jsx：**不要包在 .page-container 裡**
-// （那個 class 會加 max-width:1440px + padding-inline 的左右內距，就是留白的
-// 來源）。.av-section／.av-case／.page-content 這幾層本身都沒有水平 padding，
-// 所以直接當 <section> 的子元素天生就撐滿視窗寬，不需要 100vw + 負 margin。
+// ⚠️ 2026-08-28：改為與 SOLUTION 共用同一個寬度規則，**不再滿版出血**。
+// 使用者指示：「兩者共用同一份寬度規則…之後改一邊兩邊都會同步」。做法是包進
+// .page-container（max-width:1440 + padding-inline: var(--page-gutter)），
+// 跟 Solution.jsx 完全一樣。1440 時 1440→1360，1920 時 1600→1360。
+//
+// 這推翻了 2026-08-26 的前一版指示（「不要包在 .page-container 裡」，比照
+// ProcessAnimation.jsx 出血）。已回報過三件事、使用者確認後才改：
+//   1. Figma 稿本身是不同寬度——796:766 是 1440（整頁寬），796:743 是 1359
+//   2. 這張圖是為出血而做的：alpha 從頂端 0 漸變到約 80% 高度的 255，內縮後
+//      下半部左右兩側會切出硬邊（實測左右緣 alpha 最大值 255）
+//   3. 要還原成出血：把下面這層 <div className="page-container"> 拿掉，並把
+//      aero-v.css 的 .av-bg-frame 加回 max-width: var(--site-max) 即可
 //
 // 照片是使用者自己在 Figma 切好的合成圖（public/work/aero-v/background.png，
 // 4320×2934 = 3x），Rectangle 220/221/222 那幾層暗化與遮罩**已經烤進圖裡**，
@@ -25,38 +33,41 @@ export default function Background() {
   const ref = useStandardEntrance('.av-entrance-item');
 
   return (
-    <section className="av-section av-bg" ref={ref}>
-      <div className="av-bg-frame">
-        <img
-          className="av-bg-photo"
-          src="/work/aero-v/bg-background.webp"
-          srcSet="/work/aero-v/bg-background.webp 1x, /work/aero-v/bg-background@2x.webp 2x"
-          width={1440}
-          height={978}
-          loading="lazy"
-          decoding="async"
-          alt="髮廊裡兩位髮型師正在為一位顧客上染劑，顧客的頭髮被分成多束處理。畫面經過去彩與暗化處理，呈現沙龍作業時瀰漫化學藥劑的環境。"
-        />
+    <section className="av-section" ref={ref}>
+      {/* 與 Solution.jsx 同一份寬度規則——要改寬度改 .page-container，兩區同步 */}
+      <div className="page-container">
+        <div className="av-bg-frame">
+          <img
+            className="av-bg-photo"
+            src="/work/aero-v/bg-background.webp"
+            srcSet="/work/aero-v/bg-background.webp 1x, /work/aero-v/bg-background@2x.webp 2x"
+            width={1440}
+            height={978}
+            loading="lazy"
+            decoding="async"
+            alt="髮廊裡兩位髮型師正在為一位顧客上染劑，顧客的頭髮被分成多束處理。畫面經過去彩與暗化處理，呈現沙龍作業時瀰漫化學藥劑的環境。"
+          />
 
-        <p className="av-bg-eyebrow av-entrance-item">Background</p>
-        <h2 className="av-bg-title av-entrance-item">A Hidden Health Risk in Hair Salons</h2>
-        <p className="av-bg-body av-entrance-item">
-          Hair salons expose hairstylists to more than just fallen hair. Hair dyes, conditioners,
-          and styling products can release airborne pollutants such as VOCs, while poor ventilation
-          can increase long-term respiratory risks.
-        </p>
+          <p className="av-bg-eyebrow av-entrance-item">Background</p>
+          <h2 className="av-bg-title av-entrance-item">A Hidden Health Risk in Hair Salons</h2>
+          <p className="av-bg-body av-entrance-item">
+            Hair salons expose hairstylists to more than just fallen hair. Hair dyes, conditioners,
+            and styling products can release airborne pollutants such as VOCs, while poor
+            ventilation can increase long-term respiratory risks.
+          </p>
 
-        {/* 兩張數據卡是純文字卡片（node 796:777 / 796:780），依 CLAUDE.md
-            「單純文字卡片類用程式碼反而穩」的規則用程式碼做，不匯圖。
-            毛玻璃底 rgba(255,255,255,0.39) + backdrop-blur 6px 取自 Figma。 */}
-        <div className="av-bg-stat av-bg-stat--left av-entrance-item">
-          <p className="av-bg-stat-num">87.3%</p>
-          <p className="av-bg-stat-label">of hairdressers reported respiratory symptoms</p>
-        </div>
+          {/* 兩張數據卡是純文字卡片（node 796:777 / 796:780），依 CLAUDE.md
+              「單純文字卡片類用程式碼反而穩」的規則用程式碼做，不匯圖。
+              毛玻璃底 rgba(255,255,255,0.39) + backdrop-blur 6px 取自 Figma。 */}
+          <div className="av-bg-stat av-bg-stat--left av-entrance-item">
+            <p className="av-bg-stat-num">87.3%</p>
+            <p className="av-bg-stat-label">of hairdressers reported respiratory symptoms</p>
+          </div>
 
-        <div className="av-bg-stat av-bg-stat--right av-entrance-item">
-          <p className="av-bg-stat-num">4x</p>
-          <p className="av-bg-stat-label">higher PM2.5 levels were recorded in hair salons</p>
+          <div className="av-bg-stat av-bg-stat--right av-entrance-item">
+            <p className="av-bg-stat-num">4x</p>
+            <p className="av-bg-stat-label">higher PM2.5 levels were recorded in hair salons</p>
+          </div>
         </div>
       </div>
     </section>

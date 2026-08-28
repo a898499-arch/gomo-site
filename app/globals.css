@@ -39,6 +39,8 @@
      問題：1440 設計稿的滿版照片撐到 1920 是放大 33%（會糊），而且照片比
      .page-container 的 1360 文字欄寬 41%，視覺上壓過一切。實測 1920 時
      .ss-pa-frame 高 1192px、.av-bg-frame 高 1304px，都超出視窗；
+     （.av-bg-frame 已於 2026-08-28 改為包在 .page-container 裡、與 SOLUTION
+      共用寬度規則，因此不再套用 --site-max。見 aero-v.css 該處註解。）
      .wb-charref-frame 的素材原生只有 1214px，在 1920 是 0.63x，連 1x 都不到。
 
      ⚠️ 要改封頂寬度只改這一個值，各處一律 max-width: var(--site-max)，
