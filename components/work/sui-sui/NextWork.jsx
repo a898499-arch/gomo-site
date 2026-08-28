@@ -2,21 +2,12 @@
 
 import Link from 'next/link';
 import { useStandardEntrance } from '@/lib/useStandardEntrance';
-import works from '@/data/works.json';
+import { getNextWorks } from '@/lib/getNextWorks';
 
-// node 545:558。跟 WanderBuddy 的 Next Work 邏輯完全一樣：排除當前作品
-// 本身，依 works.json 陣列順序取「當前作品之後的兩筆」，走到最後一筆就
-// 繞回陣列開頭。
-function getNextWorks(currentSlug, count = 2) {
-  const currentIndex = works.findIndex((w) => w.slug === currentSlug);
-  if (currentIndex === -1) return works.slice(0, count);
-
-  const result = [];
-  for (let i = 1; i <= count; i++) {
-    result.push(works[(currentIndex + i) % works.length]);
-  }
-  return result;
-}
+// node 545:558。挑選規則抽在 lib/getNextWorks.js（原本這裡與 WanderBuddy
+// 各有一份一字不差的實作，2026-08-29 收斂成單一來源）：排除當前作品本身，
+// 依 works.json 陣列順序取「當前作品之後的兩筆」，走到最後一筆就繞回開頭。
+// ⚠️ 這一輪只動這個函式，markup 與 CSS 完全沒碰，輸出與改動前相同。
 
 export default function NextWork({ currentSlug }) {
   const ref = useStandardEntrance('.ss-next-card');

@@ -10,11 +10,8 @@ import './next-work.css';
 //
 // 標記與樣式**照抄** sui-sui/NextWork.jsx，只把 class 前綴從 ss- 換成
 // work-next-，因為 ss- 那組樣式住在 sui-sui.css 裡，那支只有 SuiSuiPage
-// 會載入；直接 import 過來會是沒有樣式的裸標記。挑選規則則是抽到
-// lib/getNextWorks.js 共用，沒有再寫第三份。
-//
-// ⚠️ sui-sui 與 wanderbuddy 兩頁維持原狀沒有改，理由見 lib/getNextWorks.js
-// 的註解。要把那兩頁也收斂到這支元件的話是另一個決定，已回報。
+// 會載入；直接 import 過來會是沒有樣式的裸標記。
+// 挑選規則三頁共用 lib/getNextWorks.js，全站只有一份實作。
 export default function NextWork({ currentSlug }) {
   const ref = useStandardEntrance('.work-next-card');
   const nextWorks = getNextWorks(currentSlug);

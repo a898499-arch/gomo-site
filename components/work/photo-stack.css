@@ -26,20 +26,3 @@
   object-fit: cover;
 }
 
-/* 純文字副本用。跟 sui-sui.css / wanderbuddy.css 裡的定義一字不差，但那兩份
-   分別住在各自頁面的樣式表裡、只有該頁會載入，所以這裡自帶一份，讓 PhotoStack
-   在任何頁面都是自足的。
-   ⚠️ aero-v.css 沒有這條，但 AeroV 的 LogoOverview / WorkFootage 有用到
-   .visually-hidden —— 那頁的隱藏文字在正式建置下可能會直接顯示出來。
-   這是另一頁的問題，這一輪沒有動，已回報。 */
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}

@@ -38,17 +38,6 @@
   padding-inline: 24px;
 }
 
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
 
 /* ---------- Logo & Overview（node 545:56，1160×533，左右各留白
    140px＠1440 參考寬，跟 WanderBuddy 那頁同一個比例） ---------- */

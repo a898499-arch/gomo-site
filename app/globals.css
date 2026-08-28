@@ -143,6 +143,37 @@ body:has(.page-content > [data-nav-bleed]) .site-nav {
   background: transparent;
 }
 
+/* 無障礙工具：視覺上隱藏、但螢幕閱讀器與搜尋引擎讀得到。
+   CLAUDE.md 對「純展示區塊改用 Figma 匯出圖」要求的補償做法就靠這條
+   （匯出圖除了 alt 之外，要另外附一份視覺隱藏的純文字副本）。
+
+   ⚠️ 2026-08-29 從各頁 CSS 提到這裡。原本 sui-sui.css 與 wanderbuddy.css
+   各自定義了一份一字不差的規則，而 aero-v.css **沒有**——但 AeroV 的
+   Wordmark / LogoOverview / WorkFootage / PhotoCycler / SketchToPrototype
+   都用到這個 class。
+
+   實測結論（不要照直覺推斷，這裡驗過）：aero-v 先前其實是「被順便蓋到」的。
+   三個作品頁元件都由同一個 /work/[slug] 路由 import，Next 會把三份頁面
+   樣式表打包進同一支 chunk，所以 sui-sui.css 那份定義在 /work/aero-v 也
+   生效。實驗方法：把 globals 的定義拿掉、還原 sui-sui/wanderbuddy 的定義後
+   建置，含 av-air-frame 的 chunk 裡 visually-hidden 出現 2 次。
+   也就是說**當時沒有真的壞掉**，但那是靠打包方式的巧合撐著——哪天 aero-v
+   拆成獨立路由、或 sui-sui 那份被刪掉，隱藏文字就會露出來。
+
+   提到全站樣式表是為了讓它不再依賴這個巧合，也不必每開一個新頁面複製一次。
+   不要再往個別頁面的 CSS 複製一份。 */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
 .page-container {
   max-width: 1440px;
   margin-inline: auto;

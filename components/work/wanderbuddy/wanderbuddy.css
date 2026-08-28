@@ -321,17 +321,6 @@
   white-space: nowrap;
 }
 
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
 
 /* ---------- 共用的小標籤樣式（Typography 的「TYPOGRAPHY」、Color 的「COLOR」
    是同一層級、同一套樣式，Figma 上兩者字級/字重/字距/顏色完全一致，
