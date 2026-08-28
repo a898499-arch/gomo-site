@@ -1091,3 +1091,388 @@
   /* 四張卡在手機改單欄 */
   .av-feat-cards { grid-template-columns: 1fr; }
 }
+
+/* ============ AIRFLOW（node 796:784，1279.78564×658）============
+   Figma 位置 x=120 y=7350。
+
+   ⚠️ 靠右、不置中：Figma 的右緣 1399.79 貼齊內容欄右緣（1400），左緣卻在
+   120，比內容欄多縮了 80px。所以寬度＝內容欄的 94.1019%、左邊推 5.8824%。
+   全頁第二個非置中的區塊（Dimensions 是反過來靠左），已回報。
+
+   ⚠️ 區塊間距刻意偏離 Figma：Figma 是 Dimensions 底→AIRFLOW 頂 229px，
+   這裡是 .av-section 通用節奏 172.8px（1440 時），差 −56.2px。
+
+   整框鎖 aspect-ratio、字級用 cqw，1155 / 1440 / 1920 是同一張構圖等比縮放。 */
+.av-air-frame {
+  position: relative;
+  width: 94.1019%; /* 1279.78564 / 1360 */
+  margin-left: 5.8824%; /* 80 / 1360 */
+  aspect-ratio: 1279.78564 / 658;
+  container-type: inline-size;
+}
+
+/* 796:883 — 24px Poppins SemiBold #5B5B5B uppercase，行高 40.4，x=33 y=0 */
+.av-air-eyebrow {
+  position: absolute;
+  left: 2.5786%; /* 33 / 1279.78564 */
+  top: 0;
+  margin: 0;
+  font-size: 1.8753cqw; /* 24 / 1279.78564 */
+  font-weight: 600;
+  line-height: 1.6833; /* 40.4 / 24 */
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #5b5b5b;
+}
+
+/* ---------- 左側插畫 ----------
+   容器＝Figma x=0..545.0732、y=64..658，也就是照片框加上所有箭頭與圖例的
+   聯集。子元素的百分比分母因此是 545.0732 × 594。 */
+.av-air-illus {
+  position: absolute;
+  left: 0;
+  top: 9.7264%; /* 64 / 658 */
+  width: 42.5911%; /* 545.0732 / 1279.78564 */
+  height: 90.2736%; /* 594 / 658 */
+}
+
+/* 796:791 —— 等比填滿，不裁切（見 Airflow.jsx 的說明） */
+.av-air-stool {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 94.1425%; /* 513.1456 / 545.0732 */
+  height: 100%;
+  display: block;
+}
+
+.av-air-arrow {
+  position: absolute;
+  display: block;
+}
+
+/* 796:801 橘色上半段 */
+.av-air-arrow--arrow-orange-b {
+  left: 42.4762%; /* 231.526 / 545.0732 */
+  top: 43.2773%; /* (321.067 − 64) / 594 */
+  width: 7.5704%; /* 41.2646 / 545.0732 */
+  height: 14.6194%; /* 86.8394 / 594 */
+}
+
+/* 796:793 橘色下半段 */
+.av-air-arrow--arrow-orange-a {
+  left: 42.7814%; /* 233.189 / 545.0732 */
+  top: 57.7219%; /* (406.868 − 64) / 594 */
+  width: 6.9757%; /* 38.0227 / 545.0732 */
+  height: 10.8164%; /* 64.2491 / 594 */
+}
+
+/* 796:811，SVG 尺寸 89×64 與 Figma 框完全相同，無外擴 */
+.av-air-arrow--arrow-brown-up {
+  left: 38.1734%; /* 208.0732 / 545.0732 */
+  top: 42.2559%; /* (315 − 64) / 594 */
+  width: 16.3281%; /* 89 / 545.0732 */
+  height: 10.7744%; /* 64 / 594 */
+}
+
+/* 796:826 */
+.av-air-arrow--arrow-brown-down {
+  left: 24.6551%; /* 134.3877 / 545.0732 */
+  top: 75.9906%; /* (515.3843 − 64) / 594 */
+  width: 42.3016%; /* 230.6046 / 545.0732 */
+  height: 23.9922%; /* 142.5136 / 594 */
+}
+
+/* 796:832 / 796:837 —— 同一組水平藍箭頭的左右兩半，各自往下外擴 10.71% */
+.av-air-arrow--arrow-blue-up-l {
+  left: 11.7000%; /* 63.7734 / 545.0732 */
+  top: 13.7529%; /* (145.6919 − 64) / 594 */
+  width: 30.0992%; /* 164.063 / 545.0732 */
+  height: 9.1487%; /* 54.3432 / 594 */
+}
+
+.av-air-arrow--arrow-blue-up-r {
+  left: 49.6794%; /* (276.1377 − 5.3486) / 545.0732 */
+  top: 13.7529%;
+  width: 30.0992%;
+  height: 9.1487%;
+}
+
+/* 796:841 —— 左右各外擴 24.06%，所以 left 要往左退 4px */
+.av-air-arrow--arrow-blue-middle {
+  left: 43.9891%; /* (243.7725 − 4.0) / 545.0732 */
+  top: 25.2522%; /* (213.998 − 64) / 594 */
+  width: 4.5176%; /* 24.6244 / 545.0732 */
+  height: 44.6689%; /* 265.333 / 594 */
+}
+
+/* 796:814 / 815 / 816 —— 疊在柱身上的三塊純色矩形。
+   ⚠️ 這三個在 Figma 帶 180° 旋轉，get_metadata 給的 x/y 是**旋轉前的原點**，
+   也就是視覺上的右下角，不是左上角。照 metadata 直接當 left/top 用會整個往
+   右下偏一個框（實際踩過：藍色塊會飄到柱身右邊的空白處）。這裡的數值是拿
+   get_design_context 的 inset 百分比反推的視覺框：left = metadata.x − w，
+   top = metadata.y − h。本區其餘元素都沒有旋轉，已逐一比對過 inset 與
+   metadata 一致。 */
+.av-air-band {
+  position: absolute;
+  display: block;
+}
+
+.av-air-band--hepa {
+  left: 40.0081%; /* (285.0732 − 67) / 545.0732 */
+  top: 24.0741%; /* (232 − 25 − 64) / 594 */
+  width: 12.2919%; /* 67 / 545.0732 */
+  height: 4.2088%; /* 25 / 594 */
+  background: #3f62de;
+}
+
+.av-air-band--fan {
+  left: 41.8428%; /* (275.0732 − 47) / 545.0732 */
+  top: 38.7205%; /* (309 − 15 − 64) / 594 */
+  width: 8.6227%; /* 47 / 545.0732 */
+  height: 2.5253%; /* 15 / 594 */
+  background: #ff931e;
+}
+
+.av-air-band--bracing {
+  left: 42.5765%; /* (272.0732 − 40) / 545.0732 */
+  top: 70.3704%; /* (515 − 33 − 64) / 594 */
+  width: 7.3385%; /* 40 / 545.0732 */
+  height: 5.5556%; /* 33 / 594 */
+  background: #fbd500;
+}
+
+/* 796:817 Frame 54 x=324.0732 y=407 221×68 */
+.av-air-legend {
+  position: absolute;
+  left: 59.4550%; /* 324.0732 / 545.0732 */
+  top: 57.7441%; /* (407 − 64) / 594 */
+  width: 40.5450%; /* 221 / 545.0732 */
+  height: 11.4478%; /* 68 / 594 */
+  display: flex;
+  align-items: center;
+  gap: 1.3284cqw; /* 17 / 1279.78564 */
+}
+
+.av-air-swatches {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7814cqw; /* 10 / 1279.78564 */
+  flex: none;
+  width: 3.1255cqw; /* 40 */
+}
+
+.av-air-swatch {
+  display: block;
+  height: 1.2502cqw; /* 16 */
+}
+
+.av-air-swatch--hepa { background: #3f62de; }
+.av-air-swatch--fan { background: #ff931e; }
+.av-air-swatch--bracing { background: #fbd500; }
+
+.av-air-legend-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1721cqw; /* 15 / 1279.78564 */
+  flex: none;
+}
+
+/* 796:823–825 — 14px Poppins Light #000000，行高 27.4；Figma 的行框高 12，
+   文字是「上下溢出、垂直置中」，所以行框高 12 但不裁切。 */
+.av-air-legend-row {
+  display: flex;
+  align-items: center;
+  height: 0.9377cqw; /* 12 */
+  font-size: 1.0939cqw; /* 14 / 1279.78564 */
+  font-weight: 300;
+  line-height: 2.1410cqw; /* 27.4 */
+  white-space: nowrap;
+  color: #000000;
+}
+
+/* ---------- 右欄 796:847，x=583 y=71 696.7857×551 ----------
+   子元素百分比分母是 696.7857 × 551。 */
+.av-air-col {
+  position: absolute;
+  left: 45.5545%; /* 583 / 1279.78564 */
+  top: 10.7903%; /* 71 / 658 */
+  width: 54.4455%; /* 696.7857 / 1279.78564 */
+  height: 83.7386%; /* 551 / 658 */
+}
+
+/* 桌機不成為版面節點，讓五個 row 的子元素直接吃 .av-air-col 的絕對定位 */
+.av-air-row { display: contents; }
+
+.av-air-icon {
+  position: absolute;
+  display: block;
+}
+
+.av-air-icon--exhaust {
+  left: 0;
+  top: 5.4446%; /* 30 / 551 */
+  width: 20.8803%; /* 145.4918 / 696.7857 */
+  height: 7.0461%; /* 38.8242 / 551 */
+}
+
+/* 796:854 —— 四周各外擴 0.86% / 0.62% */
+.av-air-icon--vortex {
+  left: 6.2613%; /* (627.1288 − 0.5006 − 583) / 696.7857 */
+  top: 24.7736%; /* (208 − 0.4973 − 71) / 551 */
+  width: 8.4977%; /* 59.2059 / 696.7857 */
+  height: 14.7386%; /* 81.2095 / 551 */
+}
+
+.av-air-icon--coaxial {
+  left: 4.0598%; /* (611.2881 − 583) / 696.7857 */
+  top: 48.4835%; /* (338.144 − 71) / 551 */
+  width: 12.7461%; /* 88.8141 / 696.7857 */
+  height: 11.9521%; /* 65.8559 / 551 */
+}
+
+.av-air-icon--cyclonic {
+  left: 8.7692%; /* (644.1013 − 583) / 696.7857 */
+  top: 67.1530%; /* (441.0132 − 71) / 551 */
+  width: 3.3651%; /* 23.4492 / 696.7857 */
+  height: 13.0624%; /* 71.9736 / 551 */
+}
+
+.av-air-icon--intake {
+  left: 0.8121%; /* (588.6578 − 583) / 696.7857 */
+  top: 85.4810%; /* (542 − 71) / 551 */
+  width: 19.1691%; /* 133.5671 / 696.7857 */
+  height: 13.7931%; /* 76 / 551 */
+}
+
+/* 文字欄：左緣 770.66、右緣＝框右緣，寬 509.13 */
+.av-air-title,
+.av-air-body {
+  position: absolute;
+  left: 26.9318%; /* (770.6556 − 583) / 696.7857 */
+  width: 73.0682%; /* 509.1304 / 696.7857 */
+  margin: 0;
+  color: #353535;
+}
+
+.av-air-title {
+  font-size: 1.5628cqw; /* 20 / 1279.78564 */
+  font-weight: 500;
+  line-height: 1.37; /* 27.4 / 20 */
+}
+
+.av-air-body {
+  font-size: 1.4065cqw; /* 18 / 1279.78564 */
+  font-weight: 300;
+  line-height: 1.5222; /* 27.4 / 18 */
+}
+
+.av-air-title--exhaust { top: 0; }
+.av-air-body--exhaust { top: 5.0817%; } /* 28 / 551 */
+.av-air-title--vortex { top: 23.7750%; } /* 131 / 551 */
+.av-air-body--vortex { top: 28.8566%; } /* 159 / 551 */
+.av-air-title--coaxial { top: 42.4682%; } /* 234 / 551 */
+.av-air-body--coaxial { top: 47.5499%; } /* 262 / 551 */
+.av-air-title--cyclonic { top: 66.2432%; } /* 365 / 551 */
+.av-air-body--cyclonic { top: 71.3249%; } /* 393 / 551 */
+.av-air-title--intake { top: 84.9365%; } /* 468 / 551 */
+.av-air-body--intake { top: 90.0182%; } /* 496 / 551 */
+
+/* ---------- RWD（Figma 只有 1440 一個 frame，以下是假設值）----------
+   ≤900px：解除長寬比鎖定改流式，理由同 SOLUTION / Dimensions —— cqw 字級
+   在窄視窗會把 18px 內文縮到 8px 級別。左側插畫整塊維持原長寬比等比縮，
+   因為裡面的箭頭是靠百分比疊在照片上的，拆開就沒有意義。 */
+@media (max-width: 900px) {
+  .av-air-frame {
+    width: 100%;
+    margin-left: 0;
+    aspect-ratio: auto;
+    container-type: normal;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .av-air-eyebrow {
+    position: static;
+    font-size: 16px;
+  }
+  .av-air-illus {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 545.0732 / 594;
+  }
+  /* 圖例在窄視窗會跟插畫擠在一起，字級改用固定值不再跟著縮 */
+  .av-air-legend { gap: 8px; }
+  .av-air-swatches { width: 20px; gap: 5px; }
+  .av-air-swatch { height: 8px; }
+  .av-air-legend-rows { gap: 7px; }
+  .av-air-legend-row {
+    height: 6px;
+    font-size: clamp(8px, 1.5vw, 12px);
+    line-height: 1.2;
+  }
+
+  .av-air-col {
+    position: static;
+    width: 100%;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+  /* 圖示固定 56px 一欄、標題與內文疊在右欄 */
+  .av-air-row {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    column-gap: 16px;
+    row-gap: 4px;
+    align-items: start;
+  }
+  .av-air-icon {
+    position: static;
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    width: 100%;
+    height: auto;
+    align-self: center;
+  }
+  .av-air-title,
+  .av-air-body {
+    position: static;
+    grid-column: 2;
+    width: auto;
+  }
+  .av-air-title { font-size: clamp(17px, 2.4vw, 20px); }
+  .av-air-body { font-size: clamp(14px, 2vw, 18px); }
+}
+
+/* ============ WORK FOOTAGE（node 796:738，1160×206）============
+   Figma 位置 x=140 y=9309。內層 Frame 16（796:739）是 x=32 寬 1077 的
+   flex column、gap 11、置中——跟 796:715 同一組件式，連那 9.5px 的左偏
+   都一樣，所以整段重用 .av-overview-inner / .av-overview-head /
+   .av-overview-subtitle / .av-overview-body，這裡只補字標的尺寸。
+
+   ⚠️ 區塊間距刻意偏離 Figma：Figma 是 senorio2 底→work footage 頂 335px，
+   這裡是 .av-section 通用節奏 172.8px（1440 時），差 −162.2px。
+
+   字標（墨跡 ≠ 文字框，同 .av-overview-title 那套）：
+     796:740 文字框 314×83（固定高、行置中），墨跡 314×67。
+     ⚠️ 用的是 FootageTitleWord 不是 TitleWord —— 兩者墨跡高同樣是 67，
+     但這一個字距更緊（314 vs 338 寬）。詳見 WorkFootage.jsx 的說明。
+     墨跡在框內的位置是拿 Figma 算圖量的：頂 3、底 70（83 − 3 − 67 = 13）。
+     margin-top 3 + 墨跡 67 + margin-bottom 13 = 83，剛好還原文字框，
+     下面 11px 的 flex gap 因此不必為了這一項另外調整。 */
+.av-foot-title {
+  margin: 3px 0 13px;
+  color: #353535;
+}
+
+.av-foot-title-mark {
+  display: block;
+  width: min(314px, 58%);
+  height: auto;
+  margin-inline: auto;
+}

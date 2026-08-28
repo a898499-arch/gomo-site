@@ -1,0 +1,30 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="88.8143" height="65.8559" viewBox="0 0 88.8143 65.8559" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Group">
+<path id="Vector" d="M4.47883 51.5097C4.56723 43.2073 4.94292 32.212 6.15839 22.8514C8.02947 8.43748 11.2781 1.73584 17.0092 0.447062C22.2173 -0.726403 25.8932 0.664103 28.0589 2.04106C33.9079 5.75138 35.0718 13.0703 35.1823 13.891L26.2173 14.9356C26.092 14.0199 25.1639 10.3096 22.9392 8.89872C22.3572 8.53243 21.3701 8.09832 19.418 8.47817C17.4217 10.2146 13.8342 21.2303 13.5175 51.4623L18.0258 51.4351L9.10497 65.8559L1.84382e-05 51.5369L4.47883 51.5097Z" fill="url(#paint0_linear_0_4)"/>
+<path id="Vector_2" d="M60.7554 2.03473C62.9211 0.657772 66.6044 -0.732754 71.8051 0.440711C77.5362 1.72949 80.7775 8.43112 82.6559 22.8451C83.8714 32.1989 84.2544 43.201 84.3355 51.5034L88.8143 51.5305L79.7093 65.8495L70.7885 51.4288L75.2968 51.4559C74.9727 21.2239 71.3926 10.2083 69.3963 8.47182C67.4589 8.08519 66.4718 8.51931 65.8972 8.87881C63.7388 10.2286 62.7664 13.8033 62.597 14.9496L53.632 13.8847C53.7425 13.0639 54.9064 5.74505 60.7554 2.03473Z" fill="url(#paint1_linear_0_4)"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_4" x1="17.5937" y1="-3.72736" x2="17.5937" y2="67.9431" gradientUnits="userSpaceOnUse">
+<stop stop-color="white" stop-opacity="0"/>
+<stop offset="0.0131" stop-color="#E8E4E0" stop-opacity="0.0631"/>
+<stop offset="0.0301" stop-color="#D0C7BF" stop-opacity="0.1452"/>
+<stop offset="0.0485" stop-color="#BCAFA4" stop-opacity="0.2339"/>
+<stop offset="0.0684" stop-color="#AC9D8F" stop-opacity="0.3299"/>
+<stop offset="0.0905" stop-color="#A19080" stop-opacity="0.4369"/>
+<stop offset="0.1168" stop-color="#9B8878" stop-opacity="0.5636"/>
+<stop offset="0.1575" stop-color="#998675" stop-opacity="0.76"/>
+<stop offset="1" stop-color="#998675" stop-opacity="0.76"/>
+</linearGradient>
+<linearGradient id="paint1_linear_0_4" x1="71.2228" y1="-3.72692" x2="71.2228" y2="67.9436" gradientUnits="userSpaceOnUse">
+<stop stop-color="white" stop-opacity="0"/>
+<stop offset="0.0131" stop-color="#E8E4E0" stop-opacity="0.0631"/>
+<stop offset="0.0301" stop-color="#D0C7BF" stop-opacity="0.1452"/>
+<stop offset="0.0485" stop-color="#BCAFA4" stop-opacity="0.2339"/>
+<stop offset="0.0684" stop-color="#AC9D8F" stop-opacity="0.3299"/>
+<stop offset="0.0905" stop-color="#A19080" stop-opacity="0.4369"/>
+<stop offset="0.1168" stop-color="#9B8878" stop-opacity="0.5636"/>
+<stop offset="0.1575" stop-color="#998675" stop-opacity="0.76"/>
+<stop offset="1" stop-color="#998675" stop-opacity="0.76"/>
+</linearGradient>
+</defs>
+</svg>
