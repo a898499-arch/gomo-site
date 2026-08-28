@@ -239,11 +239,15 @@
    換算成 % 定位在 1440×541 的參考框裡，隨容器寬度等比縮放。
    2026-08-15：滿版出血（不再受 .wb-section-inner 的 1280px 限制），連接線
    換成 Figma 實際的圓角彎折 bracket 向量路徑。 */
+/* 超寬螢幕封頂：見 globals.css 的 --site-max。1920 時原本會撐到 1920，
+   照片放大失真且比 1360 的文字欄寬 41%。 */
 .wb-signup-diagram {
   position: relative;
   width: 100%;
   background: #303030;
   overflow: hidden;
+  max-width: var(--site-max);
+  margin-inline: auto;
 }
 
 .wb-signup-title {
@@ -635,11 +639,19 @@
 
 /* ---------- Characters Reference（node 514:576，滿版出血、左右兩個等寬
    色塊面板，2026-08-15 整段重做——原本的米色網格版本跟 Figma 完全不符） */
+/* 超寬螢幕封頂：見 globals.css 的 --site-max。這是全站最糊的滿版元素——
+   素材 characters-ref-photos@2x.png 原生只有 1214px，在 1920 是 0.63x，
+   連 1x 都不到、等於一直在放大顯示；封到 1600 後是 0.76x。
+   （CLAUDE.md 的「WanderBuddy 不要回頭改」講的是「純展示區塊改用匯出圖」
+     那條規則，也就是不要拆掉重做；這裡只加 max-width，不動結構、不動
+     內容、不重切圖，使用者 2026-08-28 明確確認過。） */
 .wb-charref-frame {
   position: relative;
   display: flex;
   width: 100%;
   overflow: hidden;
+  max-width: var(--site-max);
+  margin-inline: auto;
 }
 
 .wb-charref-panel {
@@ -755,9 +767,13 @@
 }
 
 /* ---------- Shot（滿版置中，唯一維持標準進場的一張） ---------- */
+/* 超寬螢幕封頂：見 globals.css 的 --site-max。1920 時原本會撐到 1920，
+   照片放大失真且比 1360 的文字欄寬 41%。 */
 .wb-shot {
   position: relative;
   width: 100%;
+  max-width: var(--site-max);
+  margin-inline: auto;
 }
 .wb-shot img {
   display: block;
@@ -767,10 +783,14 @@
 
 /* ---------- Mock up 2/3/4（依 Figma 座標往畫布外出血，
    不是置中；超出的部分用 overflow:hidden 真的裁掉） ---------- */
+/* 超寬螢幕封頂：見 globals.css 的 --site-max。1920 時原本會撐到 1920，
+   照片放大失真且比 1360 的文字欄寬 41%。 */
 .wb-mockup-bleed {
   position: relative;
   width: 100%;
   overflow: hidden;
+  max-width: var(--site-max);
+  margin-inline: auto;
 }
 .wb-mockup-bleed-img {
   position: absolute;

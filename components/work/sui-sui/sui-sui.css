@@ -631,9 +631,13 @@
 }
 
 /* ---------- Process Animation（node 545:532，1450×900） ---------- */
+/* 超寬螢幕封頂：見 globals.css 的 --site-max。實測 1920 時這個框高 1192px，
+   超出整個視窗；封到 1600 後高 993px。 */
 .ss-pa-frame {
   position: relative;
   width: 100%;
+  max-width: var(--site-max);
+  margin-inline: auto;
 }
 
 /* ---------- Function 1（node 545:110，「Setup in three questions」）。
@@ -849,10 +853,16 @@
 /* ---------- Mockup 1/2/3（各自用 Figma 實際 x 座標定位，不是統一置中；
    超出 1440 參考寬的部分用 .ss-mockup-clip 的 overflow:hidden 真的裁掉。
    淡入淡出比照 WanderBuddy 的 scrubbed 做法，見 MockupFade.jsx） ---------- */
+/* 超寬螢幕封頂：見 globals.css 的 --site-max。封頂 clip 就連帶封頂裡面的
+   .ss-mockup（它的寬度與 marginLeft 都是 clip 的百分比，見 MockupFade.jsx），
+   Figma 的 x 座標比例不受影響。mockup-1.png 原生只有 1448px，在 1920 是
+   0.87x（連 1x 都不到），封到 1600 後回到 1.04x。 */
 .ss-mockup-clip {
   width: 100%;
   overflow: hidden;
   position: relative;
+  max-width: var(--site-max);
+  margin-inline: auto;
 }
 
 .ss-mockup {

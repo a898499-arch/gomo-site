@@ -35,6 +35,28 @@
      所以在 1440/1920/2560 都是同一個值，只有小於 1440 時才會縮小。 */
   --page-gutter: clamp(20px, 2.7778vw, 40px);
 
+  /* 滿版內容區塊在超寬螢幕（≥1920）的封頂寬度。
+     問題：1440 設計稿的滿版照片撐到 1920 是放大 33%（會糊），而且照片比
+     .page-container 的 1360 文字欄寬 41%，視覺上壓過一切。實測 1920 時
+     .ss-pa-frame 高 1192px、.av-bg-frame 高 1304px，都超出視窗；
+     .wb-charref-frame 的素材原生只有 1214px，在 1920 是 0.63x，連 1x 都不到。
+
+     ⚠️ 要改封頂寬度只改這一個值，各處一律 max-width: var(--site-max)，
+     不要在個別檔案寫死 1600。
+
+     ⚠️ 只給「滿版的內容區塊」用（捲動時出現的大照片／大動畫）。以下刻意
+     不套，套了會壞：
+       .page-container ——文字欄維持 1440，行寬問題另外處理（使用者指示）
+       .home-stage     ——首頁 Loading 舞台，本來就要填滿整個視窗
+       .wb-hero/.wb-vignette/.wb-scrim ——100svh 的滿版 hero，同上
+       .site-nav / .site-footer ——全幅色帶，內部已由 .page-container 封頂，
+                                   封頂外框會讓底色出現斷邊
+       .ss-hero-marquee ——UI 跑馬燈，刻意溢出再裁切（實測 2274px）才有
+                           跑動效果，封頂會破掉
+       .page-content / .ss-case / .av-case / .ss-section 等純結構容器
+                        ——本身無視覺，封頂反而讓滿版區塊無法出血 */
+  --site-max: 1600px;
+
   --nav-top-gap: 10px;
 }
 
