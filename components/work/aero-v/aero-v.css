@@ -590,3 +590,191 @@
   .av-sol-lede--left { left: 6%; width: 40%; }
   .av-sol-lede--right { left: 52%; width: 42%; }
 }
+
+/* ============ 照片輪播的疊圖層（PhotoCycler.jsx）============
+   ⚠️ 這一段刻意「不」規定格子的尺寸與長寬比——那是版面，由使用這個元件的
+   區塊自己給（見 §From Sketch to Working Prototype）。這裡只負責「兩層照片
+   疊在一起、換圖不影響版面」這件事，換到別的區塊也能直接用。
+
+   兩層 <img> 都是 absolute + inset:0：換 src、換 z-index、改 opacity 都不會
+   觸發 layout。opacity 的起始值由 JS（gsap.set）設定，不寫在 CSS 裡——
+   避免 CSS 與 GSAP 互相蓋來蓋去。 */
+.av-cycler {
+  position: relative;
+  overflow: hidden;
+}
+
+.av-cycler-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 沒開 JS 時後層沒有 src，瀏覽器會畫破圖圖示，這裡直接藏掉。
+   （有 JS 時 effect 一掛上 src 這條就不成立了。） */
+.av-cycler-layer:not([src]) {
+  display: none;
+}
+
+/* reduced-motion：PhotoCycler 不建 timeline、後層永遠不掛 src，
+   所以上面那條 :not([src]) 已經把它藏起來了。這裡再保底一次。 */
+@media (prefers-reduced-motion: reduce) {
+  .av-cycler-layer:nth-child(2) {
+    display: none;
+  }
+}
+
+/* ====== FROM SKETCH TO WORKING PROTOTYPE（node 796:888，1352×565）======
+   Figma 位置 x=48 y=3750。1352 幾乎正好等於 .page-container 的內容寬
+   （1440 − 2×40 = 1360，差 8px），所以用 .page-container，做法同 SOLUTION。
+
+   ⚠️ 這一區**不是三格並排**，是三欄不規則配置。所有座標都是從 796:888 的
+   metadata 逐一讀出來的，不是推算的：
+       sketchs   796:894   x=0    y=0    521.802 × 287
+       3d        796:901   x=561  y=3    400 × 270
+       prototype 796:900   x=561  y=287  400 × 270     ← 與 3d 同一欄
+       model     796:902   x=983  y=3    369 × 554     ← 一格通到底
+       標題      796:892   x=23   y=374  385 × 28
+       內文      796:893   x=23   y=420  458 × 137
+   欄間距刻意不一致（拼貼→中欄 39.2、中欄兩格之間 14、中欄→右欄 22），
+   三格的長寬比也不同。依 CLAUDE.md，這是刻意的設計，不可以整理成格狀。
+
+   整框鎖 aspect-ratio 1352/565、全部用百分比 + cqw，1155 與 1440 只能是同一
+   張構圖等比縮放——做法與 .av-bg-frame / .av-sol-frame 一致。 */
+.av-sketch-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1352 / 565;
+  container-type: inline-size;
+}
+
+/* 796:894，x=0 y=0 521.802×287。高度由 aspect-ratio 決定，不寫死。
+   ⚠️ 底下不要墊底色：這張是真的去背（81% 全透明），要透出頁面底色。 */
+.av-sketch-collage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 38.5948%; /* 521.802 / 1352 */
+  height: auto;
+  display: block;
+}
+
+/* 三格輪播。.av-cycler 的疊圖行為在上面那段，這裡只給位置與尺寸。 */
+.av-sketch-cell {
+  position: absolute;
+}
+
+/* 796:901 x=561 y=3 400×270 */
+.av-sketch-cell--3d {
+  left: 41.4941%; /* 561 / 1352 */
+  top: 0.5310%; /* 3 / 565 */
+  width: 29.5858%; /* 400 / 1352 */
+  height: 47.7876%; /* 270 / 565 */
+}
+
+/* 796:900 x=561 y=287 400×270 —— 與 3d 同一欄，中間只有 14px */
+.av-sketch-cell--proto {
+  left: 41.4941%;
+  top: 50.7965%; /* 287 / 565 */
+  width: 29.5858%;
+  height: 47.7876%;
+}
+
+/* 796:902 x=983 y=3 369×554 —— 直幅，高度等於中欄兩格加間距 */
+.av-sketch-cell--model {
+  left: 72.7071%; /* 983 / 1352 */
+  top: 0.5310%;
+  width: 27.2929%; /* 369 / 1352 */
+  height: 98.0531%; /* 554 / 565 */
+}
+
+/* 796:892 — 20px Poppins Bold #353535，行高 27.4px，x=23 y=374 w=385 */
+.av-sketch-title {
+  position: absolute;
+  left: 1.7012%; /* 23 / 1352 */
+  top: 66.1947%; /* 374 / 565 */
+  width: 28.4763%; /* 385 / 1352 */
+  margin: 0;
+  font-size: 1.4793cqw; /* 20 / 1352 */
+  font-weight: 700;
+  line-height: 1.37; /* 27.4 / 20 */
+  color: #353535;
+}
+
+/* 796:893 — 18px Poppins **Light(300)** #353535，行高 27.4px，
+   x=23 y=420 w=458 h=137（=5 行 × 27.4，寬度給對就會自然斷成 5 行）。
+   ⚠️ 300 不是筆誤：規格書 74 行那段 <link> 只列了 400/600/700，但實際實作在
+   app/layout.js 是用 next/font/google 載入 ['300','400','500','600','700','900']，
+   300 是有的。這裡照 Figma 用 Light，不是偏離值。 */
+.av-sketch-body {
+  position: absolute;
+  left: 1.7012%;
+  top: 74.3363%; /* 420 / 565 */
+  width: 33.8757%; /* 458 / 1352 */
+  margin: 0;
+  font-size: 1.3314cqw; /* 18 / 1352 */
+  font-weight: 300;
+  line-height: 1.5222; /* 27.4 / 18 */
+  color: #353535;
+}
+
+/* ============ SENORIO（node 796:903，1237×830）============
+   單純顯示的一張大圖，沒有文字也沒有動效。1237 置中在 1440 頁面上
+   （x=102），比 .page-container 的內容寬 1360 再往內縮，所以是 90.9559%。 */
+.av-senorio {
+  display: block;
+  width: 90.9559%; /* 1237 / 1360 */
+  max-width: 1237px;
+  height: auto;
+  margin-inline: auto;
+}
+
+/* ---------- RWD（Figma 只有 1440 一個 frame，以下是假設值）----------
+   ≥901px：維持 Figma 的絕對版面，整框等比縮放（1155 與 1440 都走這條）。
+   ≤900px：解除長寬比鎖定，改為流式堆疊——理由同 SOLUTION，長寬比鎖定加上
+   cqw 字級在窄視窗會把 18px 的內文縮到 8px 級別，無法閱讀。 */
+@media (max-width: 900px) {
+  .av-sketch-frame {
+    aspect-ratio: auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .av-sketch-collage {
+    position: static;
+    width: 100%;
+    grid-column: 1 / -1;
+  }
+  .av-sketch-cell {
+    position: static;
+    width: 100%;
+    height: auto;
+  }
+  /* 堆疊之後長寬比要自己給，否則 absolute 撐開的高度就沒了 */
+  .av-sketch-cell--3d,
+  .av-sketch-cell--proto {
+    aspect-ratio: 400 / 270;
+  }
+  .av-sketch-cell--model {
+    aspect-ratio: 369 / 554;
+    grid-row: span 2;
+  }
+  .av-sketch-title,
+  .av-sketch-body {
+    position: static;
+    width: 100%;
+    grid-column: 1 / -1;
+  }
+  .av-sketch-title { font-size: clamp(17px, 2.6vw, 20px); }
+  .av-sketch-body { font-size: clamp(15px, 2.2vw, 18px); }
+  .av-senorio { width: 100%; }
+}
+
+@media (max-width: 600px) {
+  /* 兩欄在手機上仍然太擠，改單欄；model 的 span 2 一併解除 */
+  .av-sketch-frame { grid-template-columns: 1fr; }
+  .av-sketch-cell--model { grid-row: auto; }
+}
