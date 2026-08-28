@@ -61,6 +61,18 @@
   aspect-ratio: 1440 / 966;
   overflow: hidden;
   background: var(--bg);
+
+  /* ⚠️ 這兩行是「刻意封頂」，不是版面 bug。
+     理由：1920 時 hero 高 1288px，但一般 1080 螢幕的視窗高只有約 1000px，
+     首屏根本看不完整；封到 1600 之後高 1073px，幾乎剛好是一屏。
+     （這跟 .wb-hero 那種 100svh 的 hero 不同——那種本來就填滿一個視窗高，
+      所以沒有封頂，見 globals.css 的 --site-max 註解。）
+
+     ⚠️ 若視覺上不成立——例如封頂後 hero 頂端兩側出現米色邊條、讀起來像
+     沒做完——**移除下面這兩行即可還原成滿版**，不需要動其他任何東西。
+     使用者 2026-08-28 明確保留了這個退路。 */
+  max-width: var(--site-max);
+  margin-inline: auto;
 }
 
 .av-hero-photo {
@@ -287,4 +299,294 @@
     opacity: 1 !important;
     transform: none !important;
   }
+}
+
+/* ==================== BACKGROUND（node 796:766，1440×978）====================
+   滿版出血。比照 ProcessAnimation.jsx：不包在 .page-container 裡即可——
+   .av-section／.av-case／.page-content 都沒有水平內距，直接當 <section> 的
+   子元素就天生撐滿視窗寬，不需要 100vw + 負 margin（那招會產生水平捲軸）。
+
+   ⚠️ 區塊間距刻意偏離 Figma：Figma 是 logo&overview 底→background 頂 94px、
+   background 底→SOLUTION 頂 55px；這裡兩處都採用 .av-section 的通用節奏
+   clamp(48px, 6vw, 96px)。理由（使用者 2026-08-26 裁示）：55px 是整頁的離群值
+   （其他接縫是 89～335），且已經因為「太擠沒有呼吸感」把 hero→overview 從
+   160 改成 280（後再調為 210），這裡照同一個邏輯走。94→86.4 幾乎沒差，
+   55→86.4 是明顯改善。之後疊圖比對看到這兩處的差不要當成 bug 改回去。
+
+   ⚠️ 不要在這一層或父層墊背景色：bg-background.webp 的頂端淡出是真的透明
+   （alpha 0→255 的漸層），底下必須是頁面底色才對。 */
+.av-bg {
+  /* 出血層不吃 .av-section 的水平內距（它本來就沒有），這裡只是把語意寫明 */
+  padding-inline: 0;
+}
+
+/* 超寬螢幕封頂：見 globals.css 的 --site-max。1920 時原本會撐到 1920，
+   照片放大失真且比 1360 的文字欄寬 41%。 */
+.av-bg-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1440 / 978;
+  /* 讓底下所有 cqw 以「這個框的寬度」為基準，文字與圖片嚴格等比縮放。
+     用 cqw 而不是 vw：這一區雖然目前等於視窗寬，但若日後包進容器就會失準。 */
+  container-type: inline-size;
+  max-width: var(--site-max);
+  margin-inline: auto;
+}
+
+.av-bg-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 796:774 — 24px Poppins SemiBold #007795 uppercase，行高 40.4px，
+   x 置中（metadata x=634 w=172 → 中心 720 = frame 正中），y=182 */
+.av-bg-eyebrow {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 18.6094%; /* 182 / 978 */
+  margin: 0;
+  font-size: 1.6667cqw; /* 24 / 1440 */
+  font-weight: 600;
+  line-height: 1.6833; /* 40.4 / 24 */
+  letter-spacing: normal;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #007795;
+}
+
+/* 796:775 — 36px Poppins SemiBold Italic #F5F5F5，行高 40.4px，
+   x 置中（x=400 w=640 → 中心 720），y=252 */
+.av-bg-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 25.7669%; /* 252 / 978 */
+  margin: 0;
+  font-size: 2.5cqw; /* 36 / 1440 */
+  font-weight: 600;
+  font-style: italic;
+  line-height: 1.1222; /* 40.4 / 36 */
+  white-space: nowrap;
+  color: #f5f5f5;
+}
+
+/* 796:776 — 20px Poppins Regular #FCFBF8，置中對齊，寬 1102，y=322 */
+.av-bg-body {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 32.9243%; /* 322 / 978 */
+  width: 76.5278%; /* 1102 / 1440 */
+  margin: 0;
+  font-size: 1.3889cqw; /* 20 / 1440 */
+  font-weight: 400;
+  line-height: normal;
+  text-align: center;
+  color: #fcfbf8;
+}
+
+/* 數據卡 796:777 / 796:780 — 毛玻璃底 rgba(255,255,255,0.39) + blur 6px，
+   圓角 10。是純文字卡片，依 CLAUDE.md 用程式碼做、不匯圖。 */
+.av-bg-stat {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.39);
+  -webkit-backdrop-filter: blur(0.4167cqw); /* 6 / 1440 */
+  backdrop-filter: blur(0.4167cqw);
+  border-radius: 0.6944cqw; /* 10 / 1440 */
+}
+
+/* 796:777：x=40 y=567 519×129，內距 25/25/24/26，gap 19 */
+.av-bg-stat--left {
+  left: 2.7778%; /* 40 / 1440 */
+  top: 57.9755%; /* 567 / 978 */
+  width: 36.0417%; /* 519 / 1440 */
+  padding: 1.7361cqw 1.7361cqw 1.6667cqw 1.8056cqw;
+  gap: 1.3194cqw; /* 19 / 1440 */
+}
+
+/* 796:780：x=955 y=632 443 寬，內距 24/26，內層 gap 26 */
+.av-bg-stat--right {
+  left: 66.3194%; /* 955 / 1440 */
+  top: 64.6217%; /* 632 / 978 */
+  width: 30.7639%; /* 443 / 1440 */
+  padding: 1.6667cqw 1.8056cqw; /* 24 / 26 */
+  gap: 1.8056cqw; /* 26 / 1440 */
+}
+
+/* 796:778 / 796:782 — 56px Poppins SemiBold Italic #007795，行高 40.4px */
+.av-bg-stat-num {
+  margin: 0;
+  flex-shrink: 0;
+  font-size: 3.8889cqw; /* 56 / 1440 */
+  font-weight: 600;
+  font-style: italic;
+  line-height: 0.7214; /* 40.4 / 56 */
+  white-space: nowrap;
+  color: #007795;
+}
+
+/* 796:779 / 796:783 — 24px Poppins Regular #F5F5F5，寬 297（兩張卡同寬，
+   換行位置才會跟 Figma 一致），行高 normal。
+   ⚠️ height 是刻意寫死的：Figma 這個文字框是「固定高 80」的框，不是由內容
+   撐出來的（80 ÷ 2 行 = 每行 40，但 24px 的實際行高只有 36，2 行 = 72）。
+   不寫死的話卡片高度會變成 25+72+24 = 121，比 Figma 的 129 矮 8px（實測過），
+   兩張卡都一樣。寫死之後卡片高度才等於 Figma 的 129 / 128。 */
+.av-bg-stat-label {
+  margin: 0;
+  flex-shrink: 0;
+  width: 20.625cqw; /* 297 / 1440 */
+  height: 5.5556cqw; /* 80 / 1440 */
+  font-size: 1.6667cqw; /* 24 / 1440 */
+  font-weight: 400;
+  line-height: normal;
+  color: #f5f5f5;
+}
+
+/* ============ SOLUTION（node 796:743，1359×825.31）============
+   不是滿版：Figma 是 x=41 寬 1359，幾乎正好等於 .page-container 的內容寬
+   （1440 − 2×40 = 1360），所以用 .page-container。
+   圖層名叫 airflow，但 796:784 還有另一個同名區塊，故元件與 class 用
+   sol / Solution，之後那一區才用 airflow。 */
+.av-sol-frame {
+  container-type: inline-size;
+}
+
+.av-sol-row {
+  position: relative;
+  width: 100%;
+}
+
+/* 796:744「Group 36971」1357.06×405.29 */
+.av-sol-row--top {
+  aspect-ratio: 1357.06 / 405.29;
+}
+
+/* 796:756「goal」1358×420.02 */
+.av-sol-row--goal {
+  aspect-ratio: 1358 / 420.02;
+}
+
+.av-sol-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 796:765 SOLUTION（白）與 796:764 goal（#FCFBF8）——同為 24px Poppins
+   SemiBold uppercase、行高 40.4px、x 置中。兩者顏色刻意不同，照 Figma。 */
+.av-sol-eyebrow {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  font-size: 1.766cqw; /* 24 / 1359 */
+  font-weight: 600;
+  line-height: 1.6833; /* 40.4 / 24 */
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.av-sol-eyebrow--solution {
+  top: 9.376%; /* 38 / 405.29 */
+  color: #ffffff;
+}
+
+.av-sol-eyebrow--goal {
+  top: 7.073%; /* (435 − 405.29) / 420.02 */
+  color: #fcfbf8;
+}
+
+/* 796:761 / 796:762 — 24px Poppins SemiBold Italic #353535，行高 40.4px。
+   兩段寬度不同（240 / 270），照 Figma，不要統一。 */
+.av-sol-lede {
+  position: absolute;
+  top: 36.269%; /* 147 / 405.29 */
+  margin: 0;
+  font-size: 1.766cqw; /* 24 / 1359 */
+  font-weight: 600;
+  font-style: italic;
+  line-height: 1.6833;
+  color: #353535;
+}
+
+.av-sol-lede--left {
+  left: 31.199%; /* 424 / 1359 */
+  width: 17.660%; /* 240 / 1359 */
+}
+
+.av-sol-lede--right {
+  left: 51.288%; /* 697 / 1359 */
+  width: 19.867%; /* 270 / 1359 */
+}
+
+/* 796:763 — 30px Poppins SemiBold Italic 白色，置中，寬 622 */
+.av-sol-goal-line {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 23.977%; /* (506 − 405.29) / 420.02 */
+  width: 45.769%; /* 622 / 1359 */
+  margin: 0;
+  font-size: 2.2075cqw; /* 30 / 1359 */
+  font-weight: 600;
+  font-style: italic;
+  line-height: 1.3467; /* 40.4 / 30 */
+  text-align: center;
+  color: #ffffff;
+}
+
+/* ---------- RWD（Figma 只有 1440 一個 frame，以下是假設值）----------
+   ≥901px：維持 Figma 的絕對版面，整框等比縮放（1155 與 1440 都走這條）。
+   ≤900px：解除長寬比鎖定——照片改成填滿的背景、文字改為流式堆疊。
+   理由：長寬比鎖定 + cqw 字級在窄視窗會把內文縮到 8px 級別，無法閱讀。 */
+@media (max-width: 900px) {
+  .av-bg-frame {
+    aspect-ratio: auto;
+    min-height: 78vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 20px;
+    padding: 56px var(--page-gutter);
+  }
+  .av-bg-eyebrow,
+  .av-bg-title,
+  .av-bg-body,
+  .av-bg-stat {
+    position: static;
+    left: auto;
+    top: auto;
+    transform: none;
+    width: 100%;
+    max-width: 520px;
+    margin-inline: auto;
+  }
+  .av-bg-eyebrow { font-size: 16px; }
+  .av-bg-title { font-size: clamp(22px, 3.6vw, 30px); white-space: normal; text-align: center; }
+  .av-bg-body { font-size: clamp(14px, 2vw, 17px); }
+  .av-bg-stat { padding: 18px 20px; gap: 14px; border-radius: 10px;
+                -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  .av-bg-stat-num { font-size: clamp(30px, 5.4vw, 44px); line-height: 1; }
+  .av-bg-stat-label { width: auto; height: auto; font-size: clamp(13px, 2.2vw, 17px); }
+
+  /* SOLUTION：兩排維持圖片比例，但文字改用可讀的固定級距 */
+  .av-sol-eyebrow { font-size: 14px; }
+  .av-sol-lede { font-size: clamp(11px, 2vw, 16px); }
+  .av-sol-goal-line { font-size: clamp(13px, 2.4vw, 20px); }
+}
+
+@media (max-width: 600px) {
+  /* SOLUTION 的文字在極窄時會蓋住彼此，兩段 lede 改為上下排 */
+  .av-sol-lede--left { left: 6%; width: 40%; }
+  .av-sol-lede--right { left: 52%; width: 42%; }
 }
