@@ -1,0 +1,27 @@
+/* PhotoStack —— 「照片依序排列」型作品頁的共用樣式。
+   目前 /work/mvs（806:1144）與 /work/blossom-care（806:1084）兩頁在用。 */
+
+/* Figma 的 Frame 77 / Frame 78：flex column、gap 33。
+   33px 是內容欄 1360 時量到的值，換算 33/1440 = 2.2917vw；
+   視窗 ≥1440 時內容欄固定 1360，所以上限剛好停在 33px。
+   下限 16px 是窄視窗的假設值（Figma 只有 1440 一個 frame）。 */
+.work-photo-stack {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(16px, 2.2917vw, 33px);
+  /* 區塊上下間距沿用 .av-section 的通用節奏，讓三個作品頁一致。
+     ⚠️ 刻意偏離 Figma：Figma 稿裡照片距導覽列底只有 18px（MVS 是 0px），
+     這裡走站上的通用值。已回報。 */
+  padding-block: clamp(48px, 6vw, 96px);
+}
+
+/* Figma 每張 1362×766 = aspect 4096/2304 = 16:9，object-cover、無圓角。
+   width/height 屬性已經給了長寬比，這裡的 aspect-ratio 是保險：
+   萬一之後換成非 16:9 的素材，版面不會跟著跑掉。 */
+.work-photo-stack-item {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4096 / 2304;
+  object-fit: cover;
+}

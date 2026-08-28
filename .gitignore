@@ -47,6 +47,13 @@ perf-scenario1-bench-dolly.json
 # 原檔不進版控
 public/work/sui-sui/Shot.png
 
+# MVS 與 Blossom Care 的原始照片：每張 8000×4500，兩個資料夾合計 122MB。
+# 上線用的是同目錄下壓過的 01.webp（1600 寬）與 01@2x.webp（3200 寬），
+# 合計只有 10.4MB。原始 jpg 留在本機當備份，不進版控——進了 git 歷史就
+# 永久拿不掉（使用者 2026-08-28 裁示）。要換素材時記得原檔不在 repo 裡。
+public/work/mvs/*.jpg
+public/work/blossom-care/*.jpg
+
 # 本機工作筆記／暫存
 Untitled
 _to_delete/
