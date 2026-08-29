@@ -211,36 +211,33 @@ export default function WorkIndex({ works }) {
         )
         .add(() => gsap.set(inners, { willChange: 'auto' }), 0.85);
 
-      // 3) 卡片：只有首屏可見的直接播（stagger 80ms），其餘各自掛
-      //    ScrollTrigger，捲入時才播且只播一次
-      const inView = cards.filter((c) => c.getBoundingClientRect().top < window.innerHeight);
-      const rest = cards.filter((c) => !inView.includes(c));
-
-      gsap.set(cards, { y: 40, opacity: 0, willChange: 'transform, opacity' });
-      gsap.to(inView, {
-        y: 0,
-        opacity: 1,
-        duration: 0.6,
-        stagger: 0.08,
-        ease: mainEase,
-        delay: 0.5,
-        onComplete: () => gsap.set(inView, { willChange: 'auto' }),
-      });
-
-      rest.forEach((card) => {
-        ScrollTrigger.create({
-          trigger: card,
-          start: 'top 90%',
-          once: true,
-          onEnter: () =>
-            gsap.to(card, {
-              y: 0,
-              opacity: 1,
-              duration: 0.6,
-              ease: mainEase,
-              onComplete: () => gsap.set(card, { willChange: 'auto' }),
-            }),
-        });
+      // 3) 卡片：**整批一起**進場，不做 stagger（使用者 2026-08-29 的動效
+      //    規格 §1）。translateY(24px)+opacity 0 → 定位，600ms 主曲線。
+      //
+      //    ⚠️ 這裡跟改版前的做法差很多，不要改回去：舊版是「首屏的直接播、
+      //    其餘每張各掛一個 ScrollTrigger」，所以卡片是一張一張出現的。
+      //    新規格要的是整片一起浮上來，所以改成**單一** ScrollTrigger 掛在
+      //    grid 上，越過視窗 80% 時一次把所有卡片播完。
+      //
+      //    delay 0.2 = 規格的「卡片群晚 200ms」。基準是簡介與頁籤的進場——
+      //    首屏載入時 grid 頂端（約 615px）本來就在 80% 線（800px）之內，
+      //    觸發器會立刻開火，所以這 200ms 實際上就是接在頁籤之後。
+      //    若使用者是捲動之後才讓 grid 進場，這 200ms 只是個無害的小延遲。
+      const grid = root.querySelector('.work-grid');
+      gsap.set(cards, { y: 24, opacity: 0, willChange: 'transform, opacity' });
+      ScrollTrigger.create({
+        trigger: grid,
+        start: 'top 80%',
+        once: true,
+        onEnter: () =>
+          gsap.to(cards, {
+            y: 0,
+            opacity: 1,
+            duration: 0.6,
+            ease: mainEase,
+            delay: 0.2,
+            onComplete: () => gsap.set(cards, { willChange: 'auto' }),
+          }),
       });
     }, root);
 

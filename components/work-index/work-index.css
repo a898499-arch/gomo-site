@@ -297,12 +297,42 @@
   .reveal-inner {
     transform: none !important;
   }
-  .work-card-cover img,
+  /* ⚠️ 這裡刻意**不**包含 .work-card-cover img：動效規格 §7 要求
+     reduced motion 下 hover 仍要有 150ms 的不透明度變化，那條的
+     transition 定義在下面。原本這裡是 `.work-card-cover img,
+     .work-card-title { transition: none !important }`，!important 會把
+     下面的 150ms 蓋掉（實測 computed 值是 transform 0.5s，等於整條沒生效）。 */
   .work-card-title {
     transition: none !important;
   }
   .work-tab,
   .work-tab::after {
     transition-duration: 150ms !important;
+  }
+}
+
+/* ---------- Reduced motion（使用者 2026-08-29 動效規格 §7）----------
+   進場與篩選切換的略過邏輯寫在 WorkIndex.jsx 裡（JS 讀 matchMedia）；
+   hover 是純 CSS，所以在這裡覆寫。
+
+   規格：「hover 不輪播、不播影片，只做 150ms 的不透明度變化」。
+   ⚠️ 規格沒有指定不透明度要降到多少，0.85 是我的假設值，已回報。 */
+@media (prefers-reduced-motion: reduce) {
+  /* !important 是為了蓋掉上面 .work-card 那組的 transform:none !important
+     所在的同一個 media block 裡、以及一般狀態下的 transform 500ms 定義。 */
+  .work-card-cover img {
+    transition: opacity 150ms linear !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and (hover: hover) {
+  .work-card:hover .work-card-cover img,
+  .work-card:focus-visible .work-card-cover img {
+    transform: none;
+    opacity: 0.85;
+  }
+  .work-card:hover .work-card-title,
+  .work-card:focus-visible .work-card-title {
+    transform: none;
   }
 }
