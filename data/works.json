@@ -14,6 +14,7 @@
     "year": null,
     "cover": null,
     "hoverVideo": null,
+    "hoverImages": null,
     "hidden": false
   },
   {
@@ -30,6 +31,7 @@
     "year": null,
     "cover": "/work/covers/sui-sui.webp",
     "hoverVideo": "/work/hover/sui-sui",
+    "hoverImages": null,
     "hidden": false
   },
   {
@@ -45,6 +47,7 @@
     "year": null,
     "cover": "/work/covers/wanderbuddy.webp",
     "hoverVideo": "/work/hover/wanderbuddy",
+    "hoverImages": null,
     "hidden": false
   },
   {
@@ -59,8 +62,13 @@
       "product"
     ],
     "year": null,
-    "cover": "/work/covers/aero-v.webp",
+    "cover": "/work/hover/aero-v-1.webp",
     "hoverVideo": null,
+    "hoverImages": [
+      "/work/hover/aero-v-1.webp",
+      "/work/hover/aero-v-2.webp",
+      "/work/hover/aero-v-3.webp"
+    ],
     "hidden": false
   },
   {
@@ -76,8 +84,13 @@
       "product"
     ],
     "year": null,
-    "cover": null,
+    "cover": "/work/hover/blossom-care-1.webp",
     "hoverVideo": null,
+    "hoverImages": [
+      "/work/hover/blossom-care-1.webp",
+      "/work/hover/blossom-care-2.webp",
+      "/work/hover/blossom-care-3.webp"
+    ],
     "hidden": false
   },
   {
@@ -93,8 +106,13 @@
       "product"
     ],
     "year": null,
-    "cover": null,
+    "cover": "/work/hover/mvs-1.webp",
     "hoverVideo": null,
+    "hoverImages": [
+      "/work/hover/mvs-1.webp",
+      "/work/hover/mvs-2.webp",
+      "/work/hover/mvs-3.webp"
+    ],
     "hidden": false
   },
   {
@@ -112,7 +130,8 @@
     "year": null,
     "cover": "/work/covers/ehms.webp",
     "hoverVideo": null,
-    "hidden": false
+    "hoverImages": null,
+    "hidden": true
   },
   {
     "slug": "dh2",
@@ -129,6 +148,7 @@
     "year": null,
     "cover": null,
     "hoverVideo": null,
+    "hoverImages": null,
     "hidden": true
   },
   {
@@ -145,6 +165,7 @@
     "year": null,
     "cover": null,
     "hoverVideo": null,
+    "hoverImages": null,
     "hidden": true
   },
   {
@@ -162,6 +183,7 @@
     "year": null,
     "cover": null,
     "hoverVideo": null,
+    "hoverImages": null,
     "hidden": true
   },
   {
@@ -179,6 +201,7 @@
     "year": null,
     "cover": null,
     "hoverVideo": null,
+    "hoverImages": null,
     "hidden": true
   },
   {
@@ -195,6 +218,7 @@
     "year": null,
     "cover": null,
     "hoverVideo": null,
+    "hoverImages": null,
     "hidden": true
   },
   {
@@ -211,6 +235,7 @@
     "year": null,
     "cover": null,
     "hoverVideo": null,
+    "hoverImages": null,
     "hidden": true
   }
 ]
