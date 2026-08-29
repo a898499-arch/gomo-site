@@ -3,130 +3,214 @@
     "slug": "my-place",
     "title": "My Place",
     "description": "Project description coming soon.",
-    "tags": ["UI/UX", "Web Design", "Vibe Coding"],
-    "group": ["personal"],
+    "tags": [
+      "UI/UX",
+      "Web Design",
+      "Vibe Coding"
+    ],
+    "group": [
+      "personal"
+    ],
     "year": null,
     "cover": null,
+    "hoverVideo": null,
     "hidden": false
   },
   {
     "slug": "sui-sui",
     "title": "Suì-Suì",
     "description": "Cosmetic Therapy App for Dementia Prevention",
-    "tags": ["UI/UX", "Health"],
-    "group": ["product"],
+    "tags": [
+      "UI/UX",
+      "Health"
+    ],
+    "group": [
+      "product"
+    ],
     "year": null,
     "cover": "/work/covers/sui-sui.webp",
+    "hoverVideo": "/work/hover/sui-sui",
     "hidden": false
   },
   {
     "slug": "wanderbuddy",
     "title": "WanderBuddy",
     "description": "Onboarding Flow for a City Companion App",
-    "tags": ["UI/UX"],
-    "group": ["product"],
+    "tags": [
+      "UI/UX"
+    ],
+    "group": [
+      "product"
+    ],
     "year": null,
     "cover": "/work/covers/wanderbuddy.webp",
+    "hoverVideo": "/work/hover/wanderbuddy",
     "hidden": false
   },
   {
     "slug": "aero-v",
     "title": "AERO V",
     "description": "Smart Purifying Hairdressing Stool",
-    "tags": ["Product Design", "Environment"],
-    "group": ["product"],
+    "tags": [
+      "Product Design",
+      "Environment"
+    ],
+    "group": [
+      "product"
+    ],
     "year": null,
     "cover": "/work/covers/aero-v.webp",
+    "hoverVideo": null,
     "hidden": false
   },
   {
     "slug": "blossom-care",
     "title": "Blossom Care",
     "description": "Universal vaginal Ph test kit",
-    "tags": ["Product Design", "Medical Design", "Health"],
-    "group": ["product"],
+    "tags": [
+      "Product Design",
+      "Medical Design",
+      "Health"
+    ],
+    "group": [
+      "product"
+    ],
     "year": null,
     "cover": null,
+    "hoverVideo": null,
     "hidden": false
   },
   {
     "slug": "mvs",
     "title": "MVS",
     "description": "Project description coming soon.",
-    "tags": ["Mobility Design", "Environment", "Health"],
-    "group": ["product"],
+    "tags": [
+      "Mobility Design",
+      "Environment",
+      "Health"
+    ],
+    "group": [
+      "product"
+    ],
     "year": null,
     "cover": null,
+    "hoverVideo": null,
     "hidden": false
   },
   {
     "slug": "ehms",
     "title": "Healthcare Management System (eHMS)",
     "description": "Project description coming soon.",
-    "tags": ["UI/UX", "Medical Design", "Health"],
-    "group": ["product"],
+    "tags": [
+      "UI/UX",
+      "Medical Design",
+      "Health"
+    ],
+    "group": [
+      "product"
+    ],
     "year": null,
     "cover": "/work/covers/ehms.webp",
+    "hoverVideo": null,
     "hidden": false
   },
   {
     "slug": "dh2",
     "title": "DH2",
     "description": "Project description coming soon.",
-    "tags": ["Product Design", "Appliance Design", "Health"],
-    "group": ["product"],
+    "tags": [
+      "Product Design",
+      "Appliance Design",
+      "Health"
+    ],
+    "group": [
+      "product"
+    ],
     "year": null,
     "cover": null,
+    "hoverVideo": null,
     "hidden": true
   },
   {
     "slug": "color-lab",
     "title": "Color Lab",
     "description": "Project description coming soon.",
-    "tags": ["Product Design", "Children's Products"],
-    "group": ["product"],
+    "tags": [
+      "Product Design",
+      "Children's Products"
+    ],
+    "group": [
+      "product"
+    ],
     "year": null,
     "cover": null,
+    "hoverVideo": null,
     "hidden": true
   },
   {
     "slug": "cool-cook",
     "title": "Cool Cook",
     "description": "Project description coming soon.",
-    "tags": ["Product Design", "UI/UX", "Children's Products"],
-    "group": ["product"],
+    "tags": [
+      "Product Design",
+      "UI/UX",
+      "Children's Products"
+    ],
+    "group": [
+      "product"
+    ],
     "year": null,
     "cover": null,
+    "hoverVideo": null,
     "hidden": true
   },
   {
     "slug": "co2-exting",
     "title": "CO2-EXTING",
     "description": "Project description coming soon.",
-    "tags": ["Product Design", "Public Architecture", "Environment"],
-    "group": ["product"],
+    "tags": [
+      "Product Design",
+      "Public Architecture",
+      "Environment"
+    ],
+    "group": [
+      "product"
+    ],
     "year": null,
     "cover": null,
+    "hoverVideo": null,
     "hidden": true
   },
   {
     "slug": "trace-of-conversation",
     "title": "Trace of Conversation",
     "description": "Project description coming soon.",
-    "tags": ["Reflective Design", "Craft"],
-    "group": ["product"],
+    "tags": [
+      "Reflective Design",
+      "Craft"
+    ],
+    "group": [
+      "product"
+    ],
     "year": null,
     "cover": null,
+    "hoverVideo": null,
     "hidden": true
   },
   {
     "slug": "conversation",
     "title": "Conversation",
     "description": "Project description coming soon.",
-    "tags": ["Research", "Publication"],
-    "group": ["product"],
+    "tags": [
+      "Research",
+      "Publication"
+    ],
+    "group": [
+      "product"
+    ],
     "year": null,
     "cover": null,
+    "hoverVideo": null,
     "hidden": true
   }
 ]

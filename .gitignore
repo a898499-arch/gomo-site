@@ -57,3 +57,8 @@ public/work/blossom-care/*.jpg
 # 本機工作筆記／暫存
 Untitled
 _to_delete/
+
+# 使用者的暫存區：還沒整理定位、要放進 work 的照片（11MB）。
+# 使用者 2026-08-29 指示「不要動、不要刪」，整理好之後會另外指定去處。
+# 先擋住避免暫存檔誤進 git 歷史——進了就永久拿不掉。
+public/work/work/

@@ -180,10 +180,36 @@
   transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* hover 播放的循環影片（動效規格 §3）。疊在 <img> 上面、預設全透明，
+   所以沒 hover 時看到的就是 poster（＝同一張 cover），跟其他卡片一致。
+   ⚠️ 淡入是由 data-playing 觸發、不是由 :hover——影片檔不存在或還沒開始
+   播的時候絕對不能淡進來，否則會看到一片黑。WorkCard.jsx 只有在 play()
+   的 Promise resolve 之後才掛上這個屬性。
+   ⚠️ scale 跟 <img> 用同一組數值：hover 時它就是「主圖」，§4 的
+   scale(1→1.03) 要一起套，否則影片淡入的瞬間會看到尺寸跳一下。 */
+.work-card-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 250ms linear,
+    transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.work-card-video[data-playing='true'] {
+  opacity: 1;
+}
+
 /* hover 只有兩件事：圖在框內放大、標題右移。不灰階、不陰影、不位移整張卡 */
 @media (hover: hover) {
   .work-card:hover .work-card-cover img,
-  .work-card:focus-visible .work-card-cover img {
+  .work-card:focus-visible .work-card-cover img,
+  .work-card:hover .work-card-video,
+  .work-card:focus-visible .work-card-video {
     transform: scale(1.03);
   }
   .work-card:hover .work-card-title,
@@ -322,6 +348,16 @@
      所在的同一個 media block 裡、以及一般狀態下的 transform 500ms 定義。 */
   .work-card-cover img {
     transition: opacity 150ms linear !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* JS 端已經不會呼叫 play()，這裡把淡入也一併關掉當第二道保險 */
+  .work-card-video {
+    transition: none !important;
+  }
+  .work-card-video[data-playing='true'] {
+    opacity: 0;
   }
 }
 
