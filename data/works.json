@@ -1,39 +1,63 @@
 [
   {
-    "slug": "sui-sui",
-    "title": "Sui-Sui",
+    "slug": "my-place",
+    "title": "My Place",
     "description": "Project description coming soon.",
+    "tags": ["UI/UX", "Web Design", "Vibe Coding"],
+    "group": ["personal"],
+    "year": null,
+    "cover": null,
+    "hidden": false
+  },
+  {
+    "slug": "sui-sui",
+    "title": "Suì-Suì",
+    "description": "Cosmetic Therapy App for Dementia Prevention",
     "tags": ["UI/UX", "Health"],
     "group": ["product"],
     "year": null,
-    "cover": ""
+    "cover": "/work/covers/sui-sui.webp",
+    "hidden": false
+  },
+  {
+    "slug": "wanderbuddy",
+    "title": "WanderBuddy",
+    "description": "Onboarding Flow for a City Companion App",
+    "tags": ["UI/UX"],
+    "group": ["product"],
+    "year": null,
+    "cover": "/work/covers/wanderbuddy.webp",
+    "hidden": false
   },
   {
     "slug": "aero-v",
     "title": "AERO V",
-    "description": "Project description coming soon.",
+    "description": "Smart Purifying Hairdressing Stool",
     "tags": ["Product Design", "Environment"],
     "group": ["product"],
     "year": null,
-    "cover": ""
+    "cover": "/work/covers/aero-v.webp",
+    "hidden": false
+  },
+  {
+    "slug": "blossom-care",
+    "title": "Blossom Care",
+    "description": "Universal vaginal Ph test kit",
+    "tags": ["Product Design", "Medical Design", "Health"],
+    "group": ["product"],
+    "year": null,
+    "cover": null,
+    "hidden": false
   },
   {
     "slug": "mvs",
     "title": "MVS",
     "description": "Project description coming soon.",
-    "tags": ["Mobility Design", "Health"],
+    "tags": ["Mobility Design", "Environment", "Health"],
     "group": ["product"],
     "year": null,
-    "cover": ""
-  },
-  {
-    "slug": "blossom-care",
-    "title": "Blossom Care",
-    "description": "Project description coming soon.",
-    "tags": ["Product Design", "Medical Design", "Health"],
-    "group": ["product"],
-    "year": null,
-    "cover": ""
+    "cover": null,
+    "hidden": false
   },
   {
     "slug": "ehms",
@@ -42,7 +66,8 @@
     "tags": ["UI/UX", "Medical Design", "Health"],
     "group": ["product"],
     "year": null,
-    "cover": ""
+    "cover": "/work/covers/ehms.webp",
+    "hidden": false
   },
   {
     "slug": "dh2",
@@ -51,7 +76,8 @@
     "tags": ["Product Design", "Appliance Design", "Health"],
     "group": ["product"],
     "year": null,
-    "cover": ""
+    "cover": null,
+    "hidden": true
   },
   {
     "slug": "color-lab",
@@ -60,7 +86,8 @@
     "tags": ["Product Design", "Children's Products"],
     "group": ["product"],
     "year": null,
-    "cover": ""
+    "cover": null,
+    "hidden": true
   },
   {
     "slug": "cool-cook",
@@ -69,7 +96,8 @@
     "tags": ["Product Design", "UI/UX", "Children's Products"],
     "group": ["product"],
     "year": null,
-    "cover": ""
+    "cover": null,
+    "hidden": true
   },
   {
     "slug": "co2-exting",
@@ -78,16 +106,8 @@
     "tags": ["Product Design", "Public Architecture", "Environment"],
     "group": ["product"],
     "year": null,
-    "cover": ""
-  },
-  {
-    "slug": "wanderbuddy",
-    "title": "WanderBuddy",
-    "description": "Project description coming soon.",
-    "tags": ["UI/UX"],
-    "group": ["product"],
-    "year": null,
-    "cover": ""
+    "cover": null,
+    "hidden": true
   },
   {
     "slug": "trace-of-conversation",
@@ -96,7 +116,8 @@
     "tags": ["Reflective Design", "Craft"],
     "group": ["product"],
     "year": null,
-    "cover": ""
+    "cover": null,
+    "hidden": true
   },
   {
     "slug": "conversation",
@@ -105,6 +126,7 @@
     "tags": ["Research", "Publication"],
     "group": ["product"],
     "year": null,
-    "cover": ""
+    "cover": null,
+    "hidden": true
   }
 ]

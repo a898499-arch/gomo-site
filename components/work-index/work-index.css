@@ -20,7 +20,9 @@
    標題→bio 間距 = 273 - (201+52) = 20px；
    bio→頁籤 間距 = 486 - (273+140) = 73px（= padding-bottom）。 */
 .work-intro {
-  padding: 75px 0 73px;
+  /* 上 75：Figma y=201 減掉 .page-content 為固定導覽列預留的 126px。
+     下 105：Figma node 806:1216 的 flex gap（舊稿是 73，2026-08-29 改版）。 */
+  padding: 75px 0 105px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -68,7 +70,7 @@
 
 .work-tabs {
   display: flex;
-  gap: 40px; /* Figma 3:378 */
+  gap: 45px; /* Figma 806:1220（舊稿 40） */
   list-style: none;
   margin: 0;
   padding: 0;
@@ -80,8 +82,12 @@
   padding: 0;
   text-decoration: none;
   cursor: pointer;
-  font-size: clamp(18px, 2.2222vw, 32px); /* Figma 32px */
-  letter-spacing: -0.16px;
+  /* Figma 806:1221 是 30px（舊稿 32）。
+      ⚠️ Figma 上的字體是 Karla，這裡刻意用全站的 Poppins——使用者
+      2026-08-29 確認 Karla 是 Figma 裡殘留的舊字體設定、不是刻意指定，
+      處理方式與 Sui-Sui 頁先前遇到的同一種情況一致。 */
+  font-size: clamp(18px, 2.0833vw, 30px);
+  letter-spacing: -0.15px;
   line-height: 1.45;
   font-weight: 400;
   color: var(--work-muted); /* Figma #747474 */
@@ -122,8 +128,10 @@
 .work-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  column-gap: 21px; /* Figma：731 - (38+672) = 21 */
-  row-gap: 95px; /* 原型值（Figma 反推約 86px，依你指示以原型為準） */
+  /* Figma 806:1208 改版後：672 + 16 + 672 = 1360，剛好等於內容欄寬。
+     列距＝列間距 666 − 卡片高 581 = 85。（舊稿 21 / 95） */
+  column-gap: 16px;
+  row-gap: 85px;
 }
 
 .work-empty {
@@ -190,7 +198,7 @@
 }
 
 .work-card-title {
-  margin: 16px 0 0;
+  margin: 30px 0 0; /* Figma：主圖底 415 → 標題框頂 445 */
   font-weight: 400; /* Figma 實測 Regular，不是 600 */
   font-size: clamp(22px, 2.2222vw, 32px);
   color: var(--ink);
@@ -198,10 +206,10 @@
 }
 
 .work-card-desc {
-  margin: 4px 0 0;
+  margin: 0; /* Figma：標題框 0–48、副標框 48–84，兩者相鄰無間距 */
   font-weight: 400;
   font-size: clamp(17px, 1.6667vw, 24px);
-  line-height: 22px; /* Figma 3:285 */
+  line-height: 22px; /* Figma 806:1269 */
   color: var(--work-muted);
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -212,22 +220,28 @@
 .work-card-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 32px;
+  gap: 20px; /* Figma 806:1270：116 − 96 = 20（舊稿 12） */
+  margin-top: 20px; /* Figma：副標框底 84 → tag 列頂 104 */
   padding: 0;
   list-style: none;
 }
 
 /* Figma 實測：膠囊固定高 32px、文字 line-height 22px、邊框 1px
-   → 上下內距 (32-22-2)/2 = 4px；左右內距由膠囊 left=39 / 文字 left=61
-   反推 ≈ 21px。圓角 Figma 是 70px，這裡用 999px——膠囊高 32px，兩者
-   渲染結果完全相同。
+   → 上下內距 (32-22-2)/2 = 4px。圓角 Figma 是 70px，這裡用 999px——膠囊高
+   32px，兩者渲染結果完全相同。
+
+   ⚠️ 左右內距 16px 是**刻意偏離 Figma**（使用者 2026-08-29 指示）：Figma 上
+   每顆膠囊都是手拉的固定寬，換算出來的左右內距散在 14.5～27 之間（Product/
+   Medical/Mobility Design 14~15、Web Design 16、Health 16.5、Vibe Coding 20、
+   UI/UX 21.5、Environment 27），沒有規律。寫死寬度的話，tag 文字一改就破版。
+   取出現次數最多的那一群（14~16.5，共 10 顆 tag）的代表值 16px 當統一內距，
+   寬度改由內容決定。各顆與 Figma 的寬度差已量測回報。
    邊框色用 --tag-border(#5B5B5B)，不可換成 --rule：Figma 實測明顯更深，
    而且 --rule 另有他用（頁腳分隔線等），改了會牽動別處。 */
 .work-card-tag {
   border: 1px solid var(--tag-border);
   border-radius: 999px;
-  padding: 4px 21px;
+  padding: 4px 16px;
   font-size: clamp(16px, 1.3889vw, 20px);
   letter-spacing: -0.43px;
   line-height: 22px;

@@ -13,6 +13,15 @@ export const metadata = {
   description: 'Maida Hu 的作品列表',
 };
 
+// ⚠️ 從這裡就把 hidden 濾掉，不是在 WorkIndex 裡濾。
+// WorkIndex 的整套篩選是建立在「所有卡片一次全渲染、之後只切 hidden 屬性」
+// 這個前提上（GSAP Flip 需要切換前後是同一個 DOM 節點），所以「這一版要不要
+// 出現在頁面上」必須在資料進到元件之前就決定好，不能跟 filter 混在一起。
+//
+// hidden: true 的作品是使用者 2026-08-29 依 Figma 806:1208 改版拿掉的，
+// 標記而不刪除——之後可能加回來。目前有 6 筆：dh2 / color-lab / cool-cook /
+// co2-exting / trace-of-conversation / conversation。
 export default function WorkPage() {
-  return <WorkIndex works={works} />;
+  const visible = works.filter((w) => !w.hidden);
+  return <WorkIndex works={visible} />;
 }
