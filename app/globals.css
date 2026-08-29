@@ -310,9 +310,15 @@ body:has(.page-content > [data-nav-bleed]) .site-nav {
   display: inline-block;
 }
 
+.footer-cta.link-underline::before,
 .footer-cta.link-underline::after {
   height: 2px;
   bottom: -4px;
+}
+
+/* 箭頭：hover 時右移 4px、上移 4px（規格書 §6.4） */
+.footer-cta .cta-arrow {
+  transition: transform 350ms var(--u-ease, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 .back-to-top {
@@ -327,13 +333,20 @@ body:has(.page-content > [data-nav-bleed]) .site-nav {
   align-items: center;
   justify-content: center;
   padding: 0;
-  transition: background 400ms ease-out, border-color 400ms ease-out, transform 400ms ease-out;
+  transition:
+    background 400ms ease-out,
+    border-color 400ms ease-out,
+    border-width 400ms ease-out,
+    transform 400ms ease-out;
 }
 
 .back-to-top:hover,
 .back-to-top:focus-visible {
   background: var(--accent);
   border-color: var(--accent);
+  /* 規格書只寫「描邊加粗」沒給數值，2 → 3px 是我的取值（已回報）。
+     全域 box-sizing:border-box，所以圓圈外徑仍是 63px，只有環變厚。 */
+  border-width: 3px;
   transform: scale(1.06);
 }
 
@@ -409,11 +422,15 @@ body:has(.page-content > [data-nav-bleed]) .site-nav {
   font-weight: 700;
   line-height: 2.06;
   letter-spacing: -0.005em;
-  transition: transform 150ms ease;
+  /* hover 的 translateX 跟其他底線連結一樣走 300ms；按下時才切回 150ms，
+     否則整條連結的手感會比旁邊的連結快一倍。 */
+  transition: transform 300ms var(--u-ease, cubic-bezier(0.22, 1, 0.36, 1));
 }
 
 .cv-download:active {
-  transform: scale(0.98);
+  /* translateX 要一起帶上，否則按下的瞬間 hover 的 4px 位移會被覆蓋掉 */
+  transform: translateX(4px) scale(0.98);
+  transition-duration: 150ms;
 }
 
 .footer-links {
@@ -460,14 +477,32 @@ body:has(.page-content > [data-nav-bleed]) .site-nav {
   text-transform: capitalize;
 }
 
-/* ---------- 底線（目前是靜態顯示，擦除 hover 動效之後的階段才接 JS） ---------- */
+/* ---------- 底線與「擦除」hover（規格書 §6.4）----------
+   2026-08-29 實作。原本這裡只有一條靜態的 ::after，註解寫著「擦除動效之後
+   的階段才接 JS」——結果是全站所有底線連結 hover 完全沒有反應。現在用純
+   CSS 做完，不需要 JS。
+
+   ── 為什麼是兩個偽元素而不是一個 ──
+   規格要的是「先向右擦掉、再從左畫回」，一次 hover 裡 scaleX 要 1→0→1。
+   單一 transition 做不到來回（它只能單向補間），而 @keyframes 動畫雖然做得
+   到，滑鼠移開時卻會硬切回原狀、無法「乾淨反向」。
+   改用兩條線分工：::after 是靜止時看得見的那條、::before 平常縮成 0。
+     hover ：::after 立刻向右擦除(0–300ms) → ::before 延遲 300ms 從左畫回
+     離開 ：::before 立刻向左擦除(0–300ms) → ::after 延遲 300ms 從右畫回
+   延遲值掛在「非 hover 狀態」的那一條上，離開時才會自動變成鏡像反轉。
+
+   ⚠️ --u-scale 必須保留：導覽列用 `.nav-links a.link-underline{--u-scale:0}`
+   把底線整條藏起來。兩個偽元素都乘上這個變數，所以導覽列維持沒有底線、
+   行為跟改動前完全相同。 */
 .link-underline {
   position: relative;
   display: inline-block;
   --u-scale: 1;
-  --u-origin: left;
+  --u-wipe: 300ms;
+  --u-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+.link-underline::before,
 .link-underline::after {
   content: '';
   position: absolute;
@@ -476,8 +511,20 @@ body:has(.page-content > [data-nav-bleed]) .site-nav {
   bottom: -2px;
   height: 1px;
   background: currentColor;
+  transition: transform var(--u-wipe) var(--u-ease);
+}
+
+/* 靜止時看得見的那條。transition-delay 是給「離開」用的 */
+.link-underline::after {
   transform: scaleX(var(--u-scale));
-  transform-origin: var(--u-origin);
+  transform-origin: right;
+  transition-delay: var(--u-wipe);
+}
+
+/* 平常藏著，hover 的第二段才從左畫回 */
+.link-underline::before {
+  transform: scaleX(0);
+  transform-origin: left;
 }
 
 .playground-link {
@@ -497,6 +544,57 @@ body:has(.page-content > [data-nav-bleed]) .site-nav {
   .btt-icon { width: 22px; height: 22px; }
   .footer-cta { order: 1; }
   .footer-links { flex-direction: column; gap: 32px; }
+}
+
+/* ── 擦除 hover 的觸發（規格書 §6.4）──
+   ⚠️ 範圍限定在 .site-footer 底下。理由：`.link-underline` 是全站共用的
+   class，導覽列與 About 頁的「more detail」也在用。規格書 §6.4 講的是頁腳
+   那六個連結（SITEMAPS 三個、SOCIALS 的 LinkedIn、CV Download、Let's Talk!），
+   把 hover 掛在全域會連帶改掉導覽列與 About 的既有行為。
+   focus-visible 與 hover 並列，鍵盤操作觸發同一套效果（規格書第 6 條）。 */
+@media (hover: hover) {
+  .site-footer .link-underline:hover,
+  .site-footer .link-underline:focus-visible {
+    transform: translateX(4px);
+  }
+
+  .site-footer .link-underline:hover::after,
+  .site-footer .link-underline:focus-visible::after {
+    transform: scaleX(0);
+    transition-delay: 0ms;
+  }
+
+  .site-footer .link-underline:hover::before,
+  .site-footer .link-underline:focus-visible::before {
+    transform: scaleX(var(--u-scale));
+    transition-delay: var(--u-wipe);
+  }
+
+  /* Let's Talk!：底線擦除之外，箭頭右上移 4px、整條轉 accent 紅 */
+  .footer-cta:hover .cta-arrow,
+  .footer-cta:focus-visible .cta-arrow {
+    transform: translate(4px, -4px);
+  }
+}
+
+/* 文字位移要有過場，但這條不能放在 @media (hover:hover) 裡——
+   否則觸控裝置上 :active 的縮放會變成硬切。 */
+.site-footer .link-underline {
+  transition: transform var(--u-wipe) var(--u-ease);
+}
+
+/* ⚠️ 「整體提亮」規格書沒有給具體做法，這裡採用與 About 頁 .about-more-detail
+   同一套：hover 轉 --accent 紅。已回報，要改成 filter: brightness() 或
+   opacity 也可以。 */
+.footer-cta {
+  transition:
+    transform var(--u-wipe) var(--u-ease),
+    color 350ms var(--u-ease);
+}
+
+.footer-cta:hover,
+.footer-cta:focus-visible {
+  color: var(--accent);
 }
 
 @media (hover: none) {
