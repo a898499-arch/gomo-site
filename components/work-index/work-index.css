@@ -162,6 +162,14 @@
   display: none;
 }
 
+/* 作品頁還沒做好的卡片（works.json 的 ready:false）：只擋跳轉，
+   擋法在 WorkCard.jsx 的 onClick。
+   ⚠️ 游標維持 pointer、外觀完全不變。不要改成 not-allowed 或降透明度——
+   那看起來像功能壞掉，實際上只是還沒開放（使用者 2026-08-29 明確指示）。 */
+.work-card[data-ready='false'] {
+  cursor: pointer;
+}
+
 /* cover 沒有圖時就是這塊灰底（works.json 目前 12 筆 cover 全為空）。
    規格書 §6.5 明文指定的 fallback 手法，跟 §6.3 Gallery 佔位同一個灰。 */
 /* ⚠️ border-radius 一定要在這一層、不能加在 <img> 上：hover 時圖會

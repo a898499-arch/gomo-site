@@ -377,7 +377,21 @@ body:has(.page-content > [data-nav-bleed]) .site-nav {
 .back-to-top:hover .btt-icon,
 .back-to-top:focus-visible .btt-icon {
   stroke: var(--bg);
-  transform: translateY(-4px);
+}
+
+/* ⚠️ hover 的上移量用變數而不是直接寫 transform（2026-08-29 修）。
+   原本 hover 是 translateY(-4px)、射出動畫的 keyframes 卻從 translateY(0)
+   起跑；CSS 動畫的優先權高於 transition，所以點擊的那一瞬間箭頭會從 −4px
+   硬跳回 0 再開始飛，實測取樣抓得到那一幀，肉眼也看得出來。
+   改成兩支箭頭的靜止位移與 keyframes 的起訖都以 --btt-y 表示，動畫就會
+   從「目前實際所在的位置」接著跑，不再跳。 */
+.back-to-top {
+  --btt-y: 0px;
+}
+
+.back-to-top:hover,
+.back-to-top:focus-visible {
+  --btt-y: -4px;
 }
 
 .footer-divider {
@@ -515,10 +529,14 @@ body:has(.page-content > [data-nav-bleed]) .site-nav {
   --btt-launch: 450ms;
 }
 
+.btt-icon {
+  transform: translateY(var(--btt-y));
+}
+
 .btt-icon--next {
   position: absolute;
   inset: 0;
-  transform: translateY(100%);
+  transform: translateY(calc(100% + var(--btt-y)));
 }
 
 .back-to-top[data-launching] .btt-icon {
@@ -527,10 +545,10 @@ body:has(.page-content > [data-nav-bleed]) .site-nav {
 
 @keyframes btt-launch {
   from {
-    transform: translateY(0);
+    transform: translateY(var(--btt-y));
   }
   to {
-    transform: translateY(-100%);
+    transform: translateY(calc(-100% + var(--btt-y)));
   }
 }
 
@@ -540,17 +558,11 @@ body:has(.page-content > [data-nav-bleed]) .site-nav {
 
 @keyframes btt-enter {
   from {
-    transform: translateY(100%);
+    transform: translateY(calc(100% + var(--btt-y)));
   }
   to {
-    transform: translateY(0);
+    transform: translateY(var(--btt-y));
   }
-}
-
-/* hover 時的上移 4px 對兩支都要套，否則射出動畫會從錯誤的起點開始 */
-.back-to-top:hover .btt-icon--next,
-.back-to-top:focus-visible .btt-icon--next {
-  transform: translateY(calc(100% - 4px));
 }
 
 @media (prefers-reduced-motion: reduce) {

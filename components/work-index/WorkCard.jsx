@@ -65,6 +65,11 @@ export default function WorkCard({ work }) {
   const layerA = useRef(null);
   const layerB = useRef(null);
 
+  // ready:false = 作品詳情頁還沒做好。<a> 與 href 都保留（結構正確、可右鍵
+  // 複製網址、可開新分頁），只擋左鍵跳轉；cursor 也維持 pointer，不要用
+  // not-allowed——那看起來像壞掉，實際上只是還沒開放。
+  const ready = work.ready !== false;
+
   const showImg = Boolean(work.cover) && !imgFailed;
   const hasVideo = Boolean(work.hoverVideo) && !videoBroken;
   // 影片與輪播互斥：有影片的卡不做輪播
@@ -155,6 +160,9 @@ export default function WorkCard({ work }) {
       className="work-card"
       data-slug={work.slug}
       data-group={(work.group || []).join(',')}
+      onClick={ready ? undefined : (e) => e.preventDefault()}
+      aria-disabled={ready ? undefined : 'true'}
+      data-ready={ready ? undefined : 'false'}
       onMouseEnter={hasVideo || hasPhotos ? onEnter : undefined}
       onMouseLeave={hasVideo || hasPhotos ? onLeave : undefined}
       onFocus={hasVideo || hasPhotos ? onEnter : undefined}
