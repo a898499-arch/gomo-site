@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
-import { useLenis } from './LenisProvider';
+import { useLenis, ROUTE_CHANGE_EVENT } from './LenisProvider';
 import { useNavBehaviorConfig } from './NavBehaviorProvider';
 import { mainEase } from '@/lib/ease';
 
@@ -147,8 +147,33 @@ export default function Nav() {
       }
     }
 
+    // 換頁時 LenisProvider 會把捲動歸零。歸零本身會送出一個 scroll 事件，
+    // 如果 lastScrollY 還停在前一頁的值（例如 5000），diff 會是 −5000，
+    // 被上面的 accumDelta 判定成「使用者往上滑」而把導覽列叫出來——
+    // WanderBuddy 那種「進頁時隱藏」的頁面就破功了。
+    // LenisProvider 保證這個事件在 scrollTo 之前發，所以這裡先把基準歸零，
+    // 之後那個 scroll=0 算出來的 diff 就是 0，不會誤判。
+    // 一般頁面不受影響：scroll=0 會走上面 y <= TOP_DEAD_ZONE 那條，
+    // 導覽列照常顯示。
+    function onRouteChange() {
+      lastScrollY = 0;
+      accumDelta = 0;
+    }
+    window.addEventListener(ROUTE_CHANGE_EVENT, onRouteChange);
+
     lenis.on('scroll', onScroll);
-    return () => lenis.off('scroll', onScroll);
+    return () => {
+      lenis.off('scroll', onScroll);
+      window.removeEventListener(ROUTE_CHANGE_EVENT, onRouteChange);
+      // ⚠️ 一定要殺掉還在跑的補間，否則換頁會有競態：
+      // 換頁 → 捲動歸零送出 scroll=0 → 這時 startHidden 還是「前一頁」的值，
+      // 一般頁面會走 dead zone 那條啟動一個 showNav() 的 0.3s 補間 → 接著
+      // 新頁面的 useNavBehavior({startHidden:true}) 讓 config 變動、這個
+      // effect 重跑並 gsap.set 成隱藏 → 但舊補間沒被中止，還在往 y:0 跑，
+      // 最後把隱藏狀態蓋回可見。WanderBuddy 那種「進頁時隱藏」就破功了
+      // （實測過：導覽列 transform 的 Y 停在 0）。
+      gsap.killTweensOf(nav);
+    };
   }, [lenis, startHidden]);
 
   return (
