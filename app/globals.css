@@ -433,6 +433,136 @@ body:has(.page-content > [data-nav-bleed]) .site-nav {
   transition-duration: 150ms;
 }
 
+/* ---------- CV Download 的垂直遮罩文字交換（規格書 §6.4）----------
+   與 About 頁 .amd-text-wrap 同一套技法（各自的 class，機制與時間刻意相同）。
+   ⚠️ 高度用 em 不用 px：跟著自己的字級走，字級改了不必回來調這裡。
+   ⚠️ 兩層都放在同一個 grid 格（grid-area: 1/1）互相疊著，外層 overflow:hidden
+   把上下溢出的部分裁掉，看起來就是「一行字往上捲走、另一行從下面遞補」。 */
+.cv-text-wrap {
+  display: inline-grid;
+  overflow: hidden;
+  height: 2.06em; /* 與 .cv-download 的 line-height 相同 */
+}
+
+.cv-text-default,
+.cv-text-hover {
+  grid-area: 1 / 1;
+  white-space: nowrap;
+  transition: transform 300ms var(--u-ease);
+}
+
+.cv-text-hover {
+  transform: translateY(100%);
+}
+
+/* 右側的向下箭頭：平常隱藏，hover 才淡入並上下擺動 3px */
+.cv-arrow {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  opacity: 0;
+  transition: opacity 300ms var(--u-ease);
+}
+
+.cv-arrow svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+}
+
+@media (hover: hover) {
+  .cv-download:hover .cv-text-default,
+  .cv-download:focus-visible .cv-text-default {
+    transform: translateY(-100%);
+  }
+  .cv-download:hover .cv-text-hover,
+  .cv-download:focus-visible .cv-text-hover {
+    transform: translateY(0);
+  }
+  .cv-download:hover .cv-arrow,
+  .cv-download:focus-visible .cv-arrow {
+    opacity: 1;
+    /* 淡入結束後才開始擺動，避免一邊淡入一邊跳 */
+    animation: cv-arrow-bob 900ms var(--u-ease) 300ms infinite;
+  }
+}
+
+@keyframes cv-arrow-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
+
+/* ---------- Back-to-top 點擊時箭頭射出（規格書 §6.4）----------
+   兩支箭頭疊在 .btt-icon-wrap（overflow:hidden）裡：第一支在框內、第二支
+   等在下方框外。點擊時 Footer.jsx 掛上 data-launching，兩支同時往上位移一
+   個框高——第一支飛出框外，第二支剛好遞補到原位。動畫結束移除屬性，兩支
+   瞬間回到初始位置（此時第一支已經在原位，看不出來）。
+   ⚠️ --btt-launch 要跟 Footer.jsx 的 BTT_LAUNCH_MS 一致。 */
+.back-to-top {
+  --btt-launch: 450ms;
+}
+
+.btt-icon--next {
+  position: absolute;
+  inset: 0;
+  transform: translateY(100%);
+}
+
+.back-to-top[data-launching] .btt-icon {
+  animation: btt-launch var(--btt-launch) cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes btt-launch {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+.back-to-top[data-launching] .btt-icon--next {
+  animation: btt-enter var(--btt-launch) cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes btt-enter {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* hover 時的上移 4px 對兩支都要套，否則射出動畫會從錯誤的起點開始 */
+.back-to-top:hover .btt-icon--next,
+.back-to-top:focus-visible .btt-icon--next {
+  transform: translateY(calc(100% - 4px));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* 規格書 §6.4 沒有特別寫，但全站規則是 reduced motion 不做位移動畫。
+     箭頭直接不播射出，第二支永遠留在框外。 */
+  .back-to-top[data-launching] .btt-icon,
+  .back-to-top[data-launching] .btt-icon--next {
+    animation: none;
+  }
+  .cv-download:hover .cv-arrow,
+  .cv-download:focus-visible .cv-arrow {
+    animation: none;
+  }
+  .cv-text-default,
+  .cv-text-hover,
+  .cv-arrow {
+    transition: none;
+  }
+}
+
 .footer-links {
   display: flex;
   flex-wrap: wrap;

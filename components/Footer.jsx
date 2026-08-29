@@ -1,14 +1,32 @@
 'use client';
 
 import Link from 'next/link';
+import { useRef } from 'react';
 import { useLenis } from './LenisProvider';
+
+// 箭頭射出的總長，要跟 globals.css 的 --btt-launch 一致
+const BTT_LAUNCH_MS = 450;
 
 // §6.4：進場動畫、底線擦除 hover 是後續動效搬遷階段才加——這裡先是結構+最終視覺狀態
 // （分隔線滿寬、大標直接顯示，不套 reveal-mask 的隱藏初始態，避免動畫 JS 還沒接上時內容卡住不顯示）。
 export default function Footer() {
   const lenis = useLenis();
 
+  // 點擊時箭頭「射出」：舊的往上飛出、新的從下方遞補（規格書 §6.4）。
+  // 用一個短暫的 data 屬性驅動純 CSS 動畫，而不是用 state——state 會讓整個
+  // Footer 重新 render，這裡只需要動一個 class。動畫結束就把屬性拿掉，
+  // 下次點擊才能再播一次。
+  const bttRef = useRef(null);
+
   function handleBackToTop() {
+    const btn = bttRef.current;
+    if (btn) {
+      btn.removeAttribute('data-launching');
+      // 強制回流，否則同一幀內移除再加上不會重新觸發動畫
+      void btn.offsetWidth;
+      btn.setAttribute('data-launching', 'true');
+      window.setTimeout(() => btn.removeAttribute('data-launching'), BTT_LAUNCH_MS);
+    }
     if (lenis) {
       lenis.scrollTo(0, { duration: 0.9 });
     } else {
@@ -33,13 +51,20 @@ export default function Footer() {
           </div>
 
           <button
+            ref={bttRef}
             className="back-to-top"
             type="button"
             aria-label="Back to top"
             onClick={handleBackToTop}
           >
+            {/* 兩支箭頭：預設只看得見第一支，第二支等在下方框外。
+                .btt-icon-wrap 的 overflow:hidden 就是為這個留的。 */}
             <span className="btt-icon-wrap">
               <svg className="btt-icon" viewBox="0 0 24 24" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <line x1="12" y1="19" x2="12" y2="5"></line>
+                <polyline points="5 12 12 5 19 12"></polyline>
+              </svg>
+              <svg className="btt-icon btt-icon--next" viewBox="0 0 24 24" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <line x1="12" y1="19" x2="12" y2="5"></line>
                 <polyline points="5 12 12 5 19 12"></polyline>
               </svg>
@@ -64,8 +89,25 @@ export default function Footer() {
               className="cv-download link-underline"
               aria-label="Download CV as PDF"
             >
+              {/* 垂直遮罩交換（規格書 §6.4）。與 About 頁 .amd-text-wrap
+                  同一套技法（各自的 class，機制與時間刻意相同）。
+                  ⚠️ 第二層要 aria-hidden：兩層文字都在 DOM 裡，不隱藏的話
+                  螢幕閱讀器會把「CV Download Download PDF (33KB)」連著唸。
+                  連結本身有 aria-label，無障礙名稱由那裡提供。
+                  ⚠️ 檔案大小是實測值：public/cv/cv.pdf = 34,170 bytes。
+                  規格原文寫「(?MB)」，但這個檔連 0.1MB 都不到，寫成
+                  (0.03MB) 會很怪，所以改用 KB（已回報）。換檔案時記得更新。 */}
               <span className="cv-text-wrap">
                 <span className="cv-text-default">CV Download</span>
+                <span className="cv-text-hover" aria-hidden="true">
+                  Download PDF (33KB)
+                </span>
+              </span>
+              <span className="cv-arrow" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <polyline points="19 12 12 19 5 12" />
+                </svg>
               </span>
             </a>
           </div>
