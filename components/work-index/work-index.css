@@ -164,11 +164,16 @@
 
 /* cover 沒有圖時就是這塊灰底（works.json 目前 12 筆 cover 全為空）。
    規格書 §6.5 明文指定的 fallback 手法，跟 §6.3 Gallery 佔位同一個灰。 */
+/* ⚠️ border-radius 一定要在這一層、不能加在 <img> 上：hover 時圖會
+   scale(1.03)，圓角若掛在圖上，放大後的直角會從這個框的圓角外露出來。
+   加在有 overflow:hidden 的外框才是真的裁切。灰色佔位塊是這一層自己的
+   background，所以同一條規則就一起有圓角了，不必另外處理。 */
 .work-card-cover {
   position: relative;
   width: 100%;
   aspect-ratio: 672 / 415; /* Figma mask-size */
   background: #d9d9d9;
+  border-radius: 5px;
   overflow: hidden;
 }
 
@@ -235,7 +240,15 @@
   margin: 0; /* Figma：標題框 0–48、副標框 48–84，兩者相鄰無間距 */
   font-weight: 400;
   font-size: clamp(17px, 1.6667vw, 24px);
-  line-height: 22px; /* Figma 806:1269 */
+  /* ⚠️ 不可以再寫回 Figma 的 line-height:22px。
+     Figma 806:1269 標的是 24px 字配 22px 行高——行框比字身還矮。在 Figma
+     裡看不出問題（它不裁切），但這裡為了「最多兩行、超出截斷」（規格書
+     §6.5）必須配 -webkit-line-clamp + overflow:hidden，行框一矮，p / g / j / y
+     的下伸部就會被裁掉。實測 1440px 時字級 24px、行高 22px，差 2px 全砍在
+     descender 上。
+     改用 1.4 倍（24px 時 = 33.6px）。順帶一提這反而更接近 Figma：那邊的
+     副標文字框本來就是 36px 高，先前的 22px 比設計稿矮了 14px。 */
+  line-height: 1.4;
   color: var(--work-muted);
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -342,7 +355,8 @@
    hover 是純 CSS，所以在這裡覆寫。
 
    規格：「hover 不輪播、不播影片，只做 150ms 的不透明度變化」。
-   ⚠️ 規格沒有指定不透明度要降到多少，0.85 是我的假設值，已回報。 */
+   ⚠️ 規格沒有指定不透明度要降到多少，0.85 原本是我的假設值，
+   使用者 2026-08-29 回覆確認採用。 */
 @media (prefers-reduced-motion: reduce) {
   /* !important 是為了蓋掉上面 .work-card 那組的 transform:none !important
      所在的同一個 media block 裡、以及一般狀態下的 transform 500ms 定義。 */
