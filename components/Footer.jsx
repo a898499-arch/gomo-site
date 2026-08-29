@@ -119,7 +119,18 @@ export default function Footer() {
                 <li><Link href="/" className="link-underline">Home</Link></li>
                 <li><Link href="/work" className="link-underline">Works</Link></li>
                 <li><Link href="/about" className="link-underline">About</Link></li>
-                <li>
+                {/* Playground 尚未開放（規格書 §6.4）。
+                    ⚠️ tooltip 掛在 <li> 上而不是 <a> 上：<a> 有
+                    pointer-events:none（規格要求保留），它自己收不到任何滑鼠
+                    事件，:hover 永遠不會成立。事件會穿透到父層 <li>，所以
+                    hover 判斷放在 <li>。這同時也讓「停用的連結不該有底線動畫」
+                    自動成立——底線的 hover 規則是掛在 .link-underline:hover
+                    上的，而它永遠不會被觸發。
+                    ⚠️ tooltip 本身 aria-hidden，另外補一段 .visually-hidden
+                    的「Coming soon」在連結裡：螢幕閱讀器讀不到 tooltip 的
+                    視覺提示，要用文字補上，否則只會聽到「Playground，已停用」
+                    而不知道原因。 */}
+                <li className="playground-item">
                   <a
                     href="/playground"
                     className="link-underline playground-link"
@@ -128,7 +139,11 @@ export default function Footer() {
                     onClick={(e) => e.preventDefault()}
                   >
                     Playground
+                    <span className="visually-hidden"> (Coming soon)</span>
                   </a>
+                  <span className="playground-tip" aria-hidden="true">
+                    Coming soon
+                  </span>
                 </li>
               </ul>
             </nav>

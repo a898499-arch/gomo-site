@@ -27,6 +27,14 @@
   /* §6.5 作品卡 tag 膠囊專用 — 刻意不重用 --rule，Figma 實測色值更深，
      且 --rule 另有他用（頁腳分隔線等） */
   --tag-border: #5B5B5B;
+
+  /* 底線擦除與頁腳 hover 的共用節奏（規格書 §6.4）。
+     ⚠️ 必須定義在 :root，不能只放在 .link-underline 上——.playground-tip 是
+     那個連結的**兄弟**節點而不是子孫，var() 解不到就會讓整條 transition
+     宣告失效（實測 computed 變成 transition-property:all / duration:0s，
+     等於完全沒有過場）。踩過一次，不要再搬回去。 */
+  --u-wipe: 300ms;
+  --u-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --work-muted: #747474;
 
   /* ---------- 全站版面系統 ----------
@@ -318,7 +326,7 @@ body:has(.page-content > [data-nav-bleed]) .site-nav {
 
 /* 箭頭：hover 時右移 4px、上移 4px（規格書 §6.4） */
 .footer-cta .cta-arrow {
-  transition: transform 350ms var(--u-ease, cubic-bezier(0.22, 1, 0.36, 1));
+  transition: transform 350ms var(--u-ease);
 }
 
 .back-to-top {
@@ -424,7 +432,7 @@ body:has(.page-content > [data-nav-bleed]) .site-nav {
   letter-spacing: -0.005em;
   /* hover 的 translateX 跟其他底線連結一樣走 300ms；按下時才切回 150ms，
      否則整條連結的手感會比旁邊的連結快一倍。 */
-  transition: transform 300ms var(--u-ease, cubic-bezier(0.22, 1, 0.36, 1));
+  transition: transform 300ms var(--u-ease);
 }
 
 .cv-download:active {
@@ -627,9 +635,10 @@ body:has(.page-content > [data-nav-bleed]) .site-nav {
 .link-underline {
   position: relative;
   display: inline-block;
+  /* --u-scale 留在這裡：導覽列用 .nav-links a.link-underline{--u-scale:0}
+     覆寫它把底線藏起來，那是逐元素的設定。
+     --u-wipe / --u-ease 在 :root，見那裡的註解。 */
   --u-scale: 1;
-  --u-wipe: 300ms;
-  --u-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .link-underline::before,
@@ -657,8 +666,62 @@ body:has(.page-content > [data-nav-bleed]) .site-nav {
   transform-origin: left;
 }
 
+/* ---------- Playground（停用）與「Coming soon」tooltip（規格書 §6.4）----------
+   ⚠️ pointer-events:none 讓 <a> 收不到任何滑鼠事件，所以：
+     1. 底線擦除的 hover 永遠不會觸發 —— 規格要的「停用連結不該有底線動畫」
+        自動成立，不需要額外寫規則去關掉它。
+     2. tooltip 的 hover 判斷必須掛在父層 <li>（事件會穿透過去）。
+   ⚠️ tooltip 用 visibility 而不是只用 opacity：只靠 opacity:0 的話元素仍會
+   參與命中測試，滑過它的位置會讓 <li> 保持 hover，tooltip 就關不掉。 */
 .playground-link {
   pointer-events: none;
+}
+
+.playground-item {
+  position: relative;
+}
+
+.playground-tip {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 8px);
+  z-index: 2;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: var(--footer-ink);
+  color: var(--bg);
+  font-size: 14px;
+  line-height: 1.45;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  /* 離開時立刻收掉（delay 0）；淡入的 150ms 延遲寫在 hover 那條 */
+  transition:
+    opacity 200ms var(--u-ease),
+    transform 200ms var(--u-ease),
+    visibility 0s linear 200ms;
+}
+
+@media (hover: hover) {
+  .playground-item:hover .playground-tip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    /* 規格：hover 後延遲 150ms 才淡入 */
+    transition-delay: 150ms, 150ms, 0s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .playground-tip {
+    transition: opacity 150ms linear, visibility 0s linear 150ms;
+    transform: none;
+  }
+  .playground-item:hover .playground-tip {
+    transform: none;
+  }
 }
 
 @media (max-width: 900px) {
