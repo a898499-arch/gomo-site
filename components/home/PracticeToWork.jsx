@@ -384,11 +384,23 @@ export default function PracticeToWork() {
                   <div className="ptw-carousel" id="ptw-carousel">
                     {/* current/next only — never more than two mounted at once (§6.2 五). Sources filled
                         in by JS from PTW_SLIDES (assets/img/*, falls back to the Figma cover placeholder
-                        when that list is empty, so the crossfade logic runs correctly either way). */}
+                        when that list is empty, so the crossfade logic runs correctly either way).
+
+                        ⚠️ 這裡刻意「完全不寫 src 屬性」，不是 src=""。
+                        原型 prototypes/home.html:1396–1397 寫的是 src=""，那在原生 HTML 裡
+                        會讓瀏覽器把空字串解析成「目前這一頁的網址」再送一次請求（安靜地
+                        重抓整份 HTML），而在 React 裡還會多一條 console error
+                        「An empty string ("") was passed to the src attribute」。
+                        兩邊都是缺陷，只是原型那邊不會叫出來，所以一直沒被發現。
+                        依使用者 2026-08-30 裁示：原型也有的問題一樣修掉，並在此記一筆。
+
+                        省略 src 之後行為完全不變——這兩個節點本來就是等 probeImage()
+                        探測完才由 JS 以 el.src = ... 填值（startCarousel / advance），
+                        之後補圖進 public/assets/img/ 一樣會自動生效。 */}
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img className="ptw-slide is-current" id="ptw-slide-a" src="" alt="" aria-hidden="true" ref={slideARef} />
+                    <img className="ptw-slide is-current" id="ptw-slide-a" alt="" aria-hidden="true" ref={slideARef} />
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img className="ptw-slide" id="ptw-slide-b" src="" alt="" aria-hidden="true" ref={slideBRef} />
+                    <img className="ptw-slide" id="ptw-slide-b" alt="" aria-hidden="true" ref={slideBRef} />
                   </div>
                 </div>
               </div>
