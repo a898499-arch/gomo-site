@@ -1,9 +1,10 @@
 'use client';
 
-import { useLayoutEffect, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { mainEase } from '@/lib/ease';
 import { useNavBehavior, useNavBehaviorConfig } from '@/components/NavBehaviorProvider';
+import { useLenis } from '@/components/LenisProvider';
 import './home-stage.css';
 
 /**
@@ -97,6 +98,45 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg }) {
   // PHASE 3 之後會用到：Loading 靜止狀態的 transform，存起來供推軌起點使用
   const loadingXform = useRef({ left: null, right: null });
 
+  // ---------- Loading 期間的捲動鎖定 ----------
+  // ⚠️ 只設 documentElement.overflow = 'hidden' 是不夠的。那條只擋瀏覽器
+  // 「原生」的捲動（鍵盤、原生觸控慣性、捲軸拖曳），擋不住 Lenis——Lenis
+  // 是自己接 wheel / touch 事件、再用 programmatic scrollTo 捲的，而
+  // programmatic 捲動不受 overflow 限制。實測：Loading 期間灌 8 個
+  // deltaY:400 的 wheel 事件，頁面照樣捲到 3147。
+  //
+  // 原型 prototypes/home.html 也有同樣的洞，但它從來沒被看見——當時首頁
+  // 的 .hero-stage 之後就沒有內容，文件根本沒有可捲高度。§6.2 接上來之後
+  // 文件變成 4932px，使用者就能在推軌還沒播完時滑走，§6.1「觀者的視線
+  // 全程不能失去板凳」直接失守。
+  // 這是「修正原型既有問題」，不是偏離原型（使用者 2026-08-30 裁示）。
+  //
+  // 兩條都要：lenis.stop() 擋 Lenis 自己的 wheel/touch 路徑，
+  // overflow:hidden 擋原生路徑（鍵盤空白鍵 / PageDown / 方向鍵）。
+  const lenis = useLenis();
+  const lenisRef = useRef(null);
+  lenisRef.current = lenis;
+  const scrollLockedRef = useRef(false);
+
+  const lockScroll = useCallback(() => {
+    scrollLockedRef.current = true;
+    document.documentElement.style.overflow = 'hidden';
+    lenisRef.current?.stop();
+  }, []);
+
+  const unlockScroll = useCallback(() => {
+    scrollLockedRef.current = false;
+    document.documentElement.style.overflow = '';
+    lenisRef.current?.start();
+  }, []);
+
+  // LenisProvider 是在自己的 effect 裡 new Lenis()、再用 state 傳下來的，
+  // 所以這個元件掛載當下 lenisRef.current 還是 null，lockScroll() 那一下的
+  // stop() 會落空。等 instance 出現時在這裡補一次；若那時已經解鎖了就不動。
+  useEffect(() => {
+    if (lenis && scrollLockedRef.current) lenis.stop();
+  }, [lenis]);
+
   useLayoutEffect(() => {
     const root = rootRef.current;
     if (!root) return;
@@ -157,7 +197,7 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg }) {
             ease: mainEase,
             onComplete: () => {
               stage.style.zIndex = String(P3.zAfter);
-              document.documentElement.style.overflow = '';
+              unlockScroll();
             },
           });
           playNavIntro();
@@ -209,7 +249,7 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg }) {
         tl.call(
           () => {
             gsap.set([bl, br], { willChange: 'auto' });
-            document.documentElement.style.overflow = '';
+            unlockScroll();
           },
           null,
           P3.benchLag + dollyDur
@@ -297,6 +337,13 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg }) {
         return () => cancelAnimationFrame(raf);
       };
 
+      // 捲動鎖定要在 reduced motion 的分支「之前」，兩條路徑都要鎖。
+      // reduced motion 只是跳過組裝動畫，它一樣有 Loading 期間（等資產 +
+      // 計數器跑到 100%），一樣不能讓使用者在那段時間滑走。
+      // 解鎖時機也跟著各自的路徑走：一般路徑在推軌結束（benchLag + dollyDur）
+      // 才解，reduced motion 在 300ms 交叉淡入的 onComplete 解。
+      lockScroll();
+
       // ── reduced motion：跳過組裝，直接顯示靜態 loading 狀態 ──────
       if (reduce) {
         gsap.set(bl, { x: L.x - PART_X, y: L.y, scale: L.scale, opacity: 1 });
@@ -308,7 +355,6 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg }) {
       }
 
       // ── PHASE 1 ─────────────────────────────────────────────────
-      document.documentElement.style.overflow = 'hidden';
 
       const tl = gsap.timeline();
 
@@ -411,9 +457,11 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg }) {
       window.removeEventListener('resize', onResize);
       cancelAnimationFrame(resizeRaf);
       ctx.revert();
-      document.documentElement.style.overflow = '';
+      // 離開首頁時一定要解鎖：卸載時可能還停在 Loading（使用者在推軌播完前
+      // 就點走），不解的話 Lenis 會一直是 stopped，下一頁完全捲不動。
+      unlockScroll();
     };
-  }, []);
+  }, [lockScroll, unlockScroll]);
 
   return (
     // data-nav-bleed：滿版頁面標記。必須留在最外層元素上——globals.css 用
