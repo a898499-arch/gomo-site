@@ -31,6 +31,9 @@ const NavBehaviorContext = createContext({
   resetConfig: () => {},
   registerNavIntro: () => {},
   playNavIntro: () => {},
+  navForceHiddenRef: { current: false },
+  setNavForceHidden: () => {},
+  registerNavForceHide: () => () => {},
 });
 
 export function NavBehaviorProvider({ children }) {
@@ -50,6 +53,38 @@ export function NavBehaviorProvider({ children }) {
     navIntroRef.current?.();
   }, []);
 
+  // ---------- §6.2：影片放大後強制壓住導覽列 ----------
+  // 原型 prototypes/home.html 的 navForceHidden（1681 宣告 / 1879-1880 寫入 /
+  // 2228 讀取）。原型是單一檔案裡的模組層變數，Next 這邊 Nav 與 §6.2 是兩個
+  // 元件，所以提到這裡共用。
+  //
+  // ⚠️ 用 ref 不用 state：ptwLoop 每一幀都會呼叫 setNavForceHidden，改成 state
+  // 的話每次翻轉都會讓 Nav 的捲動 effect 重跑（重新掛 lenis 監聽、重設方向基準），
+  // 而那個 effect 的 cleanup 會 killTweensOf(nav)——等於在最需要動畫的那一刻把
+  // 它殺掉。ref 讓 showNav() 每次都讀到最新值，而 effect 一次都不用重跑。
+  //
+  // ⚠️ 與 startHidden 的優先順序（明確寫下來，兩個 flag 不要互相猜）：
+  //   navForceHidden 只擋「顯示」，優先級最高——true 的時候 showNav() 直接 return，
+  //     不管 startHidden 是什麼、不管使用者往上滾多少。它不影響 hideNav()。
+  //   startHidden 管的是「進頁的初始狀態」與「停用頂端 100px 永遠顯示」，
+  //     只在 effect 掛載時讀一次。
+  // 兩者方向一致（都只會讓導覽列更容易隱藏），不會打架；目前也沒有任何一頁
+  // 同時用到——navForceHidden 只有首頁 §6.2 會設，startHidden 只有作品詳情頁。
+  const navForceHiddenRef = useRef(false);
+  const forceHideHandlerRef = useRef(null);
+  const registerNavForceHide = useCallback((fn) => {
+    forceHideHandlerRef.current = fn;
+    return () => {
+      if (forceHideHandlerRef.current === fn) forceHideHandlerRef.current = null;
+    };
+  }, []);
+  const setNavForceHidden = useCallback((v) => {
+    if (v === navForceHiddenRef.current) return;
+    navForceHiddenRef.current = v;
+    // 跨過門檻的當下就把它壓下去，不是只擋住之後的顯示（原型 setNavForceHidden 同樣行為）
+    if (v) forceHideHandlerRef.current?.();
+  }, []);
+
   const setConfig = useCallback((partial) => {
     setConfigState({ ...DEFAULT_CONFIG, ...partial });
   }, []);
@@ -60,7 +95,16 @@ export function NavBehaviorProvider({ children }) {
 
   return (
     <NavBehaviorContext.Provider
-      value={{ config, setConfig, resetConfig, registerNavIntro, playNavIntro }}
+      value={{
+        config,
+        setConfig,
+        resetConfig,
+        registerNavIntro,
+        playNavIntro,
+        navForceHiddenRef,
+        setNavForceHidden,
+        registerNavForceHide,
+      }}
     >
       {children}
     </NavBehaviorContext.Provider>

@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import HomeStage from '@/components/home/HomeStage';
+import PracticeToWork from '@/components/home/PracticeToWork';
 
 // 首頁 Loading → Hero（規格書 §6.1）。
 // 這一輪只做 PHASE 1（組裝）與 PHASE 2（計數器）；PHASE 3 推軌與 PHASE 4
@@ -26,10 +27,15 @@ function readSvg(name) {
 
 export default function HomePage() {
   return (
-    <HomeStage
-      benchLeftSvg={readSvg('stool_left.svg')}
-      benchRightSvg={readSvg('stool＿right.svg')}
-      logoSvg={readSvg('logo.svg')}
-    />
+    <>
+      <HomeStage
+        benchLeftSvg={readSvg('stool_left.svg')}
+        benchRightSvg={readSvg('stool＿right.svg')}
+        logoSvg={readSvg('logo.svg')}
+      />
+      {/* §6.2 PRACTICE → ALL WORK。原型 prototypes/home.html 的排列是
+          hero-stage 之後直接接這一段（1267 → 1364），順序照抄。 */}
+      <PracticeToWork />
+    </>
   );
 }

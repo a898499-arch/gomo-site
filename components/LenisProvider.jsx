@@ -30,6 +30,13 @@ export function LenisProvider({ children }) {
   useEffect(() => {
     const instance = new Lenis({ duration: 1.2, smoothWheel: true });
 
+    // §3.2: ScrollTrigger must ride the shared Lenis instance
+    // （原型 prototypes/home.html:1677 同一行）。
+    // 少了這行，ScrollTrigger 是靠自己在 window 上的 scroll 監聽更新——Lenis
+    // 每幀寫回 window 之後才輪到它，scrub 的區塊會慢一幀；而 §6.2 是每一幀
+    // 都讀 self.progress 的 rAF 迴圈，慢一幀就看得出來。掛上去之後兩者同幀。
+    instance.on('scroll', ScrollTrigger.update);
+
     function raf(time) {
       instance.raf(time);
       rafIdRef.current = requestAnimationFrame(raf);

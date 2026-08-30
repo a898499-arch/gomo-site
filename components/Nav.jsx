@@ -23,7 +23,7 @@ export default function Nav() {
   const logoRef = useRef(null);
   const linksRef = useRef(null);
   const lenis = useLenis();
-  const { config, registerNavIntro } = useNavBehaviorConfig();
+  const { config, registerNavIntro, navForceHiddenRef, registerNavForceHide } = useNavBehaviorConfig();
   const startHidden = config.startHidden;
   const deferIntro = config.deferIntro;
   // 導覽列在滿版 Hero 頁面的透明背景「不」在這裡處理——見 globals.css 的
@@ -108,6 +108,9 @@ export default function Nav() {
     gsap.set(nav, { y: navHidden ? getHiddenY() : 0 });
 
     function showNav() {
+      // §6.2: video grown/growing (p>=0.3) through the hold overrides scroll-up
+      // （原型 home.html:2228 同一行，同樣擺在最前面）
+      if (navForceHiddenRef.current) return;
       if (!navHidden) return;
       navHidden = false;
       nav.style.willChange = 'transform';
@@ -161,10 +164,17 @@ export default function Nav() {
     }
     window.addEventListener(ROUTE_CHANGE_EVENT, onRouteChange);
 
+    // §6.2 跨過 p>=0.3 的當下要「立刻」把導覽列壓下去，不是只擋住之後的顯示。
+    // 原型是同一個檔案裡直接呼叫 hideNav()，這裡把 hideNav 註冊給 Provider，
+    // 由它在 setNavForceHidden(true) 時回呼——跟 registerNavIntro 同一個模式，
+    // 動效與 ref 都留在 Nav 內部，§6.2 不需要跨元件抓 DOM。
+    const unregisterForceHide = registerNavForceHide(hideNav);
+
     lenis.on('scroll', onScroll);
     return () => {
       lenis.off('scroll', onScroll);
       window.removeEventListener(ROUTE_CHANGE_EVENT, onRouteChange);
+      unregisterForceHide();
       // ⚠️ 一定要殺掉還在跑的補間，否則換頁會有競態：
       // 換頁 → 捲動歸零送出 scroll=0 → 這時 startHidden 還是「前一頁」的值，
       // 一般頁面會走 dead zone 那條啟動一個 showNav() 的 0.3s 補間 → 接著
@@ -174,7 +184,7 @@ export default function Nav() {
       // （實測過：導覽列 transform 的 Y 停在 0）。
       gsap.killTweensOf(nav);
     };
-  }, [lenis, startHidden]);
+  }, [lenis, startHidden, navForceHiddenRef, registerNavForceHide]);
 
   return (
     <nav className="site-nav" ref={navRef}>

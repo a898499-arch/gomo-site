@@ -1,0 +1,248 @@
+/* ====================================================================
+   SECTION 2 — PRACTICE → ALL WORK (§6.2)
+
+   從 prototypes/home.html 的 <style> 第 494–706 行「原樣搬過來」
+   （CLAUDE.md「原型移植原則」：不改名、不優化、不動任何數字）。
+   唯一的差異是每行少了兩格縮排（原本包在 <style> 裡面），以及檔尾多了
+   兩條 .ptw-title .reveal-mask/.reveal-inner 的基礎樣式——原型把它們寫成
+   全站通用規則（home.html 903–911 行），這個 repo 沒有對應的全域定義，
+   而 work-index.css 那份 .reveal-inner 刻意沒有 translateY(100%)，
+   直接提到 globals.css 會把作品分類頁的標題推出畫面。所以縮成
+   .ptw-title 底下的區域規則，數值與原型完全相同。
+   ==================================================================== */
+
+/* ==================== SECTION 2 — PRACTICE → ALL WORK (§6.2) ==================== */
+
+/* height = growth distance + hold distance + 100vh (the sticky viewport itself, per the
+   containerHeight = pinnedDistance + 100vh identity already established for this section).
+   Growth distance shortened TWICE, both times "捲動距離太長":
+     2026-08-09  320vh -> 180vh
+     2026-08-25  180vh -> 120vh  (cut by a third; now 37.5% of the original 320vh)
+   Hold is untouched both times and stays 150vh (deliberate dwell time on the video).
+
+   All of Stage B's internal timings (t1/t2 in applyStageB) are expressed as FRACTIONS of the
+   growth phase, not absolute vh, so neither change needs a threshold recalculation there.
+   The normalisation that makes this true is one line in ptwLoop():
+       growthP = clamp01(rawSelfProgress * (growth + hold) / growth)
+   — rawSelfProgress spans the whole pinned range, and that factor rescales it so growthP hits
+   exactly 1.0 at the end of the growth distance whatever that distance is.
+
+   ⚠️ Because `growth` is the DENOMINATOR there, ptwGrowthHold() in the JS must be edited in
+   lockstep with these three CSS heights. Leave it stale and the normalisation divides by the old
+   number: the frame would finish growing well past the growth distance and eat into the hold.
+   See the JS growth/hold breakdown comment near the ScrollTrigger setup. */
+.ptw-outer {
+  position: relative;
+  height: 370vh; /* 120vh growth (shortened twice, faster pacing accepted as tradeoff) + 150vh hold + 100vh viewport */
+}
+
+.ptw-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* ⚠️ 規格書 §6.2 有寫背景色 lerp，原型未實作，移植時照原型保持現狀。
+     要補是獨立決定。
+     具體來說：--ptw-bg-current 這個變數在整份 prototypes/home.html 裡
+     從頭到尾沒有任何一行設定它（applyStageB 的註解寫了 "bg lerps"，
+     但程式碼裡沒有對應的實作），所以 fallback 的 var(--bg) 全程生效，
+     背景一路都是 #FCFBF8。實測原型與本頁在 f=0/0.1/0.2/0.5 四個進度點
+     的背景色都是 rgb(252,251,248)，兩邊一致。
+     這個 var() 掛勾原樣保留——要補 lerp 時只要開始寫入這個變數即可，
+     不需要改這條宣告。 */
+  background: var(--ptw-bg-current, var(--bg));
+}
+
+/* ---------- fixed-ratio reference viewport (1440x900, same convention as Hero/Loading) ----------
+   The whole Figma file stacks each screen state in its own 900px-tall band inside one tall page,
+   e.g. loading1/loading2 are literally separate 1440x900 frames. Section 2 doesn't get separate
+   frames, but its content still falls cleanly into two such bands within "首頁1" (confirmed by
+   checking the content's own y-extents against band boundaries, not assumed):
+     collage state:   y 1001.84->1795.86, fits inside band y=900->1800  (4px to spare)
+     ALL WORKS state: y 1921->2679,       fits inside band y=1800->2700 (21px to spare)
+   Every element below is positioned as a plain % of this SAME 1440x900 box — left=x/1440,
+   top=(y-bandOffset)/900 — no other transform, centering, or bounding-box invention on top. The
+   box is letterboxed (never stretched) to whatever the actual viewport's aspect ratio is.
+
+   2026-08-10 fix: this is the one exception §6.2's collage/video-frame system needs — it keeps
+   %-based relative positioning (the GSAP scroll math depends on it), but its reference is now
+   capped at the SAME literal 1440px the rest of the site's .page-container uses, not
+   `calc(100vh*1440/900)` alone. That vh-only formula could render *wider* than 1440 on an
+   ordinary widescreen monitor (e.g. 1920x1080 -> 100vh*1440/900 = 1728px), scaling the collage/
+   title/video-frame up past their Figma-authored size while nav (fixed-px) didn't move — that
+   mismatch was the root cause of the title-vs-nav-logo misalignment bug. `1440px` in this min()
+   hard-stops the growth; `calc(100vh*1440/900)` stays so the box still never taller than the
+   100vh sticky stage on short viewports. */
+.ptw-viewport {
+  position: relative;
+  width: min(100%, 1440px, calc(100vh * 1440 / 900));
+  aspect-ratio: 1440 / 900;
+}
+
+.ptw-visual {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(0.94) translateY(20px);
+}
+
+.ptw-fig {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  animation: ptw-idle-a 6s ease-in-out infinite;
+  animation-play-state: paused;
+}
+.ptw-fig img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.ptw-visual.is-idle .ptw-fig { animation-play-state: running; }
+
+/* back layer: dance woman_3, dance woman_3-1, grass, flower_red — confirmed/assigned behind the
+   video frame (§6.2 三層). left/top/width/height = Figma x,y,w,h as % of the 1440x900 band
+   (y offset by -900, the collage state's band). */
+.ptw-fig-dw3   { left: 46.0382%; top: 11.3156%; width: 18.7514%; height: 34.7122%; z-index: 1; animation-duration: 6.4s; animation-delay: -0.6s; }
+.ptw-fig-dw31  { left: 72.0778%; top: 14.0856%; width: 16.0194%; height: 29.1756%; z-index: 1; animation-duration: 5.2s; animation-delay: -2.1s; }
+.ptw-fig-grass { left: 64.9306%; top: 21.8300%; width: 10.7243%; height: 13.0922%; z-index: 1; animation-duration: 7s;   animation-delay: -3.4s; }
+.ptw-fig-red   { left: 43.1944%; top: 33.7778%; width: 3.8396%;  height: 4.7811%;  z-index: 1; animation-duration: 4.6s; animation-delay: -1.2s; }
+
+/* front layer: everything else, in front of the video frame */
+.ptw-fig-dw1   { left: 54.4312%; top: 72.7644%; width: 24.2583%; height: 26.7756%; z-index: 3; animation-duration: 6.8s; animation-delay: -4.4s; }
+.ptw-fig-dw2   { left: 34.7778%; top: 39.8844%; width: 12.2667%; height: 39.0556%; z-index: 3; animation-duration: 5.6s; animation-delay: -0.2s; }
+.ptw-fig-dw5   { left: 80.2333%; top: 48.2400%; width: 13.2979%; height: 35.4600%; z-index: 3; animation-duration: 6.1s; animation-delay: -3.9s; }
+.ptw-fig-orange{ left: 86.3889%; top: 35.3333%; width: 4.2736%;  height: 6.4722%;  z-index: 3; animation-duration: 4.9s; animation-delay: -1.8s; }
+.ptw-fig-pink  { left: 43.2639%; top: 76.3333%; width: 4.8778%;  height: 8.3122%;  z-index: 3; animation-duration: 5.4s; animation-delay: -2.7s; }
+.ptw-fig-yellow{ left: 76.1111%; top: 73.7778%; width: 2.9861%;  height: 5.0000%;  z-index: 3; animation-duration: 4.3s; animation-delay: -0.9s; }
+.ptw-fig-leaf  { left: 93.6361%; top: 70.2256%; width: 7.1924%;  height: 12.7633%; z-index: 3; animation-duration: 6.6s; animation-delay: -5.1s; }
+
+/* A3 idle breathing — CSS keyframes only, no JS/rAF. Amplitude raised once (still meant to read as
+   "barely there", just less so than the original ±3px/±0.8°) — must not out-compete the video. */
+@keyframes ptw-idle-a {
+  0%, 100% { translate: 0 0; rotate: 0deg; }
+  50%      { translate: 0 -6px; rotate: 1.5deg; }
+}
+
+/* ---------- video frame (mid layer). §6.2 四 growth never resizes/remounts the element — but a
+   clip-path-on-a-full-size-box approach (the previous implementation) turned out to be wrong: the
+   box that object-fit:cover measures for its crop is the element's own LAYOUT size, which
+   clip-path never changes (clip-path only masks paint, it doesn't resize anything) — so cover was
+   always cropping against the ambient 1440x900 (16:10) box regardless of the clip-path window,
+   which is a DIFFERENT ratio than the intended 16:9 window and cut content unpredictably (e.g.
+   the left edge of the placeholder slide). Fixed by giving the innermost media box a real 16:9
+   layout size and moving/scaling *that* box with `transform` to match the current window — cover
+   then crops against the actual visible shape, and clip-path isn't needed at all (corner-radius is
+   confirmed 0 at both Figma ends anyway, so there's nothing else clip-path was doing for us). */
+.ptw-frame {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+}
+
+.ptw-frame-media {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  transform-origin: 0 0; /* JS positions/scales this from its own top-left corner, see applyStageB */
+  overflow: hidden;
+}
+
+.ptw-frame-inner {
+  position: absolute;
+  inset: 0;
+  transform: scale(1.12);
+}
+
+.ptw-carousel {
+  position: absolute;
+  inset: 0;
+}
+
+.ptw-slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* no object-position override — the full case-study slide (branding +
+                         photo) is the correct source image; different frame ratios crop it
+                         differently by design, that's expected, not a bug */
+  opacity: 0;
+  transition: opacity 600ms linear;
+}
+.ptw-slide.is-current { opacity: 1; }
+
+/* ---------- title (A2 mask-reveal; exits p=0->0.30). Figma: node 21:180, x=40 y=1185 -> left
+   2.7778%, top 31.6667% of the collage-state band. ---------- */
+.ptw-title {
+  /* top set as a plain (non-transform) offset deliberately — Stage B animates this element's
+     GSAP `y`/`opacity`/`scale` for the p=0->0.30 exit, and GSAP's `y` REPLACES the full
+     translateY on every call rather than adding to one already baked into a CSS transform, so
+     the base position has to live outside `transform` or the first Stage-B frame would snap.
+     2026-08-08 feedback: left confirmed against 40px/1440 (unchanged); width recomputed to keep
+     an 80px gap to dance woman_2's left edge (x=500.80): (500.80-80-40)/1440 = 26.4444%, wider
+     than the old Figma-node-width-derived 25.2778% — font-size untouched, only the wrap width
+     changes, which means the narrower column now wraps each sentence across 3-4 lines instead of
+     one (intentional per feedback: "讓文字換行位置改變"), and the block is far taller than the
+     old 2-line estimate as a result. top is set from the ACTUAL rendered block height (measured
+     at the 1440-reference width: 375.5px, not a line-height*2 guess) so its center lands exactly
+     on the small-state video frame's vertical center (478.50px): 31.6667% - (503.15-478.50)/900. */
+  position: absolute;
+  left: 2.7778%;
+  top: 28.9282%;
+  width: 26.4444%;
+  z-index: 4;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: clamp(20px, 2.57vw, 37px);
+  line-height: 1.45;
+  letter-spacing: -0.025em;
+  text-transform: capitalize; /* Figma: node 21:180 is raw lowercase text styled `capitalize` */
+  color: var(--ink);
+}
+.ptw-title em { font-style: normal; color: var(--accent); }
+.ptw-title .reveal-mask { margin: 0; }
+
+/* ---------- RWD (§6.2 七) ---------- */
+@media (max-width: 900px) {
+  .ptw-outer { height: 317vh; } /* 97vh growth (2026-08-25: 146 cut by a third; 146 itself was the 180/320 ratio of the original 260vh) + 120vh hold (unchanged both times) + 100vh */
+  /* tablet: three most prominent figures stay, rest hide */
+  .ptw-fig-dw2, .ptw-fig-dw3, .ptw-fig-grass, .ptw-fig-red { display: none; }
+}
+
+@media (max-width: 600px) {
+  .ptw-outer { height: 235vh; } /* 60vh growth (2026-08-25: 90 cut by a third; 90 itself was the 180/320 ratio of the original 160vh) + 75vh hold (unchanged both times) + 100vh */
+  /* mobile: only two figures, moved above/below the frame rather than around it (§6.2 七) */
+  .ptw-fig-dw5, .ptw-fig-orange, .ptw-fig-pink, .ptw-fig-yellow, .ptw-fig-leaf { display: none; }
+  .ptw-fig-dw31 { left: 30%; top: -18%; width: 40%; height: auto; }
+  .ptw-fig-dw1  { left: 30%; top: auto; bottom: -20%; width: 40%; height: auto; }
+  .ptw-fig { animation: none !important; } /* idle drift off on mobile — power (§6.2 七) */
+  .ptw-title { width: 78%; }
+}
+
+/* ---------- reduced motion (§6.2 八) ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .ptw-visual { opacity: 1; transform: none; }
+  .ptw-fig { animation: none !important; }
+  .ptw-frame { clip-path: inset(21.3515% 8.0959% 18.1849% 24.7223%); } /* fixed mid-size (midpoint of the two 16:9 states), no scroll growth */
+  .ptw-frame-inner { transform: none; }
+  .ptw-title .reveal-inner { transform: none !important; }
+  .ptw-title { position: static; transform: none; margin: 0 auto 32px; width: auto; max-width: 480px; }
+  .ptw-slide { transition: opacity 300ms linear; }
+}
+
+
+/* ---------- 遮罩式逐行揭露（原型 home.html 903–911 的全站規則，這裡縮到
+   .ptw-title 底下，見檔頭說明。數值原樣照抄） ---------- */
+.ptw-title .reveal-mask {
+  display: block;
+  overflow: hidden;
+}
+
+.ptw-title .reveal-inner {
+  display: block;
+  transform: translateY(100%);
+  will-change: transform;
+}
