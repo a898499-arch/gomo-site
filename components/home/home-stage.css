@@ -19,9 +19,19 @@
    （無白閃、無可見頁面切換）會直接失敗。
    ==================================================================== */
 
+/* 2026-08-30 修正：原本是 position:fixed; inset:0。那是當初搬 §6.1 時就
+   已經存在的偏離——原型 prototypes/home.html:102 的 .hero-stage 是
+   `position: relative; min-height: 100vh`，不是 fixed。
+   當時首頁只有這一段，看不出差別；等 §6.2 接上來才浮現：fixed 不佔文件流
+   高度，所以 #practice-to-work 的 offsetTop 是 0，整段 3308px 被這層不透明
+   的滿版覆蓋永遠蓋住（實測過）。改回原型的寫法就解決。
+   底下的 .bench-stage / .loading-slot / .loading-ui / .bench 全是
+   position:absolute，定位基準仍然是這一層，盒子尺寸也還是 100vw × 100vh，
+   幾何完全沒變；Loading 期間的捲動鎖定本來就靠 JS 的
+   documentElement.overflow='hidden'，不是靠 fixed。 */
 .home-stage {
-  position: fixed;
-  inset: 0;
+  position: relative;
+  min-height: 100vh;
   background: var(--bg);
   overflow: hidden;
   /* 蓋住 layout.js 的 Nav / Footer。
