@@ -118,6 +118,15 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg }) {
   lenisRef.current = lenis;
   const scrollLockedRef = useRef(false);
 
+  // ⚠️⚠️ documentElement.style.overflow 這行「不只是」鎖捲動。
+  // §6.3 的「捲到下一區塊」箭頭按鈕（components/home/ScrollNextButton.jsx 的
+  // pollLoadingUnlock）用 rAF 輪詢這個值，藉此判斷 Loading 是否結束、
+  // 該不該現身。這是原型 prototypes/home.html:2369 就有的做法，照抄過來。
+  //
+  // 所以：**移除或改寫 overflow 這一行之前，先改掉 ScrollNextButton 的輪詢**。
+  // 看到「都已經有 lenis.stop() 了，overflow 這行多餘」就順手刪掉的話，
+  // 那顆按鈕會靜默地永遠不出現——不會報錯、不會有 console 訊息。
+  // 兩邊的註解要一起維護（另一處在 ScrollNextButton.jsx 的 pollLoadingUnlock）。
   const lockScroll = useCallback(() => {
     scrollLockedRef.current = true;
     document.documentElement.style.overflow = 'hidden';

@@ -1,0 +1,187 @@
+/* ====================================================================
+   SECTION 3 — GALLERY (§6.3)
+
+   從 prototypes/home.html 的 <style> 第 707–861 行「原樣搬過來」
+   （CLAUDE.md「原型移植原則」：不改名、不優化、不動任何數字）。
+   每行少了兩格縮排（原本包在 <style> 裡），其餘一字未改。
+
+   ⚠️ 版面與動效的數值一律不動：卡片寬高（aspect-ratio 412.252/555）、
+   間距（rail 與 track 都是 gap:24px）、--gallery-card-h 的 100vh 適配、
+   distance-from-center 的縮放/透明/飽和公式，全部是原型調校過的值。
+   這一輪只換「資料從哪來」（改讀 works.json），不換「怎麼排、怎麼動」。
+
+   檔尾多了一條 .gallery-card-media img——原型的 .gallery-card-media 是
+   空的灰底 <div>，它自己的註解就寫著「swap for a real <img>/<picture>
+   in the same box later」。依使用者裁示改用 works.json 的 cover，灰底
+   #d9d9d9 原樣留著當 cover:null 的 fallback，盒子本身沒有任何改變。
+   ==================================================================== */
+
+/* ==================== SECTION 3 — GALLERY (§6.3) ==================== */
+/* Card size/gap are Figma-measured (node 3:150~154, the gray placeholder row): 412.252px card
+   width / 1440 = 28.6286vw; 28.140px gap (the 3 consistent ones; a 4th at 33.768px is a Figma
+   layout outlier, not used) / 1440 = 1.9542vw. Height uses aspect-ratio instead of an independent
+   vh figure so the card never distorts at non-1440:900 viewport ratios. */
+.gallery-outer {
+  position: relative;
+  padding: 96px 0;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.gallery-title {
+  /* 2026-08-10: needs its own max-width:1440+auto-margin (not just the gutter padding) — the rail
+     below it deliberately stays full-bleed edge-to-edge for the carousel, but the TITLE must align
+     with nav/footer's left edge at any width, which only holds if it's centered the same way they
+     are, not just padded relative to the (here, un-capped) window edge. */
+  max-width: 1440px;
+  margin: 0 auto 48px;
+  padding: 0 var(--page-gutter);
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600; /* 2026-08-08 feedback: SemiBold, not 700/800 — was 500 */
+  font-size: clamp(22px, 2.78vw, 40px);
+  text-transform: uppercase;
+  letter-spacing: -0.005em;
+  line-height: 1.45;
+  color: var(--accent);
+}
+.gallery-title .reveal-mask { display: block; overflow: hidden; }
+.gallery-title .reveal-inner { display: block; transform: translateY(100%); will-change: transform; }
+
+.gallery-viewport {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  touch-action: pan-y; /* reserve vertical for native scroll; JS decides per-gesture on horizontal */
+}
+
+.gallery-rail {
+  display: flex;
+  align-items: center;
+  gap: 24px; /* 2026-08-08 feedback: fixed px, not vw — same gap between the real track and its clones */
+  width: max-content;
+  cursor: grab;
+  will-change: transform; /* effectively always in motion pre-interaction (drift) or during drag/inertia */
+}
+.gallery-rail.is-dragging { cursor: grabbing; }
+
+.gallery-track {
+  display: flex;
+  align-items: center;
+  gap: 24px; /* 2026-08-08 feedback: fixed px, not vw */
+}
+
+.gallery-card {
+  position: relative;
+  flex: 0 0 auto;
+  /* 2026-08-09: height-driven (not width-driven) on desktop, so "title block + one row of cards"
+     can be fit to exactly 100vh — see computeGalleryCardMetrics() (§6.3 十). Width follows from
+     aspect-ratio, so the card never distorts. RWD (<=900px) flips this back to width-driven,
+     unchanged from before. */
+  width: auto;
+  height: var(--gallery-card-h);
+  aspect-ratio: 412.252 / 555;
+  display: block;
+  text-decoration: none;
+  overflow: hidden;
+  /* Layer 3's distance-based scale/opacity/saturate is set every rAF frame from JS, tracking
+     scroll position directly — but the hover on/off toggle needs its own eased transition
+     (§6.3: saturate 400ms, grayscale 500ms). One shared CSS transition on transform/opacity/
+     filter serves both: it's a no-op lag on the already-smooth continuous per-frame values, and
+     gives the discrete hover change its required easing without a second, hand-rolled tween. */
+  transition: transform 400ms, opacity 400ms, filter 500ms;
+}
+
+.gallery-card-media {
+  position: absolute;
+  inset: 0;
+  background: #d9d9d9; /* Figma placeholder color — swap for a real <img>/<picture> in the same box later */
+}
+
+.gallery-card-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 24px;
+  background: linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0) 45%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 400ms;
+}
+
+.gallery-card-title,
+.gallery-card-tags {
+  transform: translateY(12px);
+  opacity: 0;
+  transition: opacity 400ms, transform 400ms;
+}
+.gallery-card-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: clamp(16px, 1.4vw, 22px);
+  color: #fff;
+}
+.gallery-card-tags {
+  font-family: 'Poppins', sans-serif;
+  font-size: clamp(12px, 0.9vw, 14px);
+  color: rgba(255, 255, 255, 0.8);
+  transition-delay: 40ms;
+}
+/* year + one-line description have no data yet (§5.1 待補) — .gallery-card-meta is kept empty but
+   present in the DOM so adding that copy later doesn't require touching the layout */
+.gallery-card-meta:empty { display: none; }
+
+@media (hover: hover) {
+  .gallery-card:hover .gallery-card-overlay,
+  .gallery-card:focus-visible .gallery-card-overlay {
+    opacity: 1;
+  }
+  .gallery-card:hover .gallery-card-title,
+  .gallery-card:hover .gallery-card-tags,
+  .gallery-card:focus-visible .gallery-card-title,
+  .gallery-card:focus-visible .gallery-card-tags {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.gallery-card:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 8px;
+}
+
+/* ---------- RWD (§6.3 RWD) ---------- */
+@media (max-width: 900px) {
+  /* back to width-driven — the 100vh-fit computation (§6.3 十) is desktop-only, unchanged here */
+  .gallery-card { width: 55vw; height: auto; }
+}
+
+@media (max-width: 600px) {
+  .gallery-card { width: 78vw; height: auto; }
+}
+
+/* ---------- reduced motion: native horizontal scroll + scroll-snap, no JS physics at all ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .gallery-viewport { overflow-x: auto; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
+  .gallery-rail { cursor: auto; }
+  .gallery-card { scroll-snap-align: center; }
+  .gallery-card-overlay { transition: opacity 200ms; }
+  .gallery-card-title, .gallery-card-tags { transition: opacity 200ms; transform: none; }
+}
+
+
+/* ---------- cover 圖（原型是空的灰底 div，見檔頭說明） ----------
+   完全填滿 .gallery-card-media 這個既有的盒子：position:absolute; inset:0
+   的框沒有動，圖片只是蓋在灰底上。cover 為 null 時不渲染 <img>，
+   露出的就是原型原本的 #d9d9d9，與作品分類頁的 fallback 同一個色值。
+
+   ⚠️ 不要在這裡加任何會影響尺寸的宣告——卡片高度是 --gallery-card-h
+   驅動的，寬度由 aspect-ratio 推導，圖片只能跟著填滿，不能反過來撐開。 */
+.gallery-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}

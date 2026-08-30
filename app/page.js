@@ -2,6 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import HomeStage from '@/components/home/HomeStage';
 import PracticeToWork from '@/components/home/PracticeToWork';
+import Gallery from '@/components/home/Gallery';
+import ScrollNextButton from '@/components/home/ScrollNextButton';
 
 // 首頁 Loading → Hero（規格書 §6.1）。
 // 這一輪只做 PHASE 1（組裝）與 PHASE 2（計數器）；PHASE 3 推軌與 PHASE 4
@@ -36,6 +38,13 @@ export default function HomePage() {
       {/* §6.2 PRACTICE → ALL WORK。原型 prototypes/home.html 的排列是
           hero-stage 之後直接接這一段（1267 → 1364），順序照抄。 */}
       <PracticeToWork />
+      {/* §6.3 GALLERY。原型排列同樣是 §6.2 之後直接接這一段（1404 → 1405）。 */}
+      <Gallery />
+      {/* 「捲到下一區塊」箭頭。原型放在 <nav> 之後、hero-stage 之前
+          （1250–1263），但它是 position:fixed，DOM 位置不影響外觀；
+          放在這裡是因為它只屬於首頁——anchors 讀的是 #practice-to-work
+          與 #gallery，其他頁面沒有那兩個節點。 */}
+      <ScrollNextButton />
     </>
   );
 }

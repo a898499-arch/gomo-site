@@ -1,0 +1,42 @@
+/* ====================================================================
+   「捲到下一區塊」箭頭按鈕（§6.3 附屬，原型 2026-08-09 新增）
+
+   從 prototypes/home.html 的 <style> 第 986–1014 行「原樣搬過來」。
+   每行少了兩格縮排，其餘一字未改。
+
+   ⚠️ 圓形外框／邊框／hover／icon 全部共用頁腳 back-to-top 的樣式
+   （原型註解原話：no separate visual component），那些住在
+   app/globals.css 的 .back-to-top / .btt-icon-wrap / .btt-icon。
+   這個檔案只負責「定位」與「把箭頭轉 180 度」兩件事。
+   改頁腳那組樣式時記得這裡也會跟著變——那是原型刻意的設計。
+   ==================================================================== */
+
+/* ---------- scroll-to-next-section button (new, 2026-08-09) ----------
+   Shares the .back-to-top class for all circle/border/hover/icon styling — no separate visual
+   component, so future style edits to one apply to both, per instruction. Default appearance is
+   already .back-to-top's own default (1px outline, transparent, ink arrow) — solid red only shows
+   on hover, no override needed here. Position 2026-08-09 feedback: bottom-right instead of
+   vertically centered, `bottom: 15vh` (not flush with the bottom edge). */
+.scroll-next-btn {
+  position: fixed;
+  bottom: 15vh;
+  /* 2026-08-10: `position:fixed` can't sit inside .page-container to inherit its centering, so this
+     reproduces the same math directly — beyond 1440px the container's right edge is inset by
+     (viewport-1440)/2 + gutter from the window edge, not just a flat gutter; below 1440px that
+     term goes negative and max() falls back to the flat gutter, same as the container itself. */
+  right: max(var(--page-gutter), calc((100vw - 1440px) / 2 + var(--page-gutter)));
+  z-index: 900; /* below nav's 1000 (nav always topmost), above page content */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms ease-out, background 400ms ease-out, border-color 400ms ease-out, transform 400ms ease-out;
+}
+
+.scroll-next-btn.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.scroll-next-btn .btt-icon-wrap {
+  transform: rotate(180deg); /* flips the shared up-arrow glyph to point down; also flips its hover translateY(-4px) into a downward nudge for free, same shared rule */
+}
+
