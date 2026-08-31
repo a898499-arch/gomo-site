@@ -300,6 +300,30 @@ body:has(.page-content > [data-nav-bleed]) .site-nav {
   color: var(--accent);
 }
 
+/* 大標的遮罩式揭露（原型 prototypes/home.html 903–911 的全站 .reveal-mask /
+   .reveal-inner）。跟 §6.2 同樣的理由縮成區域規則：提到全域會蓋掉
+   work-index.css 那份刻意不帶 translateY(100%) 的 .reveal-inner，把作品分類頁
+   的標題整條推出畫面。數值一字不改。 */
+.footer-headline .reveal-mask {
+  display: block;
+  overflow: hidden;
+}
+
+.footer-headline .reveal-inner {
+  display: block;
+  transform: translateY(100%);
+  will-change: transform;
+}
+
+/* ---------- entrance targets (initial state set by JS unless reduced-motion) ----------
+   原型 prototypes/home.html:1181–1184 原樣照抄。
+   ⚠️ will-change 常駐在這裡是原型的做法（CLAUDE.md 的「will-change 只在動畫
+   執行期間掛上」是針對新寫的動效；這一段走「原型移植原則」，不自行優化）。
+   這些節點只有頁腳進場那一次會動，數量也只有 7 個，成本可控。 */
+[data-animate] {
+  will-change: transform, opacity;
+}
+
 .footer-cta {
   display: inline-flex;
   align-items: center;
@@ -398,7 +422,14 @@ body:has(.page-content > [data-nav-bleed]) .site-nav {
   width: 100%;
   height: 1px;
   background: var(--footer-rule);
+  /* 進場時由 scaleX(0) 從左往右畫出來（原型 prototypes/home.html:1015–1023）。
+     2026-08-30 補回：搬 Footer 那一輪刻意拿掉了 scaleX(0)，因為進場的 JS 還沒
+     移植，留著會讓分隔線永遠是隱形的。現在 JS 搬過來了（Footer.jsx 的
+     runEntrance），初始態要跟著補回去。 */
+  transform: scaleX(0);
+  transform-origin: left;
   margin: clamp(40px, 4.6vw, 67px) 0 clamp(32px, 4.2vw, 61px);
+  will-change: transform;
 }
 
 .footer-bottom {
@@ -580,6 +611,21 @@ body:has(.page-content > [data-nav-bleed]) .site-nav {
   .cv-text-hover,
   .cv-arrow {
     transition: none;
+  }
+
+  /* 頁腳進場的 reduced-motion 收尾（原型 prototypes/home.html:1193–1194）。
+     JS 那邊也會把它們 gsap.set 到最終狀態，這裡是「JS 還沒跑到」的保險——
+     少了這兩條，初始態的 scaleX(0) / translateY(100%) 會讓分隔線與大標在
+     reduced motion 下完全看不見。 */
+  .footer-divider {
+    transform: scaleX(1) !important;
+  }
+  [data-animate] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .footer-headline .reveal-inner {
+    transform: none !important;
   }
 }
 
