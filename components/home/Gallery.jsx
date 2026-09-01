@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -34,12 +35,25 @@ import './gallery.css';
  * 不是從卡片數推算的常數，所以幾張卡都會自己對齊。
  */
 
-// 首頁 Gallery 要顯示的作品。hidden 是「這一版不對外顯示」，兩處（作品分類頁
-// 與這裡）用同一個判準，不要各自發明規則。
-// ⚠️ ready:false 刻意「不」過濾——那是「詳情頁還沒做好」，卡片照樣要出現在
-// 牆上，只是點不進去。這跟 lib/getNextWorks.js 不同：那支是「要把使用者送去
-// 哪裡」，送到死路是壞的；這裡是「展示牆」，缺一張才是壞的。
-const GALLERY_WORKS = works.filter((w) => !w.hidden);
+// 首頁 Gallery 要顯示的作品。
+//
+// 2026-09-01 起與 lib/getNextWorks.js 用**同一套**判準：!hidden && ready !== false
+// ——只顯示「詳情頁真的做好」的作品，不要兩套邏輯。
+//   hidden       這一版不對外顯示
+//   ready:false  詳情頁還沒做好
+// 先前這裡刻意不濾 ready，理由是「展示牆缺一張才是壞的」；使用者 2026-09-01
+// 改口：牆上放一張點不進去的卡，跟送使用者去死路是同一件事，判準統一。
+//
+// ⚠️ 張數會影響無限輪播的接縫餘裕，見下方 measureCycle 附近的註解。
+//
+// 唯一的顯示閘門：!hidden && ready !== false。卡片端不再重複判斷。
+const GALLERY_WORKS = works.filter((w) => !w.hidden && w.ready !== false);
+
+// clone 卡片的拖曳門檻：pointerdown 到 click 之間位移超過這個距離，就當成
+// 「拖曳軌道」而不是「點卡片」，不導航。軌道本身的方向判斷是 6px
+// （DIRECTION_DECIDE_PX），這裡取 5px——比它稍小，確保任何已經被判定為拖曳的
+// 手勢一定也超過這個門檻，不會出現「軌道在拖、放開卻跳頁」。
+const CLONE_DRAG_TOLERANCE_PX = 5;
 
 export default function Gallery() {
   const outerRef = useRef(null);
@@ -47,6 +61,13 @@ export default function Gallery() {
   const viewportRef = useRef(null);
   const railRef = useRef(null);
   const trackRef = useRef(null);
+
+  // clone 的委派導航要用（見 makeCloneNavigable）。放進 ref 是為了不動
+  // useLayoutEffect 的空相依陣列——那條 effect 只該在掛載時跑一次，
+  // 重跑會把 clone 與所有物理狀態重建一遍。
+  const router = useRouter();
+  const routerRef = useRef(router);
+  routerRef.current = router;
 
   useLayoutEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -60,17 +81,51 @@ export default function Gallery() {
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    /* click preventDefault applies regardless of reduced-motion (§6.3 點擊/導航 暫行處理) — detail
-       pages don't exist yet, but the <a href> itself stays real (right-click/open-in-new-tab/crawl
-       all still work), only the primary click is suppressed.
+    /* ---------- clone 卡片的導航（2026-09-01）----------
+       原型（與這裡的前一版）對 clone 的每個 <a> 都掛 preventDefault，理由是
+       「詳情頁還不存在」。詳情頁存在之後那個理由失效，但 clone 一直沒改，
+       結果是 15 張可見卡裡有 10 張點下去毫無反應。
 
-       ⚠️ 原型對「每一張」真卡片都套這個。使用者 2026-08-30 裁示改掉：那行的
-       理由是「詳情頁還不存在」，現在 6 個詳情頁存在了，理由失效。真卡片改用
-       ready 邏輯（在下面的 JSX 裡處理），這個函式只留給複製出來的 clone——
-       clone 是 aria-hidden + tabindex=-1 的裝飾品，本來就不該被導航。 */
-    function suppressNav(a) {
-      a.addEventListener('click', function (e) {
+       ⚠️ clone 是 track.cloneNode(true) 產生的**原生節點**，React 不知道它們
+       存在，所以真卡片身上 next/link 的 click handler 沒有被複製過去——放著
+       不管的話點 clone 會走原生 <a href>、整頁重新載入。這裡用事件委派補上
+       client-side 導航，讓 clone 跟本尊行為一致。useRouter 是原型沒有的東西，
+       屬於框架適配。
+
+       ⚠️ aria-hidden="true"（clone 容器）與 tabindex="-1"（每個 <a>）都保留。
+       兩者跟「可以用滑鼠點」不衝突：axe 的 aria-hidden-focus 規則管的是
+       **可聚焦**（在 tab 序裡），而 tabindex="-1" 已經把它們移出 tab 序；
+       滑鼠點擊 <a href> 則與 tabindex 無關。於是三件事同時成立——螢幕閱讀器
+       只讀到 5 張真卡、鍵盤只走得到 5 張真卡、滑鼠 15 張都能點。
+
+       監聽器掛在 clone 的「容器」上（一個容器一個），不是每張卡各一個。 */
+    function makeCloneNavigable(cloneEl) {
+      let downX = 0;
+      let downY = 0;
+
+      cloneEl.addEventListener('pointerdown', function (e) {
+        downX = e.clientX;
+        downY = e.clientY;
+      });
+
+      cloneEl.addEventListener('click', function (e) {
+        // 點到的可能是卡片裡的 <img> / <div>，不要假設就是 <a> 本身
+        const a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+        if (!a) return;
+
+        // 修飾鍵與非主鍵一律放行，交給瀏覽器原生行為（cmd/ctrl 開新分頁、
+        // shift 開新視窗、alt 下載、中鍵開背景分頁）。攔掉的話會比現在更糟。
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+
+        // 軌道可以拖曳，而且拖曳結束時瀏覽器仍然會派送 click。位移超過門檻
+        // 就視為拖曳：擋掉導航，但也不做 router.push——放開手不該跳頁。
+        if (Math.hypot(e.clientX - downX, e.clientY - downY) > CLONE_DRAG_TOLERANCE_PX) {
+          e.preventDefault();
+          return;
+        }
+
         e.preventDefault();
+        routerRef.current.push(a.getAttribute('href'));
       });
     }
 
@@ -114,10 +169,13 @@ export default function Gallery() {
         const c = track.cloneNode(true);
         c.id = id;
         c.setAttribute('aria-hidden', 'true');
+        // tabindex="-1"：移出 tab 序（螢幕閱讀器與鍵盤都只走真卡）。
+        // ⚠️ 這一行「不是」用來擋點擊的——擋點擊的那行已於 2026-09-01 拿掉，
+        // clone 現在可以用滑鼠點，導航由 makeCloneNavigable 的委派處理。
         c.querySelectorAll('a').forEach(function (a) {
           a.setAttribute('tabindex', '-1');
-          suppressNav(a);
         });
+        makeCloneNavigable(c);
         return c;
       }
       const prevClone = makeInertClone('gallery-track-clone-prev');
@@ -429,18 +487,12 @@ export default function Gallery() {
                 資料來自 works.json（原型是寫死的 12 張 <a>）。標題與 tags 直接用
                 works.json 的欄位，不再各自維護一份。 */}
             {GALLERY_WORKS.map((work) => {
-              const ready = work.ready !== false;
               return (
                 <Link
                   className="gallery-card"
                   href={`/work/${work.slug}`}
                   data-slug={work.slug}
                   key={work.slug}
-                  // ready:false = 詳情頁還沒做好。<a> 與 href 都保留（可右鍵開新分頁、
-                  // 可被爬），只擋左鍵跳轉——與作品分類頁 WorkCard 完全同一套。
-                  onClick={ready ? undefined : (e) => e.preventDefault()}
-                  aria-disabled={ready ? undefined : 'true'}
-                  data-ready={ready ? undefined : 'false'}
                 >
                   <div className="gallery-card-media">
                     {work.cover && (
