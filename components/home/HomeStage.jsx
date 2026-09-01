@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
-import { mainEase } from '@/lib/ease';
+import { mainEase, makeBezierEase } from '@/lib/ease';
 import { useNavBehavior, useNavBehaviorConfig } from '@/components/NavBehaviorProvider';
 import { useLenis } from '@/components/LenisProvider';
 import './home-stage.css';
@@ -10,8 +10,14 @@ import './home-stage.css';
 /**
  * 首頁 Loading → Hero 舞台（規格書 §6.1）
  *
- * 這一輪只做 PHASE 1（0 → 1.65s 組裝）與 PHASE 2（1.65s → 載入完成的計數器）。
- * PHASE 3（FLIP 推軌）與 PHASE 4（Hero 內容）下一輪再做，這裡刻意留空。
+ * PHASE 1（0 → 1.65s 組裝）· PHASE 2（計數器）· PHASE 3（FLIP 推軌）·
+ * PHASE 4（Hero 內容：問候語、職稱打字機輪播、對話泡泡）。
+ *
+ * ⚠️ PHASE 1–3 是先前依規格書 §6.1 實作的，結構與 prototypes/home.html
+ * 不同（loading slot 的量測方式、計數器的等寬字符格與 FLIP 位移補間、
+ * 導覽列走 NavBehaviorProvider 的 deferIntro）。PHASE 4 則是從原型的
+ * JS 2639–2793 / 2917–2927 原樣移植進來的，時間軸與參數一字未改。
+ * 兩者接合處的偏離都寫在各自的註解裡。
  *
  * ⚠️ 架構（改動前務必讀 home-stage.css 檔頭）：
  * 板凳的 CSS 寬高／位置寫的是「Hero 的最終值」，Loading 的小尺寸是執行期
@@ -55,6 +61,41 @@ const P3 = {
   reducedFade: 0.3, // reduced motion：直接 300ms 交叉淡入
 };
 
+// PHASE 4 時間軸（原型 prototypes/home.html:2916–2927，單位秒，
+// 起點與 PHASE 3 同一條時間軸——都是 runTransition 開始那一刻）
+const P4 = {
+  greetingIn: 0.9, // 4.1 問候語遮罩揭露（900 → 1600ms），刻意壓在推軌尾巴上
+  greetingDur: 0.7,
+  jobStart: 1.7, // 4.2 職稱輪播開始，之後永遠循環
+  dialogueAt: 2.2, // 4.3 對話泡泡彈出後開始打字
+  dialogueRightDelay: 0.35, // 右泡泡再晚 350ms
+  idleDrift: 3.5, // 4.4 板凳恢復 2px sine 漂移，週期放慢
+};
+
+// §2.3 Pop 曲線——只給對話泡泡的彈出用，overshoot ≤6%（原型 2563）
+const popEase = makeBezierEase(0.34, 1.4, 0.64, 1);
+
+// §4.2 職稱輪播的內容與節奏（原型 2640–2713），一字未改
+const JOB_PHRASES = [
+  { article: 'An', title: 'Industrial Designer' },
+  { article: 'A', title: 'Product Designer' },
+  { article: 'A', title: 'Maker' },
+];
+const TYPE_MS = 40; // 打字：每字 40ms
+const DELETE_MS = 22; // 刪字：每字 22ms
+const HOLD_MS = 1200; // 打完之後停留
+const AFTER_DELETE_MS = 120; // 刪完之後、下一句開始打之前的空檔
+const PAUSED_POLL_MS = 200; // 分頁隱藏時的回檢間隔
+const RM_SWAP_MS = 3500; // reduced motion：不打字，每 3.5s 交叉淡入換一句
+const RM_FADE_S = 0.2;
+
+// §4.3 對話泡泡的台詞與打字速度（原型 2774–2793）
+const DIALOGUE_LEFT_TEXT = 'lāi-té-tsē';
+const DIALOGUE_RIGHT_TEXT = 'Grab a seat!';
+const DIALOGUE_CHAR_MS = 45;
+const DIALOGUE_POP_S = 0.4;
+const DIALOGUE_CURSOR_HIDE_MS = 200;
+
 /**
  * 三段式 ease（§6.1 節奏）：0→60 輕快、60→90 明顯變慢、90→100 最慢。
  * 回傳 0–1 的 progress，乘 100 後 floor 成顯示值。
@@ -70,7 +111,7 @@ function counterEase(t) {
   return 0.9 + (1 - Math.pow(1 - local, 2)) * 0.1;
 }
 
-export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg }) {
+export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg, dialogueSvg }) {
   // 首頁是滿版 Hero：不要 .page-content 的 126px 上留白、導覽列背景透明。
   // 這兩件事由最外層 <div> 的 data-nav-bleed 屬性 + globals.css 的 :has()
   // 規則處理，「不」走這個 hook——走 hook 的話 SSR 的 HTML 不帶那個 class，
@@ -94,6 +135,17 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg }) {
   const counterRef = useRef(null);
   const numRef = useRef(null);
   const pctRef = useRef(null);
+
+  // PHASE 4
+  const greetingRef = useRef(null);
+  const jobCurrentRef = useRef(null);
+  const jobArticleRef = useRef(null);
+  const jobTitleRef = useRef(null);
+  const jobCursorRef = useRef(null);
+  const dialogueLeftRef = useRef(null);
+  const dialogueRightRef = useRef(null);
+  const dialogueLeftTypedRef = useRef(null);
+  const dialogueRightTypedRef = useRef(null);
 
   // PHASE 3 之後會用到：Loading 靜止狀態的 transform，存起來供推軌起點使用
   const loadingXform = useRef({ left: null, right: null });
@@ -162,6 +214,10 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg }) {
       return { x: s.left - b.left, y: s.top - b.top, scale };
     };
 
+    // PHASE 4 掛的原生 listener 與 timer——gsap.context 只管 GSAP 自己建立的
+    // 補間，這些要自己收回來
+    const cleanups = [];
+
     const ctx = gsap.context(() => {
       const bl = benchLeftRef.current;
       const br = benchRightRef.current;
@@ -173,6 +229,243 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg }) {
       const L = measure(bl, slotLeftRef.current);
       const R = measure(br, slotRightRef.current);
       loadingXform.current = { left: L, right: R };
+
+      // ── PHASE 4：職稱打字機輪播（§4.2）與對話泡泡（§4.3）───────────
+      // 原型 prototypes/home.html:2639–2793 原樣移植，時間常數見上方 P4 /
+      // JOB_* / DIALOGUE_*。唯一的框架適配是「卸載時要能停下來」：原型是
+      // 單頁、永不卸載，所以只有 generation 這一道防線；Next 換頁時
+      // HomeStage 會 unmount，殘留的 setInterval / setTimeout 會對已經拔掉
+      // 的節點寫 textContent。做法是把所有 timer id 收進 timers，cleanup
+      // 一次清掉，並沿用原型自己的 generation 機制（bump 一次就讓所有
+      // 在途的 callback 自己認賠退出），不另外發明新機制。
+      const timers = new Set();
+      const later = (fn, ms) => {
+        const id = setTimeout(() => {
+          timers.delete(id);
+          fn();
+        }, ms);
+        timers.add(id);
+        return id;
+      };
+      const every = (fn, ms) => {
+        const id = setInterval(fn, ms);
+        timers.add(id);
+        return id;
+      };
+      const stop = (id) => {
+        clearTimeout(id);
+        clearInterval(id);
+        timers.delete(id);
+      };
+
+      let jobIndex = 0;
+      let jobCarouselPaused = false;
+      // 每次（重新）啟動循環就 +1，讓上一代殘留的 timer 自己偵測到過期而停止
+      let jobCarouselGeneration = 0;
+
+      const onVisibility = () => {
+        jobCarouselPaused = document.visibilityState === 'hidden';
+      };
+      document.addEventListener('visibilitychange', onVisibility);
+      cleanups.push(() =>
+        document.removeEventListener('visibilitychange', onVisibility)
+      );
+
+      function renderJobChars(phrase, articleCount, titleCount) {
+        jobArticleRef.current.textContent = phrase.article.slice(0, articleCount);
+        jobTitleRef.current.textContent = phrase.title.slice(0, titleCount);
+      }
+
+      /* 打字與刪字走的是同一條「先冠詞、再職稱」的合併字元序列——置中是
+         .job-line 的 flex justify-content:center 自動得到的，因為每敲一個鍵
+         寬度只變動約一個字元，不會整句跳動。 */
+      function typePhrase(phrase, generation, onDone) {
+        const articleLen = phrase.article.length;
+        const titleLen = phrase.title.length;
+        const total = articleLen + titleLen;
+        let i = 0;
+        jobCursorRef.current.classList.remove('blink');
+        const interval = every(function () {
+          if (generation !== jobCarouselGeneration) {
+            stop(interval);
+            return;
+          }
+          i++;
+          renderJobChars(phrase, Math.min(i, articleLen), Math.max(0, i - articleLen));
+          if (i >= total) {
+            stop(interval);
+            onDone();
+          }
+        }, TYPE_MS);
+      }
+
+      function deletePhrase(phrase, generation, onDone) {
+        const articleLen = phrase.article.length;
+        const titleLen = phrase.title.length;
+        let remaining = articleLen + titleLen;
+        const interval = every(function () {
+          if (generation !== jobCarouselGeneration) {
+            stop(interval);
+            return;
+          }
+          remaining--;
+          renderJobChars(
+            phrase,
+            Math.min(remaining, articleLen),
+            Math.max(0, remaining - articleLen)
+          );
+          if (remaining <= 0) {
+            stop(interval);
+            onDone();
+          }
+        }, DELETE_MS);
+      }
+
+      function runJobCycle(generation) {
+        if (generation !== jobCarouselGeneration) return;
+        const phrase = JOB_PHRASES[jobIndex];
+
+        typePhrase(phrase, generation, function () {
+          if (generation !== jobCarouselGeneration) return;
+          // idle：游標持續閃爍，直到下一次刪字開始
+          jobCursorRef.current.classList.add('blink');
+
+          later(function () {
+            if (generation !== jobCarouselGeneration) return;
+            if (jobCarouselPaused) {
+              // 分頁被隱藏：原地等，不推進，稍後回檢
+              later(function () {
+                runJobCyclePausedCheck(generation);
+              }, PAUSED_POLL_MS);
+              return;
+            }
+            jobCursorRef.current.classList.remove('blink');
+            deletePhrase(phrase, generation, function () {
+              if (generation !== jobCarouselGeneration) return;
+              later(function () {
+                if (generation !== jobCarouselGeneration) return;
+                jobIndex = (jobIndex + 1) % JOB_PHRASES.length;
+                runJobCycle(generation);
+              }, AFTER_DELETE_MS);
+            });
+          }, HOLD_MS);
+        });
+      }
+
+      function runJobCyclePausedCheck(generation) {
+        if (generation !== jobCarouselGeneration) return;
+        if (jobCarouselPaused) {
+          later(function () {
+            runJobCyclePausedCheck(generation);
+          }, PAUSED_POLL_MS);
+          return;
+        }
+        jobCursorRef.current.classList.remove('blink');
+        const phrase = JOB_PHRASES[jobIndex];
+        deletePhrase(phrase, generation, function () {
+          if (generation !== jobCarouselGeneration) return;
+          later(function () {
+            if (generation !== jobCarouselGeneration) return;
+            jobIndex = (jobIndex + 1) % JOB_PHRASES.length;
+            runJobCycle(generation);
+          }, AFTER_DELETE_MS);
+        });
+      }
+
+      function startJobCarousel(reducedMotionMode) {
+        jobCarouselGeneration++;
+        const generation = jobCarouselGeneration;
+        const jobCurrent = jobCurrentRef.current;
+
+        if (reducedMotionMode) {
+          // 簡化版：不打字，標記裡本來就有完整句子，只做交叉淡入
+          gsap.to(jobCurrent, { opacity: 1, duration: RM_FADE_S });
+          jobCursorRef.current.style.display = 'none';
+          let rmIndex = 0;
+          (function loopRM() {
+            if (generation !== jobCarouselGeneration) return;
+            later(function () {
+              if (generation !== jobCarouselGeneration) return;
+              if (jobCarouselPaused) {
+                loopRM();
+                return;
+              }
+              rmIndex = (rmIndex + 1) % JOB_PHRASES.length;
+              const phrase = JOB_PHRASES[rmIndex];
+              gsap.to(jobCurrent, {
+                opacity: 0,
+                duration: RM_FADE_S,
+                onComplete: function () {
+                  renderJobChars(phrase, phrase.article.length, phrase.title.length);
+                  gsap.to(jobCurrent, { opacity: 1, duration: RM_FADE_S });
+                },
+              });
+              loopRM();
+            }, RM_SWAP_MS);
+          })();
+          return;
+        }
+
+        gsap.set(jobCurrent, { opacity: 1 });
+        renderJobChars(JOB_PHRASES[jobIndex], 0, 0); // 從空的開始打
+        runJobCycle(generation);
+      }
+
+      function typeText(el, text) {
+        el.classList.remove('cursor-hidden');
+        let i = 0;
+        const interval = every(function () {
+          i++;
+          el.textContent = text.slice(0, i);
+          if (i >= text.length) {
+            stop(interval);
+            later(function () {
+              el.classList.add('cursor-hidden');
+            }, DIALOGUE_CURSOR_HIDE_MS);
+          }
+        }, DIALOGUE_CHAR_MS);
+      }
+
+      function popDialogue(el, typedEl, text, extraDelaySec) {
+        gsap.to(el, {
+          opacity: 1,
+          scale: 1,
+          duration: DIALOGUE_POP_S,
+          ease: popEase,
+          delay: extraDelaySec,
+          onComplete: function () {
+            typeText(typedEl, text);
+          },
+        });
+      }
+
+      // 原型 2609–2616 的初始隱藏態裡屬於 PHASE 4 的兩條
+      gsap.set([dialogueLeftRef.current, dialogueRightRef.current], { opacity: 0, scale: 0.7 });
+      gsap.set(jobCurrentRef.current, { opacity: 0 });
+
+      // reduced motion 的 PHASE 4 收尾（原型 3009–3017）
+      const settleHeroContentReduced = () => {
+        gsap.set(greetingRef.current, { y: '0%' });
+        gsap.to([dialogueLeftRef.current, dialogueRightRef.current], {
+          opacity: 1,
+          scale: 1,
+          duration: P3.reducedFade,
+        });
+        dialogueLeftTypedRef.current.textContent = DIALOGUE_LEFT_TEXT;
+        dialogueRightTypedRef.current.textContent = DIALOGUE_RIGHT_TEXT;
+        dialogueLeftTypedRef.current.classList.add('cursor-hidden');
+        dialogueRightTypedRef.current.classList.add('cursor-hidden');
+        startJobCarousel(true);
+      };
+
+      cleanups.push(() => {
+        jobCarouselGeneration++; // 讓所有在途的 callback 認賠退出
+        timers.forEach((id) => {
+          clearTimeout(id);
+          clearInterval(id);
+        });
+        timers.clear();
+      });
 
       // ── PHASE 3 轉場：Loading 變成 Hero ─────────────────────────
       // §6.1：一次連續的攝影機推軌，不是換頁。不可淡出到空白、不可白閃、
@@ -210,6 +503,8 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg }) {
             },
           });
           playNavIntro();
+          // PHASE 4 在 reduced motion 下不做時間軸，一次到位（原型 3009–3017）
+          settleHeroContentReduced();
           return;
         }
 
@@ -262,6 +557,75 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg }) {
           },
           null,
           P3.benchLag + dollyDur
+        );
+
+        // ── PHASE 4（原型 2916–2927，接在同一條時間軸上）────────────
+
+        // 4.1 問候語遮罩揭露（900 → 1600ms），刻意壓在板凳推軌的尾巴上
+        tl.to(
+          greetingRef.current,
+          { y: '0%', duration: P4.greetingDur, ease: mainEase },
+          P4.greetingIn
+        );
+
+        // 4.2 職稱輪播開始（1700ms），之後永遠循環
+        tl.call(() => startJobCarousel(false), null, P4.jobStart);
+
+        // 4.3 對話泡泡彈出後開始打字（2200ms）
+        tl.call(
+          () => popDialogue(dialogueLeftRef.current, dialogueLeftTypedRef.current, DIALOGUE_LEFT_TEXT, 0),
+          null,
+          P4.dialogueAt
+        );
+        tl.call(
+          () =>
+            popDialogue(
+              dialogueRightRef.current,
+              dialogueRightTypedRef.current,
+              DIALOGUE_RIGHT_TEXT,
+              P4.dialogueRightDelay
+            ),
+          null,
+          P4.dialogueAt
+        );
+
+        // 4.4 idle：板凳恢復 2px sine 漂移，週期放慢（3500ms）
+        //
+        // ⚠️ 寫法與原型不同，但**波形完全相同**，說明如下。
+        // 原型（2795–2818）是一條 rAF 迴圈直接算 Math.sin：
+        //   左 y = 2·sin(2πt/4)          右 y = 2·sin(2πt/4 + 0.6π)
+        //   → 振幅 2px、週期 4s、右板凳相位領先 0.6π
+        // 本專案的 §6.1 不是從原型移植的，PHASE 2 的漂移早就寫成 GSAP 的
+        // yoyo 補間；這裡沿用同一套寫法（也才不會有一個 rAF 迴圈跟 GSAP
+        // 搶同一個 y），但把參數推回與原型等價：
+        //   fromTo(+2 → -2, duration 2, sine.inOut, yoyo, repeat -1)
+        //   展開後 y(t) = 2·cos(πt/2)——振幅 2px、週期 4s，與原型同一條正弦
+        //   （sine.inOut 是 (1-cos πp)/2，yoyo 接回去剛好是完整餘弦，不是近似）
+        //   .totalTime(1.2) 把右板凳先跑掉 1.2s = 0.3 個週期 = 0.6π 相位，
+        //   與原型的相位差一致；用 delay 做不到這件事——delay 會讓右板凳
+        //   先靜止 1.2 秒才開始動。
+        // 唯一沒對齊的是「絕對起始相位」（原型用 cos vs 我們用 sin 差 π/2），
+        // 而原型那個相位本來就取決於 performance.now()，每次載入都不一樣。
+        //
+        // ⚠️ 順帶一提：PHASE 2 的 loading 漂移（見下方 T.countStart 那段）
+        // 是 y: L.y-2 的單向 yoyo，等於在 L.y 與 L.y-2 之間擺盪——峰對峰
+        // 只有 2px，且不會低於基準線，跟原型的 ±2px 不一樣。那段是依規格書
+        // 實作、已經驗收過的，這一輪沒有動它，但兩段的振幅因此不一致。
+        tl.call(
+          () => {
+            const driftOpts = {
+              y: -2,
+              duration: 2,
+              ease: 'sine.inOut',
+              repeat: -1,
+              yoyo: true,
+            };
+            gsap.fromTo(bl, { y: 2 }, driftOpts);
+            const driftRight = gsap.fromTo(br, { y: 2 }, { ...driftOpts });
+            driftRight.totalTime(1.2);
+          },
+          null,
+          P4.idleDrift
         );
       };
 
@@ -465,6 +829,7 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg }) {
     return () => {
       window.removeEventListener('resize', onResize);
       cancelAnimationFrame(resizeRaf);
+      cleanups.forEach((fn) => fn());
       ctx.revert();
       // 離開首頁時一定要解鎖：卸載時可能還停在 Loading（使用者在推軌播完前
       // 就點走），不解的話 Lenis 會一直是 stopped，下一頁完全捲不動。
@@ -491,6 +856,39 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg }) {
           aria-hidden="true"
           dangerouslySetInnerHTML={{ __html: benchRightSvg }}
         />
+
+        {/* §6.1 PHASE 4.3 對話泡泡。放在 .bench-stage 裡面是原型的排列
+            （prototypes/home.html:1327–1345）——泡泡要跟著板凳所在的那一層，
+            它們是「從板凳長出來的」。
+            ⚠️ 原型是 <svg> 直接躺在 .dialogue 底下；這裡多包一層 <div>，
+            因為 React 的 dangerouslySetInnerHTML 不能跟其他 children 並存。
+            版面不受影響：包裹層是 display:block、寬度撐滿，CSS 的
+            `.dialogue svg` / `.dialogue-left svg` 都是後代選擇器，照樣命中。 */}
+        <div className="dialogue dialogue-left" ref={dialogueLeftRef}>
+          <div aria-hidden="true" dangerouslySetInnerHTML={{ __html: dialogueSvg }} />
+          <div className="dialogue-text-wrap">
+            {/* 逐字更新的那一份對輔助技術是噪音，aria-hidden 掉；
+                完整台詞由下面的 .dialogue-full-copy 提供 */}
+            <span
+              className="dialogue-text dialogue-typed cursor-hidden"
+              ref={dialogueLeftTypedRef}
+              aria-hidden="true"
+            />
+          </div>
+          <span className="dialogue-full-copy">{DIALOGUE_LEFT_TEXT}</span>
+        </div>
+
+        <div className="dialogue dialogue-right" ref={dialogueRightRef}>
+          <div aria-hidden="true" dangerouslySetInnerHTML={{ __html: dialogueSvg }} />
+          <div className="dialogue-text-wrap">
+            <span
+              className="dialogue-text dialogue-typed cursor-hidden"
+              ref={dialogueRightTypedRef}
+              aria-hidden="true"
+            />
+          </div>
+          <span className="dialogue-full-copy">{DIALOGUE_RIGHT_TEXT}</span>
+        </div>
       </div>
 
       {/* 空的定位參考框，只提供 Loading 階段的幾何來源，不渲染內容 */}
@@ -523,6 +921,35 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg }) {
             %
           </span>
         </p>
+      </div>
+
+      {/* §6.1 PHASE 4.1 / 4.2 Hero 內容（原型 prototypes/home.html:1348–1359）。
+          排列照原型：.bench-stage 之後、.hero-stage 的直接子層。 */}
+      <div className="hero-content">
+        <h1 className="greeting">
+          <span className="reveal-mask">
+            <span className="reveal-inner" ref={greetingRef}>
+              Mihumisang! I&apos;m Maida,
+            </span>
+          </span>
+        </h1>
+        <div className="job-line">
+          <div className="job-carousel">
+            {/* 標記裡先放完整的第一句：reduced motion 走的是「不打字、直接
+                交叉淡入」，靠的就是這份初始文字（原型 2740 的註解）。
+                一般路徑會在 startJobCarousel 裡先 renderJobChars(...,0,0)
+                清空再開始打。 */}
+            <div className="job-phrase job-current" ref={jobCurrentRef}>
+              <span className="job-article" ref={jobArticleRef}>
+                An
+              </span>
+              <span className="job-title" ref={jobTitleRef}>
+                Industrial Designer
+              </span>
+              <span className="job-cursor" ref={jobCursorRef} aria-hidden="true" />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

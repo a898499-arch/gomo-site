@@ -5,9 +5,8 @@ import PracticeToWork from '@/components/home/PracticeToWork';
 import Gallery from '@/components/home/Gallery';
 import ScrollNextButton from '@/components/home/ScrollNextButton';
 
-// 首頁 Loading → Hero（規格書 §6.1）。
-// 這一輪只做 PHASE 1（組裝）與 PHASE 2（計數器）；PHASE 3 推軌與 PHASE 4
-// Hero 內容下一輪再做。
+// 首頁 Loading → Hero（規格書 §6.1）。PHASE 1 組裝 → PHASE 2 計數器 →
+// PHASE 3 推軌 → PHASE 4 Hero 內容（問候語、職稱輪播、對話泡泡）。
 //
 // 板凳與 logo 必須是 inline SVG（CLAUDE.md：插畫一律 inline SVG，不用
 // <img>），因為 PHASE 3 的推軌要直接量測並 transform 這些節點。
@@ -34,6 +33,13 @@ export default function HomePage() {
         benchLeftSvg={readSvg('stool_left.svg')}
         benchRightSvg={readSvg('stool＿right.svg')}
         logoSvg={readSvg('logo.svg')}
+        // §6.1 PHASE 4.3 的兩顆對話泡泡共用同一份圖形——左邊那顆是 CSS 的
+        // scaleX(-1) 水平鏡像（原型 prototypes/home.html:328–333），所以只讀一次。
+        // ⚠️ 這份 message_bubble.svg 是從原型的 inline SVG（1338–1340）原樣
+        // 抽出來的，不是 assets/svg/message_1.svg。兩者不同：後者的 viewBox 是
+        // 取整後的 194×110，前者是原型驗證過的 193.498×109.613，座標精度也不同。
+        // 泡泡寬度由 CSS 固定、高度靠 viewBox 推導，換成取整版會讓高度差 0.26%。
+        dialogueSvg={readSvg('message_bubble.svg')}
       />
       {/* §6.2 PRACTICE → ALL WORK。原型 prototypes/home.html 的排列是
           hero-stage 之後直接接這一段（1267 → 1364），順序照抄。 */}

@@ -71,6 +71,19 @@
    stool_2 node 3:217：x=363    y=526   ，277.932×274.893
    left 用百分比讓它跟著舞台寬度縮放，top 用絕對值（Figma 的 y 是相對
    900px 高的 frame，不是相對視窗高度）。 */
+/* ⚠️ 已知待辦（2026-09-01 記錄，Maida 裁示：先維持現狀）
+   右板凳目前是「平塗」，缺少左板凳那種手繪顆粒（grain）。與原型並排的
+   像素比對：右板凳差 3.84%，左板凳只有 0.69%（後者純粹是 svgo --precision=2
+   造成的邊緣抗鋸齒）。
+   來由：Figma 匯出的 stool_1.svg 裡，grain 是一張 1.56MB 的 base64 點陣圖
+   而不是向量。2026-08-25 把它移除了，理由是 PHASE 3 推軌會把板凳從 121px
+   放大到 278px，點陣圖會糊，而左板凳是純向量（那就是它 1.4MB、20 個 path
+   的原因）會銳利，兩張並排不一致。
+   prototypes/home.html:1325 走的是另一條路——整張右板凳改用 base64 PNG 的
+   <img>。**不要照抄那條**：那等於把「放大會糊」的問題放回來，也違反
+   CLAUDE.md 的「插畫一律 inline SVG」。
+   正解：回 Figma 把右板凳的紋理圖層換成跟左板凳同一種雜訊類型（向量），
+   重新匯出。Maida 會處理，在那之前這個落差是已知的、不是漏做。 */
 .bench-right {
   width: 253.346px;
   height: 258.9px;
@@ -197,6 +210,226 @@
   display: inline-block;
 }
 
+/* ====================================================================
+   PHASE 4 — Hero 內容（問候語、職稱打字機輪播、對話泡泡）
+   從 prototypes/home.html 的 CSS 218–384 原樣移植，數值一字未改。
+   Figma 座標推導的過程全寫在原型的註解裡，一併搬過來。
+   ==================================================================== */
+
+/* ---------- Hero content ---------- */
+.hero-content {
+  position: relative;
+  z-index: 15;
+  padding-top: 218px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* 遮罩式揭露。原型的 .reveal-mask 是全站規則（903–906），這裡跟頁腳與
+   §6.2 一樣縮成區域規則——提到全域會蓋掉 work-index.css 那份刻意不帶
+   translateY(100%) 的 .reveal-inner。數值不變，只多一層選擇器。 */
+.greeting .reveal-mask {
+  display: block;
+  overflow: hidden;
+}
+
+.greeting {
+  margin: 0;
+  overflow: hidden;
+}
+
+.greeting .reveal-inner {
+  display: block;
+  font-weight: 500;
+  font-size: clamp(28px, 3.3vw, 48px);
+  color: var(--ink);
+  letter-spacing: -0.24px;
+  line-height: 1.64;
+  text-transform: capitalize;
+  white-space: nowrap;
+  /* 原型的全站 .reveal-inner（907–911）提供初始態；這裡是區域版，
+     要自己帶上，否則 PHASE 4.1 的 y:'0%' 沒有起點可跑。 */
+  transform: translateY(100%);
+  will-change: transform;
+}
+
+.job-line {
+  /* 用 line-height（不是固定 height）預留垂直空間，整行的 ascender/descender
+     ——例如 "MAKER" 的 cap-height 加上游標——才不會被裁掉。先前的 bug 是在
+     兄弟層的 wrapper 上寫死 height，跟這一行自己的字型度量對不上。 */
+  margin-top: 4px;
+  line-height: 1.64;
+  min-height: 1.64em;
+  display: flex;
+  justify-content: center;
+}
+
+.job-carousel {
+  display: inline-flex;
+}
+
+.job-phrase {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3em;
+  white-space: nowrap;
+  font-size: clamp(28px, 3.3vw, 48px);
+  line-height: 1.64;
+}
+
+.job-phrase .job-article {
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: -0.24px;
+}
+
+.job-phrase .job-title {
+  font-weight: 900;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+}
+
+.job-cursor {
+  display: inline-block;
+  width: 2px;
+  align-self: stretch;
+  background: var(--accent);
+  margin-left: 2px;
+}
+
+.job-cursor.blink {
+  animation: job-cursor-blink 1s steps(1) infinite;
+}
+
+@keyframes job-cursor-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ---------- 對話泡泡 ---------- */
+.dialogue {
+  position: absolute;
+  z-index: 25;
+  transform-origin: 20% 100%; /* 右泡泡的尾巴在左下角，要「從板凳長出來」 */
+  opacity: 0;
+}
+
+/* message_1／"Grab a seat!"（node 3:273）x=1016 y=468.0007 w=190 h=106.15 確認正確
+   （它自己的 metadata 與兄弟文字節點 "message text_1"（node 3:280）x=1038 y=503
+   w=154 h=36 自洽——文字完整落在泡泡 bbox 內，邊距合理）。
+   message_2 自己的 shape 節點 metadata（x=404）不可信：它不包含自己的兄弟文字節點
+   "message text_2"（node 3:279）x=260 y=497 w=115 h=36——證明那個 shape 節點的 x/y
+   是用另一個座標空間回報的，是 Figma 在這個鏡像／布林節點上的怪癖。文字節點的
+   metadata 才可信（與全解析度 Figma 截圖的直接像素量測自洽：橢圓 bbox 量到 x=232
+   y=466）。下面的 left 是由 message text_2 可信的 x/y 減去右側量到的同一個
+   「文字到泡泡頂」偏移（約 31px，已按比例換算）推出來，再用截圖像素量測交叉檢查
+   （232 vs 236——在量測誤差內），最終值是經過截圖比對迴圈確認／微調的，不是照信。 */
+.dialogue-left {
+  left: 16.25%;
+  top: 466px;
+  width: 170px;
+  transform-origin: 80% 100%;
+}
+
+/* 寬度由 SVG bbox 推出的 190px 修正為 202px：在 Figma 自己的字級（25px）下，
+   "Grab a seat!" 渲染寬度約 154px（與 message text_1 自己的 w=154 吻合），
+   154 + 兩側各 24px 內距 = 202px——190px 裝不下內距而不溢出。這印證了
+   message_1 的布林運算 SVG bbox 少報約 12px 寬，跟 message_2 的 x/y 是同一
+   類 metadata 不可靠問題（見上），不是字級問題（字級／字重／行高／字距都
+   已逐項驗證與 Figma 相同）。 */
+.dialogue-right {
+  left: 70.56%;
+  top: 468px;
+  width: 202px;
+}
+
+.dialogue svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* 兩顆泡泡共用 message_1 的圖形（確認正確的那個形狀），左邊那顆是它的水平
+   鏡像，純用 CSS 做，對稱性在構造上就是精確的。只作用在 <svg> 上（不是外層
+   的 .dialogue-left，那層由 GSAP 的 scale 彈出動畫在動），兩組 transform 才
+   不會互相打架；scaleX(-1) 翻的是尾巴，不會連帶翻到兄弟層的
+   .dialogue-text-wrap（那是另一個、沒被鏡像的元素）。 */
+.dialogue-left svg {
+  transform: scaleX(-1);
+}
+
+.dialogue-text-wrap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  /* Figma 兩顆泡泡的 padding-left == padding-right（24/24、26/26），
+     所以單純置中就精確滿足，跟文字寬度無關 */
+  justify-content: center;
+  text-align: center;
+}
+
+/* top = 文字節點自己的 Figma y 減去它所屬泡泡容器的 Figma y——也就是文字相對
+   泡泡的實測位置，不是透過橢圓／內距數字再推導一次（用給定的 padding-top 交叉
+   檢查會發現：真正的橢圓頂比 SVG 自己的 bbox 頂低約 4–7px，兩顆泡泡還不一樣，
+   把它折進內距運算再倒推回同一個 top 值是循環論證——直接用文字自己的 y 才是
+   到同一個答案的可靠路徑）。
+   右：message text_1（node 3:280）y=503，dialogue-right 容器 y=468 → 503-468=35
+   左：message text_2（node 3:279）y=497，dialogue-left  容器 y=466 → 497-466=31 */
+.dialogue-right .dialogue-text-wrap {
+  top: 35px;
+}
+
+.dialogue-left .dialogue-text-wrap {
+  top: 31px;
+}
+
+.dialogue-text {
+  font-weight: 300;
+  font-style: italic;
+  font-size: 25px; /* Figma: node 3:279/3:280，text-[25px] */
+  color: var(--accent);
+  letter-spacing: -0.125px; /* Figma: tracking-[-0.125px] */
+  line-height: 1.45; /* Figma: leading-[1.45] */
+  white-space: nowrap;
+}
+
+.dialogue-typed::after {
+  content: '';
+  display: inline-block;
+  width: 1px;
+  height: 0.9em;
+  background: var(--accent);
+  margin-left: 2px;
+  vertical-align: -0.1em;
+}
+
+.dialogue-typed.cursor-hidden::after {
+  display: none;
+}
+
+/* 打字中的那一份是 aria-hidden（逐字更新會讓螢幕閱讀器一直重唸），
+   完整台詞另外放一份視覺隱藏的副本給輔助技術。
+   沿用原型自己的 class（902 那組全站 .visually-hidden 之外的獨立規則），
+   不改名成專案的 .visually-hidden——原型移植原則。 */
+.dialogue-full-copy {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 /* ---------- reduced motion ---------- */
 /* §6.1：完全跳過 loading 組裝與推軌，顯示靜態 loading 狀態，
    但計數器仍然計數（計數是資訊，不是裝飾），改為固定線性速度，
@@ -208,5 +441,24 @@
   .loading-logo,
   .loading-counter {
     opacity: 1;
+  }
+
+  /* 原型 prototypes/home.html:1206–1209 原樣照抄。
+     Loading/Hero：完全跳過組裝與推軌，直接交叉淡入到 Hero 最終狀態。 */
+  .loading-logo,
+  .bench,
+  .dialogue {
+    transition: opacity 300ms ease;
+  }
+  .dialogue {
+    transform: none !important;
+  }
+  .job-cursor.blink {
+    animation: none;
+    opacity: 1;
+  }
+  /* 原型的全站 .reveal-inner 由 1192 那條處理；這裡是區域版的對應規則。 */
+  .greeting .reveal-inner {
+    transform: none !important;
   }
 }
