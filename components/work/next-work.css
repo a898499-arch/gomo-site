@@ -1,6 +1,19 @@
-/* Next Work —— 數值全部照抄 sui-sui.css 的 .ss-next-*，只換 class 前綴。
-   換前綴的原因見 NextWork.jsx 檔頭：ss- 那組住在 sui-sui.css，只有
-   SuiSuiPage 會載入。 */
+/* Next Work —— 全站唯一一份。
+   數值原本照抄 sui-sui.css 的 .ss-next-*，2026-09-01 五個作品頁全部改用這支，
+   sui-sui.css / wanderbuddy.css 那兩份重複的樣式與元件已刪除。
+
+   ⚠️ 欄寬 1360 vs Figma 1365 的 5px：不是 bug，不用「修」。
+   Figma 的 Next Work 兩張封面各 672、第二張 left=693 → 總寬 1365
+   （node 545:558；作品分類頁 806:1208 的 grid 也是 1365）。
+   這裡用的是全站的 .page-container——1440 封頂減兩側 var(--page-gutter) 40px
+   = 1360，差 5px。使用者 2026-09-01 裁示：在 8px 容忍範圍內，就用 1360，
+   換成寫死 1365 反而會讓這一區脫離全站唯一的欄寬來源。
+
+   ⚠️ 這裡刻意「不」用 Sui-Sui / WanderBuddy 頁自己的 .ss-/.wb-section-inner
+   （max-width 1280 → 內容寬 1200）。這個網站有兩套欄寬而且是有系統的：
+   卡片類版面 1365（Next Work、作品分類頁），內文類版面 1200（詳情頁的文字
+   與圖說）。Next Work 是卡片，本來就該走 1365 這一套。舊版的「頁內對齊」
+   是移植時套上去的假一致。 */
 
 .work-next {
   padding-block: clamp(48px, 6vw, 96px);

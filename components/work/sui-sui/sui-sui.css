@@ -887,75 +887,10 @@
   color: #717171;
 }
 
-/* ---------- Next Work（node 545:558；同 §6.5 作品分類頁卡片視覺規則，
-   跟 WanderBuddy 那頁的 Next Work 共用同一套樣式邏輯） ---------- */
-.ss-next-title {
-  margin: 0 0 40px;
-  font-weight: 500;
-  font-size: 32px;
-  letter-spacing: -0.16px;
-  color: #353535;
-}
-
-.ss-next-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  column-gap: 21px;
-  row-gap: 48px;
-}
-
-.ss-next-card {
-  display: block;
-  text-decoration: none;
-  color: inherit;
-}
-
-/* 2026-09-01：拿掉 border-radius: 4px。Figma node 545:558 的封面遮罩是
-   <rect width="672" height="415">，沒有 rx——圓角從來不存在，4px 是當初自己
-   給的值。全站四處（這裡、wanderbuddy.css、work/next-work.css 4px，
-   work-index.css 5px）一起歸零。 */
-.ss-next-card-cover {
-  width: 100%;
-  aspect-ratio: 672 / 415;
-  background: #d9d9d9;
-}
-
-.ss-next-card-title {
-  margin: 16px 0 0;
-  font-weight: 400;
-  font-size: clamp(22px, 2.2222vw, 32px);
-  color: var(--ink);
-}
-
-.ss-next-card-desc {
-  margin: 4px 0 0;
-  font-weight: 400;
-  font-size: clamp(16px, 1.4vw, 20px);
-  line-height: 22px;
-  color: var(--work-muted, #747474);
-}
-
-.ss-next-card-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 20px;
-  padding: 0;
-  list-style: none;
-}
-
-.ss-next-card-tag {
-  border: 1px solid #5b5b5b;
-  border-radius: 999px;
-  padding: 4px 21px;
-  font-size: 16px;
-  color: var(--ink);
-  line-height: 22px;
-}
-
-@media (max-width: 600px) {
-  .ss-next-grid { grid-template-columns: 1fr; }
-}
+/* Next Work 的樣式已移除（2026-09-01）。這一頁改用共用的
+   components/work/NextWork.jsx，樣式住在 components/work/next-work.css，
+   數值與這裡原本那份完全相同（只有外層容器從 1280 換成 .page-container
+   的 1440——卡片類版面在 Figma 是 1365 欄寬，不是內文的 1200）。 */
 
 /* ====================================================================
    Hero — 九宮格式品牌板拼貼

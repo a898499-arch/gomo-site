@@ -15,7 +15,7 @@ import CharactersReference from './CharactersReference';
 import Shot from './Shot';
 import MockupBleed from './MockupBleed';
 import ProjectFootage from './ProjectFootage';
-import NextWork from './NextWork';
+import NextWork from '@/components/work/NextWork';
 
 // 依 Figma node 491:59（總高 12907px）由上而下組裝。Nav / Footer 是全站
 // 共用元件，已經在 app/layout.js 掛好了，這裡不用重複放。

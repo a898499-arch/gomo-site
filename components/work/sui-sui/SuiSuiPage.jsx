@@ -18,7 +18,7 @@ import Function4 from './Function4';
 import HandWarmUp from '@/components/HandWarmUp/HandWarmUp';
 import MockupFade from './MockupFade';
 import WorkFootage from './WorkFootage';
-import NextWork from './NextWork';
+import NextWork from '@/components/work/NextWork';
 
 // 依 Figma node 545:47（作品頁＿suisui，總高 17899px）由上而下組裝，
 // 用 MCP 讀完整份結構後排序，不是照使用者原本給的清單（那份少列了

@@ -6,17 +6,22 @@ import { useStandardEntrance } from '@/lib/useStandardEntrance';
 import { getNextWorks } from '@/lib/getNextWorks';
 import './next-work.css';
 
-// 「照片依序排列」型作品頁的 Next Work 區塊（Figma：MVS 806:1165、
-// Blossom Care 806:1104）。
+// 全站唯一一份 Next Work 區塊。
+// Figma：Sui-Sui 545:558、MVS 806:1165、Blossom Care 806:1104
+// （AERO V 那份 Figma 沒有這一區，以 545:558 為準）。
 //
-// 標記與樣式**照抄** sui-sui/NextWork.jsx，只把 class 前綴從 ss- 換成
-// work-next-，因為 ss- 那組樣式住在 sui-sui.css 裡，那支只有 SuiSuiPage
-// 會載入；直接 import 過來會是沒有樣式的裸標記。
-// 挑選規則三頁共用 lib/getNextWorks.js，全站只有一份實作。
+// 數值原本照抄 sui-sui/NextWork.jsx，只把 class 前綴從 ss- 換成 work-next-，
+// 因為 ss- 那組樣式住在 sui-sui.css 裡，那支只有 SuiSuiPage 會載入；
+// 直接 import 過來會是沒有樣式的裸標記。
+// 挑選規則共用 lib/getNextWorks.js，同樣只有一份實作。
 //
-// ⚠️ 只有這一份共用元件會出封面圖。sui-sui/NextWork.jsx 與
-// wanderbuddy/NextWork.jsx 是凍結的，維持灰底佔位——那是預期的，
-// 不是漏做（使用者 2026-09-01 裁示：之後再決定要不要一起收）。
+// 2026-09-01：sui-sui/NextWork.jsx 與 wanderbuddy/NextWork.jsx 已刪除，
+// 五個作品頁全部改用這一支——
+//   /work/sui-sui、/work/wanderbuddy      各自的 Page 直接 import
+//   /work/aero-v                          AeroVPage 直接 import
+//   /work/mvs、/work/blossom-care         經由 components/work/PhotoStack.jsx
+// ⚠️ MVS 與 Blossom Care 的 Page 檔案裡「看不到」<NextWork>，是 PhotoStack
+// 代為輸出的。要在那兩頁加 Next Work 之前先看 PhotoStack，不然會出現兩個。
 export default function NextWork({ currentSlug }) {
   const ref = useStandardEntrance('.work-next-card');
   const nextWorks = getNextWorks(currentSlug);
