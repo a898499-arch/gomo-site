@@ -910,11 +910,14 @@
   color: inherit;
 }
 
+/* 2026-09-01：拿掉 border-radius: 4px。Figma node 545:558 的封面遮罩是
+   <rect width="672" height="415">，沒有 rx——圓角從來不存在，4px 是當初自己
+   給的值。全站四處（這裡、wanderbuddy.css、work/next-work.css 4px，
+   work-index.css 5px）一起歸零。 */
 .ss-next-card-cover {
   width: 100%;
   aspect-ratio: 672 / 415;
   background: #d9d9d9;
-  border-radius: 4px;
 }
 
 .ss-next-card-title {

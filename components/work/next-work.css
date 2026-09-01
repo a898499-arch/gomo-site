@@ -28,13 +28,39 @@
   color: inherit;
 }
 
-/* works.json 的 cover 目前是空字串（使用者說之後自己填），
-   所以先出 #d9d9d9 的佔位框，跟 sui-sui / wanderbuddy 現況一致。 */
+/* 卡片封面。
+   Figma node 545:558（Sui-Sui 頁的 Next Work，AERO V 那份 Figma 沒有這一區，
+   所以以這個為準）2026-09-01 用 get_design_context 重讀：
+     mask-size 672×415            → aspect-ratio: 672 / 415（與既有值相同，未改）
+     遮罩 SVG 是 <rect width="672" height="415" fill="#D9D9D9"/>
+       ↳ 沒有 rx/ry              → Figma 的圓角其實是 0
+       ↳ fill #D9D9D9            → 沒有圖時的灰底就是這個值（與既有值相同）
+     圖層是 object-cover          → 對應 object-fit: cover（見下）
+
+   ⚠️ 沒有 border-radius 是對的，不要「補回」4px。
+   2026-09-01 全站統一：這裡與 sui-sui.css / wanderbuddy.css 原本各是 4px、
+   work-index.css 是 5px，四處都是當初自己給的值，Figma 從來沒有圓角。
+   作品分類頁（node 806:1208）的卡片封面用的是**同一個遮罩** Rectangle 80，
+   一樣沒有 rx，所以四處一起歸零。 */
 .work-next-card-cover {
+  position: relative;
   width: 100%;
   aspect-ratio: 672 / 415;
   background: #d9d9d9;
-  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* object-fit: cover。
+   ⚠️ 這一條 Figma 有講：get_design_context 匯出的 <img> 帶的就是
+   object-cover（Figma 圖層的縮放模式是「填滿」）。不是我的假設。
+   實務上也不會裁到任何東西——素材本身就是 672×415 / 1344×830，跟這個框
+   同比例，cover 與 contain 在目前所有作品上輸出完全相同；差別只在之後
+   有人放進非 672:415 的圖時，cover 會裁邊、contain 會留白條。 */
+.work-next-card-cover img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .work-next-card-title {

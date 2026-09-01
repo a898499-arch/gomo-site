@@ -13,6 +13,7 @@ import Dimensions from './Dimensions';
 import Airflow from './Airflow';
 import Senorio2 from './Senorio2';
 import WorkFootage from './WorkFootage';
+import NextWork from '@/components/work/NextWork';
 
 // AERO V 作品詳情頁。依 Figma node 796:705「作品頁＿aero v」（1440×10266）
 // 由上而下組裝，區塊順序與 y 座標是用 MCP 讀完整份結構後排出來的。
@@ -69,6 +70,11 @@ export default function AeroVPage() {
       {/* y=9309 — node 796:738，1160×206。字標＋副標＋描述，結構同
           796:714 的上半段，樣式重用 .av-overview-*。 */}
       <WorkFootage />
+
+      {/* Next work。AERO V 那份 Figma 沒有這一區，沿用既有做法——共用的
+          components/work/NextWork.jsx（MVS / Blossom Care 也是它），版面依
+          Sui-Sui 的 node 545:558。位置比照 SuiSuiPage.jsx：work footage 之後。 */}
+      <NextWork currentSlug="aero-v" />
 
       {/* node 796:713「overview section」（1360×502）是 hidden 的舊灰底
           佔位，不做——跟 Sui-Sui 那個 #d9d9d9 佔位同一種。整頁到此完成。 */}

@@ -181,7 +181,10 @@
   width: 100%;
   aspect-ratio: 672 / 415; /* Figma mask-size */
   background: #d9d9d9;
-  border-radius: 5px;
+  /* 2026-09-01：拿掉 border-radius: 5px。node 806:1208 的每張卡片封面都是
+     mask-size 672×415 套同一個遮罩 Rectangle 80（<rect width="672"
+     height="415">，沒有 rx）——跟 Next Work 的 node 545:558 是同一個遮罩節點。
+     圓角從來不存在，5px 是當初自己給的值。全站四處一起歸零。 */
   overflow: hidden;
 }
 
