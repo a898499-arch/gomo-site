@@ -55,8 +55,9 @@ const P3 = {
   dolly: 1.3, // 3.2 推軌 1300ms（手機縮短為 1000ms，見 §6.1 RWD）
   dollyMobile: 1.0,
   benchLag: 0.08, // 右板凳晚 80ms
-  zDrop: 0.35, // 舞台 z-index 降階，讓導覽列能浮上來
-  zAfter: 999, // 降到 999：高於頁腳(auto)、低於導覽列(1000)
+  zDrop: 0.35, // 舞台 z-index 第一段降階，讓導覽列能浮上來
+  zAfter: 999, // 第一段：降到 999——推軌還在跑，仍高於頁面其餘內容，低於導覽列(1000)
+  zSettled: 'auto', // 第二段：推軌結束就交還層級（見 home-stage.css 檔頭「兩段式降階」）
   navIn: 0.4, // 3.3 導覽列進場
   reducedFade: 0.3, // reduced motion：直接 300ms 交叉淡入
 };
@@ -498,7 +499,9 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg, dialog
             duration: P3.reducedFade,
             ease: mainEase,
             onComplete: () => {
-              stage.style.zIndex = String(P3.zAfter);
+              // reduced motion 沒有推軌，交叉淡入完成就是「推軌結束」，
+              // 所以一次降到底，不做兩段式（跟一般路徑的終點狀態相同）
+              stage.style.zIndex = P3.zSettled;
               unlockScroll();
             },
           });
@@ -536,23 +539,23 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg, dialog
         tl.to(bl, { x: 0, y: 0, scale: 1, duration: dollyDur, ease: mainEase }, 0);
         tl.to(br, { x: 0, y: 0, scale: 1, duration: dollyDur, ease: mainEase }, P3.benchLag);
 
-        // 舞台降階，導覽列才能浮上來。此時 Loading UI 已經淡完，
-        // 導覽列內容也還是透明的（deferIntro），不會有東西突然冒出來。
-        //
-        // ⚠️ 只降到 999，不可降到 0。.footer-frame 是 position:relative /
-        // z-index:auto，跟 z-index:0 同層且在 DOM 中較後面——舞台降到 0 的
-        // 話頁腳會整個蓋上來，板凳被頁腳文字擋住，直接違反 §6.1「觀者的
-        // 視線全程不能失去板凳」。實測過，推軌 500ms 處畫面會露出整個
-        // 頁腳。999 剛好高於頁腳、低於導覽列的 1000。
+        // 舞台降階第一段（+350ms）：1100 → 999，導覽列才能浮上來。
+        // 此時 Loading UI 已經淡完，導覽列內容也還是透明的（deferIntro），
+        // 不會有東西突然冒出來。推軌還在跑，所以先停在 999——仍高於頁面
+        // 其餘內容，「觀者的視線全程不能失去板凳」在這一段有保障。
         tl.call(() => { stage.style.zIndex = String(P3.zAfter); }, null, P3.zDrop);
 
         // 3.3 導覽列到位（400 → 900ms）。板凳還在移動的同時。
         tl.call(() => playNavIntro(), null, P3.navIn);
 
-        // 推軌結束才解鎖捲動，中途不會被捲動打斷
+        // 推軌結束才解鎖捲動，中途不會被捲動打斷。
+        // 同一刻做舞台降階第二段：999 → auto。推軌一結束，這一層就不再是
+        // 遮罩層、只是普通的頁面內容，沒有理由繼續佔著 999（詳見
+        // home-stage.css 檔頭的「兩段式降階」）。
         tl.call(
           () => {
             gsap.set([bl, br], { willChange: 'auto' });
+            stage.style.zIndex = P3.zSettled;
             unlockScroll();
           },
           null,

@@ -29,16 +29,41 @@
    position:absolute，定位基準仍然是這一層，盒子尺寸也還是 100vw × 100vh，
    幾何完全沒變；Loading 期間的捲動鎖定本來就靠 JS 的
    documentElement.overflow='hidden'，不是靠 fixed。 */
+/* ---------- z-index 的「兩段式降階」（2026-09-01）----------
+   這裡的 1100 只是 **Loading 期間** 的值，之後由 HomeStage.jsx 的
+   runTransition 分兩段改寫成 inline style：
+
+     1100  Loading 全程  —— 蓋住 layout.js 的 Nav 與 Footer
+      999  推軌 +350ms   —— 讓 .site-nav（fixed, z-index:1000）能浮上來，
+                            但仍高於頁面其餘內容，推軌期間「觀者的視線
+                            全程不能失去板凳」在這一段有保障
+     auto  推軌結束      —— 推軌一結束，這一層就不再是遮罩層、只是普通的
+                            頁面內容，交還層級
+
+   ⚠️ 為什麼一定要有第二段（別再把它拿掉）：
+   停在 999 的話，`.scroll-next-btn`（position:fixed, z-index:900，
+   components/home/scroll-next-button.css）在整個第一屏都被這層不透明背景
+   蓋住——按鈕的 class 是對的、opacity 是 1，但 elementFromPoint 打到的是
+   .bench-stage，使用者看不見也點不到。原型的 .hero-stage 根本沒有
+   z-index（prototypes/home.html:102），按鈕自然浮在 Hero 上，999 是移植時
+   為了遮罩才加的，不是設計要求。
+
+   ⚠️ 為什麼歷史上曾經寫著「只降到 999，不可降到 0」：
+   那條實測是 2026-08-26（commit 8c4c1f3）做的，當時這一層還是
+   `position: fixed; inset: 0`——不佔文件流高度，頁腳因此坐在文件 y≈0、
+   幾何上真的疊在板凳上，降到 0 會被頁腳蓋住。2026-08-30（commit 2e47059）
+   改成 relative + min-height:100vh 之後，頁腳被推到文件 ~4900px，捲動位置
+   0 時不可能重疊，那個理由已經失效。已重新實測確認。
+
+   ⚠️ 降成 auto 之後這一層不再建立 stacking context，底下的 .bench-stage(10)
+   / .hero-content(15) / .loading-ui(20) / .dialogue(25) 會直接參與根層級。
+   之所以安全，是因為這一層的 overflow:hidden 會把它們裁在舞台盒子內，
+   幾何上碰不到 §6.2 之後的內容。要拿掉 overflow:hidden 之前先想過這件事。 */
 .home-stage {
   position: relative;
   min-height: 100vh;
   background: var(--bg);
   overflow: hidden;
-  /* 蓋住 layout.js 的 Nav / Footer。
-     ⚠️ 必須高於 .site-nav 的 z-index:1000——導覽列是 position:fixed 且
-     z-index 1000，設成 100 的話它會浮在 Loading 畫面上方（實測過）。
-     §6.1 的 PHASE 3 要到 +400ms 才讓導覽列進場，在那之前不能露出。
-     PHASE 3 實作時，這一層要跟著推軌一起降下去／淡出。 */
   z-index: 1100;
 }
 
