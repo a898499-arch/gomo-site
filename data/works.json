@@ -1,9 +1,9 @@
 [
   {
-    "slug": "my-place",
-    "ready": false,
-    "title": "My Place",
-    "description": "Project description coming soon.",
+    "slug": "goodmood",
+    "ready": true,
+    "title": "Goodmood",
+    "description": "I designed this site. Then I built it.",
     "tags": [
       "UI/UX",
       "Web Design",
@@ -14,6 +14,7 @@
     ],
     "year": null,
     "cover": null,
+    "galleryCover": null,
     "hoverVideo": null,
     "hoverImages": null,
     "hidden": false
@@ -32,6 +33,7 @@
     ],
     "year": null,
     "cover": "/work/covers/sui-sui.webp",
+    "galleryCover": "/work/gallery/sui-sui.webp",
     "hoverVideo": "/work/hover/sui-sui",
     "hoverImages": null,
     "hidden": false
@@ -49,6 +51,7 @@
     ],
     "year": null,
     "cover": "/work/covers/wanderbuddy.webp",
+    "galleryCover": "/work/gallery/wanderbuddy.webp",
     "hoverVideo": "/work/hover/wanderbuddy",
     "hoverImages": null,
     "hidden": false
@@ -67,6 +70,7 @@
     ],
     "year": null,
     "cover": "/work/hover/aero-v-1.webp",
+    "galleryCover": "/work/gallery/aero-v.webp",
     "hoverVideo": null,
     "hoverImages": [
       "/work/hover/aero-v-1.webp",
@@ -90,6 +94,7 @@
     ],
     "year": null,
     "cover": "/work/hover/blossom-care-1.webp",
+    "galleryCover": "/work/gallery/blossom-care.webp",
     "hoverVideo": null,
     "hoverImages": [
       "/work/hover/blossom-care-1.webp",
@@ -113,6 +118,7 @@
     ],
     "year": null,
     "cover": "/work/hover/mvs-1.webp",
+    "galleryCover": "/work/gallery/mvs.webp",
     "hoverVideo": null,
     "hoverImages": [
       "/work/hover/mvs-1.webp",
@@ -136,6 +142,7 @@
     ],
     "year": null,
     "cover": "/work/covers/ehms.webp",
+    "galleryCover": null,
     "hoverVideo": null,
     "hoverImages": null,
     "hidden": true
@@ -155,6 +162,7 @@
     ],
     "year": null,
     "cover": null,
+    "galleryCover": null,
     "hoverVideo": null,
     "hoverImages": null,
     "hidden": true
@@ -173,6 +181,7 @@
     ],
     "year": null,
     "cover": null,
+    "galleryCover": null,
     "hoverVideo": null,
     "hoverImages": null,
     "hidden": true
@@ -192,6 +201,7 @@
     ],
     "year": null,
     "cover": null,
+    "galleryCover": null,
     "hoverVideo": null,
     "hoverImages": null,
     "hidden": true
@@ -211,6 +221,7 @@
     ],
     "year": null,
     "cover": null,
+    "galleryCover": null,
     "hoverVideo": null,
     "hoverImages": null,
     "hidden": true
@@ -229,6 +240,7 @@
     ],
     "year": null,
     "cover": null,
+    "galleryCover": null,
     "hoverVideo": null,
     "hoverImages": null,
     "hidden": true
@@ -247,6 +259,7 @@
     ],
     "year": null,
     "cover": null,
+    "galleryCover": null,
     "hoverVideo": null,
     "hoverImages": null,
     "hidden": true
