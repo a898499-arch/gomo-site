@@ -10,7 +10,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 // - cover 為 null（首圖還沒做好的作品）→ 完全不產生 <img>，只留
 //   .work-card-cover 自己的 #D9D9D9 灰底，比例與有圖的卡片一致
 //   （672/415 由 CSS 的 aspect-ratio 鎖住）。不用假圖硬填。
-//   2026-08-29 使用者補了 hover 素材之後，只剩 my-place 還是 null；
+//   2026-08-29 使用者補了 hover 素材之後，只剩 goodmood 還是 null
+//   （2026-09-02 那一筆從 my-place 改名為 goodmood，預覽圖還沒切）；
 //   blossom-care 與 mvs 的主圖改用各自 hoverImages 的第 1 張（灰塊拿掉），
 //   aero-v 同理改用 aero-v-1——規格要求「沒 hover 時顯示 photo_1」。
 // - cover 有值但載入失敗 → onError 把 img 拿掉，一樣退回灰底，

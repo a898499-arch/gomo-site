@@ -27,8 +27,18 @@ import './gallery.css';
  *   原型寫死 12 張 <a>  →  改讀 data/works.json
  *   過濾 hidden: true（那些不該出現在首頁 Gallery）
  *   ready: false 仍然顯示，只是不可點——與作品分類頁 WorkCard 同一套做法
- *   .gallery-card-media 從空的灰底 div 改成放 cover 圖，cover: null 時
- *     不渲染 <img>，露出原型原本的 #d9d9d9
+ *   .gallery-card-media 從空的灰底 div 改成放圖，沒圖時不渲染 <img>，
+ *     露出原型原本的 #d9d9d9
+ *
+ * ⚠️⚠️ 三種作品圖，**用途不同、比例不同、不可混用**（2026-09-02）：
+ *   /work/gallery/  直式 532×720（@2x 1065×1440）  → 首頁 Gallery 卡片
+ *   /work/covers/   橫式 672×415（@2x 1344×830）   → /work 分類頁卡片首圖
+ *   /work/hover/    橫式 672×415（@2x 1344×830）   → 卡片 hover 輪播 / Next Work
+ * 對應的 works.json 欄位分別是 galleryCover / cover / hoverImages。
+ * 這一區讀的是 **galleryCover**，不是 cover——.gallery-card 的比例是
+ * 412.252/555（直式 0.743），拿 672×415 的橫圖套 object-fit:cover 會把左右
+ * 各裁掉一大半。先前就是這樣，2026-09-02 修正。
+ * 直式素材的 532/720 = 0.739，與卡片 0.743 差 0.5%，實際幾乎不裁。
  *
  * ⚠️ 卡片數量變了不會影響接縫：cycle 是執行期用
  * `nextClone.offsetLeft - track.offsetLeft` 量出來的（原型的做法），
@@ -495,13 +505,13 @@ export default function Gallery() {
                   key={work.slug}
                 >
                   <div className="gallery-card-media">
-                    {work.cover && (
+                    {work.galleryCover && (
                       // 卡片的無障礙名稱由底下的 .gallery-card-title 提供，
                       // 圖片是純視覺，alt="" 才不會重複朗讀。
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={work.cover}
-                        srcSet={`${work.cover} 1x, ${work.cover.replace(/\.webp$/, '@2x.webp')} 2x`}
+                        src={work.galleryCover}
+                        srcSet={`${work.galleryCover} 1x, ${work.galleryCover.replace(/\.webp$/, '@2x.webp')} 2x`}
                         alt=""
                         aria-hidden="true"
                         loading="lazy"
