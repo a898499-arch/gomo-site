@@ -54,6 +54,29 @@ public/work/sui-sui/Shot.png
 public/work/mvs/*.jpg
 public/work/blossom-care/*.jpg
 
+# 首頁 Gallery 卡片的直式來源大圖（1065×1440，各 1.7–3.0MB）。
+# 上線用的是同目錄壓過的 <slug>.webp（532×720）與 <slug>@2x.webp（1065×1440），
+# 六張合計約 600KB。原始 PNG 留在本機當備份，不進版控——進了 git 歷史就
+# 永久拿不掉（沿用 2026-08-28 對 mvs/blossom-care 原始 jpg 的同一條裁示）。
+#
+# ⚠️ 範圍只到 public/work/gallery/，**不要**寫成 public/work/**/*.png：
+# 那會連 public/work/goodmood/ 底下八張要上線的 PNG（spec-1/2、
+# compare-1/2-original/generated、slider-before/after）一起擋掉，
+# 本機看起來正常、部署後整區 404。
+public/work/gallery/*.png
+
+# Goodmood 頁對比圖與滑軌的來源大圖（各 0.6–2.0MB，合計約 8MB）。
+# 上線用的是同目錄壓過的 <name>.webp 與 <name>@2x.webp（八個檔合計約 450KB）。
+# 原始 PNG 留在本機當備份，不進版控——進了 git 歷史就永久拿不掉
+# （沿用 2026-08-28 對 mvs/blossom-care 原始 jpg 的同一條裁示）。
+#
+# ⚠️ 範圍只到 compare-* 與 slider-*，**不要**擴大成
+# public/work/goodmood/*.png：spec-1.png / spec-2.png 是「Define Before I
+# Build」那一區真正上線在用的素材（Figma 沒有對應的 webp 版本），
+# 擋掉的話本機正常、部署後那一區的兩張規格書截圖會 404。
+public/work/goodmood/compare-*.png
+public/work/goodmood/slider-*.png
+
 # 本機工作筆記／暫存
 Untitled
 _to_delete/
