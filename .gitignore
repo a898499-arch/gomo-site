@@ -77,6 +77,14 @@ public/work/gallery/*.png
 public/work/goodmood/compare-*.png
 public/work/goodmood/slider-*.png
 
+# Claude Code 的本機個人設定（含絕對路徑與逐條 curl 允許規則，
+# 換機器就失效）。共用的 .claude/settings.json 若之後要進版控，
+# 這條不會擋到它。
+#
+# ⚠️ 刻意精確到檔名，**不要**改成擋整個 .claude/ ——那樣之後想放一份
+# 要跟人共用的 settings.json 就進不去了（使用者 2026-09-02 裁示）。
+.claude/settings.local.json
+
 # 本機工作筆記／暫存
 Untitled
 _to_delete/
