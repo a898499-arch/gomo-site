@@ -1,0 +1,177 @@
+/* ==========================================================
+   WanderBuddy Hero 照片牆 —— **components/hero.css 的副本**
+
+   ⚠️ 這是 components/hero.css 的副本，原檔在 components/hero.css
+   （由 components/Hero.jsx 使用，只有 /work/wanderbuddy 那一頁）。
+   兩邊是**刻意分開維護**的：改原檔不會同步過來，改這裡也不會影響
+   WanderBuddy 頁。使用者 2026-09-02 裁示——原元件的尺寸常數是為那一頁的
+   滿版 hero 調的，共用會讓兩頁互相牽動，改壞一頁就是兩頁一起壞。
+
+⚠️⚠️ 兩個寫死的常數都出自**同一個基準：1440×900 的視窗**。
+   不要各自用不同基準去改其中一個——2026-09-02 曾經一度變成
+   「--col-h 用 1440×900、--logo-w 卻用『塞進 942 殼』反推的 200」，
+   那兩個說法不能同時成立（使用者抓到）。原因：vw/vh 是**視窗**單位不是
+   容器單位，瀏覽器在 1440 寬時 22vw 永遠是 316.8px，跟外面的殼多寬完全
+   無關，所以「重新塞進 942 的殼」在 CSS 裡不會發生，200 只能靠寫死。
+
+   採用的基準與推導（兩個常數同源）：
+     視窗 1440×900（Figma 的參考視窗）
+       --col-h  = min(140vh, 1400px) → 140 × 900/100 = 1260px
+       --logo-w = clamp(190px, 22vw, 300px) → 22 × 1440/100 = 316.8 → 封頂 300px
+     hero 本體因此維持原尺寸 1440×900，再由外層整體 scale 成 Figma 那張
+     942 寬的內容（0.6542 = 942/1440），最後裁成 598×574。
+   驗算：logo 渲染寬 = 300 × 0.6542 = 196.2，icon rect = 160/285 × 196.2 = 110.2；
+   Figma 實測 icon ≈ 112.5，差 2.3px（logo 全寬差 4.2px），在 8px 內。
+
+   副本相對原檔改了「三個地方」，其餘一字未動：
+     1. class 前綴 .wb-* → .gm-hero-*
+        （goodmood 頁不會載入 hero.css，現在不會撞；同名 class 是遲早
+         會出事的東西，一開始就分開最便宜——使用者 2026-09-02 指示）
+     2. .gm-hero 的尺寸：原檔是 height:100vh/100svh 的滿版 hero，副本固定
+        1440×900——就是上面那個基準視窗的尺寸。縮放與裁切交給外層
+        （見 goodmood.css 的 .gm-frame-crop），這一層維持原尺寸。
+     3. --col-h / --logo-w 從 vh/vw 改成上面算好的定值。不寫死的話小窗裡的
+        構圖會隨瀏覽器視窗變動。
+   另外刪掉了原檔的三組 RWD media query（max-width 1100/820/520）與
+   min-width:2000px 那一條：副本是固定 1440×900 的盒子，跟視窗寬度無關，
+   那些斷點在這裡永遠不會、也不該觸發。
+   ========================================================== */
+
+.gm-hero {
+  /* ---- 想調整效果改這裡就好（同原檔）---- */
+  --bg: #eceef1;
+  --tilt: -20deg;
+  --zoom: 1.45;
+  --col-w: 210px;
+  --gap: 28px;
+  --radius: 22px;
+  --scrim: 0.92;
+  /* 副本專用的兩個定值，見檔頭 3、4 */
+  --col-h: 1260px;   /* = min(140vh, 1400px) @ 900 高 */
+  --logo-w: 300px;   /* = clamp(190px, 22vw, 300px) @ 1440 寬（22vw=316.8，封頂） */
+  /* -------------------------------------- */
+
+  position: relative;
+  /* 副本：固定尺寸，不是滿版（見檔頭 2） */
+  width: 1440px;
+  height: 900px;
+  overflow: hidden;
+  background: var(--bg);
+  isolation: isolate;
+}
+
+/* 傾斜的平面 ---------------------------------------------- */
+.gm-hero-plane {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  gap: var(--gap);
+  transform: translate(-50%, -50%) rotate(var(--tilt)) scale(var(--zoom));
+  transform-origin: center center;
+}
+
+/* 欄高上限是必要的：一份 track 內容約 1450px，
+   欄高超過這個值，循環接回時會露出空隙 */
+.gm-hero-col {
+  width: var(--col-w);
+  flex: 0 0 var(--col-w);
+  height: var(--col-h);
+  overflow: hidden;
+}
+
+.gm-hero-track {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  will-change: transform;
+  animation-name: gmHeroScroll;
+  animation-timing-function: linear; /* 必須 linear，否則循環接縫會頓 */
+  animation-iteration-count: infinite;
+}
+
+/* 五欄速度全不同、方向交錯 → 不會同步成一致節奏 */
+.gm-hero-col:nth-child(1) .gm-hero-track { animation-duration: 74s; }
+.gm-hero-col:nth-child(2) .gm-hero-track { animation-duration: 92s; animation-direction: reverse; }
+.gm-hero-col:nth-child(3) .gm-hero-track { animation-duration: 66s; }
+.gm-hero-col:nth-child(4) .gm-hero-track { animation-duration: 85s; animation-direction: reverse; }
+.gm-hero-col:nth-child(5) .gm-hero-track { animation-duration: 78s; }
+
+/* 內容放兩份，跑到 -50% 剛好接回起點 → 無縫循環 */
+@keyframes gmHeroScroll {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(0, -50%, 0); }
+}
+
+/* 離開視窗時暫停——由 HeroLoop.jsx 的 useInViewPause 切這個 data 屬性。
+   只切 animation-play-state，不動 transform，接回來時相位不會跳。 */
+.gm-hero[data-paused='true'] .gm-hero-track,
+.gm-hero[data-paused='true'] .gm-hero-logo {
+  animation-play-state: paused;
+}
+
+.gm-hero-track img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 402/874;
+  object-fit: cover;
+  border-radius: var(--radius);
+  background: #fff;
+  box-shadow: 0 18px 44px rgba(20, 30, 50, 0.14), 0 2px 5px rgba(20, 30, 50, 0.05);
+}
+
+/* 邊緣淡出 ------------------------------------------------- */
+.gm-hero-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 62% 58% at 50% 50%,
+    rgba(236, 238, 241, 0) 0%,
+    rgba(236, 238, 241, 0.35) 42%,
+    rgba(236, 238, 241, 0.85) 72%,
+    var(--bg) 100%
+  );
+}
+
+/* logo 後方光暈 -------------------------------------------- */
+.gm-hero-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle 300px at 50% 50%,
+    rgba(236, 238, 241, var(--scrim)) 0%,
+    rgba(236, 238, 241, calc(var(--scrim) * 0.72)) 42%,
+    rgba(236, 238, 241, 0) 100%
+  );
+}
+
+/* Logo ----------------------------------------------------- */
+.gm-hero-logo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--logo-w);
+  translate: -50% -50%;
+  opacity: 0;
+  scale: 0.94;
+  animation: gmHeroFadeIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards;
+}
+
+.gm-hero-logo img {
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 10px 24px rgba(20, 30, 50, 0.16));
+}
+
+@keyframes gmHeroFadeIn {
+  to { opacity: 1; scale: 1; }
+}
+
+/* 無障礙 --------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .gm-hero-track { animation: none; }
+  .gm-hero-logo { animation: none; opacity: 1; scale: 1; }
+}

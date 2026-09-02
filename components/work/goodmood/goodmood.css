@@ -1,0 +1,1098 @@
+/* ====================================================================
+   Goodmood 作品詳情頁 — 這個網站本身的 case study
+   Figma：檔案 j4saimg2oJWL5tUkBh5Bww，整頁 frame 2343:129（1440×11831）
+
+   這一輪只做 Frame 98（開場，2955:2665）與 overview（3337:3227）。
+   其餘七區之後分輪做，順序見 GoodmoodPage.jsx 的註解。
+
+   ⚠️ 這一頁「沒有」滿版 hero：開場是置中的標記 + 標題群，從 Figma y=200
+   開始。所以最外層不加 data-nav-bleed，要保留 .page-content 的 126px
+   上留白（做法同 app/about/page.js，不同於 AERO V / Sui-Sui / WanderBuddy）。
+
+   ⚠️ 各區在 Figma 的寬度刻意不一致（1160 / 1283 / 1366 / 1344 / 1234 /
+   1347 / 1048），不要整成同一個欄寬——那是設計，不是雜訊。
+   ==================================================================== */
+
+/* ---------- 正文欄寬：嚴格照 Figma ----------
+   每一段各自寫自己的 max-width，用的就是 Figma 節點上的欄寬：
+     開場正文（Frame 98 / 2873:2284）        1128px
+     overview 正文（3220:2806）               1283px
+     Define Before I Build 正文（輪 2）       1162px
+     Design Process 正文（輪 2）              1139px
+   一律配 margin-inline: auto 置中，text-align: center 不變。
+   RWD 不需要額外斷點——max-width 在視窗變窄時本來就會讓位給實際可用寬度。
+
+   ⚠️ 沿革，別再繞回去（2026-09-01 → 09-02）：
+   這裡曾經改用 ch 來壓行寬，目標是「一行不超過 65–75 字元」。過程中量到兩件
+   值得留下的事實：
+     1. Poppins 的 1ch ≠ 1 個平均字元。ch 的定義是「數字 0 的寬度」，而
+        Poppins 的 0 明顯比平均小寫字母寬——18px 時 1ch = 11.305px、
+        20px 時 12.563px。所以 68ch 實際裝得下 94 / 91 字元，不是 68。
+     2. 逐值實測（Poppins，字體堆疊 `Poppins, "Poppins Fallback", sans-serif`，
+        2026-09-01）：
+          55ch → 開場 70 字元 / overview 69 字元
+          56ch → 開場 73 字元 / overview 75 字元   ← 真正達成 ≤75
+          57ch → 開場 77 字元 / overview 78 字元   ← 只是接近
+        一度採用 56ch。
+   2026-09-02 實機比對後，使用者決定回到 Figma 欄寬，理由是**段落只有三四行、
+   是置中短段，寬欄是設計選擇而非可讀性缺陷**。字元數上限就此取消，
+   --gm-measure 變數已移除。
+   **不要再自行加字元數上限。** 看到一行超過 75 字元不是「沒做無障礙」，
+   是經過量測與比對之後的設計決定。 */
+
+.gm-case {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==================== 開場（Frame 98，node 2955:2665）====================
+   Figma：x=140 y=200，1160×625。x=140 表示左右各留 140px，置中。
+   導覽列帶是 0–116，所以「導覽列下緣 → 內容頂」是 84px。
+   .page-content 已經給了 116 + var(--nav-top-gap)(10) = 126px，
+   這裡再補 74px 就精準落在 Figma 的 y=200。
+   ⚠️ 這是「第一區單獨指定」，性質同 aero-v.css 的
+   .av-section--after-hero（那裡是 210px）。若改走通用節奏
+   clamp(48px,6vw,96px) 會落在 212.4，比 Figma 多 12.4px，超過 8px 門檻。 */
+.gm-opening {
+  padding-top: 74px;
+}
+
+/* ⚠️ 這一層用 .page-container 的寬度（1440 封頂、左右 var(--page-gutter)
+   → 內容 1360），**不是** Figma 的 1160。
+   原因：Figma 的 1160 在這一區其實只管分隔線，而分隔線已經確定要改成
+   跟導覽列同寬的 1360（見下方 .gm-opening-divider-row 的註解）。其餘子項
+   都有自己的寬度上限——文字框 1128、meta 928——沒有任何一項需要 1160。
+   若這一層寫成 1160，子項的 padding 會把分隔線一起夾成 1160，1360 就做不到。 */
+.gm-opening-inner {
+  max-width: 1440px;
+  margin-inline: auto;
+  padding-inline: var(--page-gutter);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* node 3279:2871 的 gap：標記 → 底下整組 40px */
+  gap: 40px;
+}
+
+/* node 2936:2616「Union」175×177。用 components/GomoMark.jsx，
+   不重新匯出——見該檔案檔頭。 */
+.gm-mark {
+  width: 175px;
+  height: auto;
+  flex-shrink: 0;
+}
+
+.gm-mark svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* node 3279:2870 的 gap：文字群 → meta 三欄 45px
+   （Figma：分隔線 y=161 → meta 標籤頂 y=206） */
+.gm-opening-body-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 45px;
+}
+
+/* node 3279:2865 的 gap：文字框 → 分隔線 40px
+   （Figma：正文底 y=121 → 分隔線 y=161） */
+.gm-opening-text-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+}
+
+/* node 3279:2864：1128×121，gap 5（副標底 y=35 → 正文頂 y=40） */
+.gm-opening-text {
+  width: 100%;
+  max-width: 1128px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* node 2873:2283：24px Poppins Italic、#717171、字距 −0.12px、行高 1.45、
+   capitalize。整句 37 字元、一行就放得下，寬度交給父層 .gm-opening-text
+   的 1128（Figma Frame 115），這一層不再另設欄寬。 */
+.gm-opening-tagline {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(18px, 1.6667vw, 24px);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.45;
+  letter-spacing: -0.12px;
+  color: #717171;
+  text-transform: capitalize;
+}
+
+/* node 2873:2284：18px Poppins Regular、#353535、字距 −0.09px、行高 1.5。
+   ⚠️ 欄寬 1128px 就是 Figma 節點 2873:2284 的寬度，嚴格照抄（見檔頭「正文欄寬」
+   那段沿革）。寫在這裡而不是只靠父層 .gm-opening-text 的 1128——兩者現在數值
+   相同，但意圖不同：父層是 Figma 的 Frame 115 外框，這一行是段落自己的欄寬。
+   ⚠️ 置中，不是靠左：Figma 原始節點這一段是 text-align: center，跟上面的
+   副標、以及 overview 的 kicker / 標題共用同一條中軸。
+   （2026-09-01 一度做成靠左，是指令誤植，已作廢。） */
+.gm-opening-body {
+  /* ⚠️ width:100% 是必要的，不是多餘：這是 flex 子項，只寫 margin-inline:auto
+     會讓它變成 fit-content（實測 1054.77px，剛好是最長那一段不換行的寬度）。
+     現在三段都在 1128 內、每段一行，跟 Figma 一致，看不出差別；但之後文案
+     變長時，換行點會落在 1054.77 而不是 Figma 的 1128。加上 width:100% 讓
+     欄寬真的是 1128。 */
+  width: 100%;
+  margin-inline: auto;
+  max-width: 1128px;
+  text-align: center;
+  font-size: clamp(15px, 1.25vw, 18px);
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: -0.09px;
+  color: #353535;
+}
+
+/* Figma 是「一個文字節點裡三段」，段與段之間沒有額外間距，只是換行
+   （匯出碼三個 <p> 都帶 mb-0）。這裡用三個 <p> 保留語意，但把預設的
+   段落邊界清掉，視覺才跟 Figma 一致。 */
+.gm-opening-body p {
+  margin: 0;
+}
+
+/* node 2873:2292「Vector 99」：1160×0。
+   ⚠️ 寬度刻意「不」用 Figma 的 1160，改成 .gm-opening-inner 的整個內容寬
+   （1440 下 1360，+200）——跟導覽列同一個 --page-gutter，左右緣對齊導覽列
+   logo 左緣與 about me 右緣。Sui-Sui / WanderBuddy / AERO V 三頁已經是這個
+   做法，使用者 2026-09-01 確認 Goodmood 也照做。 */
+.gm-opening-divider-row {
+  width: 100%;
+}
+
+.gm-opening-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--rule);
+}
+
+/* Duration / Category / Tool 三欄（node 3279:2869）。
+   Figma 的三個「值」中心在 1160 容器內是 272.5 / 580 / 892。
+   用 928px 三等分 → 270.67 / 580 / 889.33，差 −1.83 / 0 / −2.67，都在 8px 內。
+   （AERO V 用的 944 會是 −7.17 / 0 / +2.67，較差；928 是 .ss-overview-meta
+   與 .wb-overview-meta 已經在用的值。） */
+.gm-opening-meta {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 928px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  justify-items: center;
+}
+
+.gm-opening-meta-item {
+  text-align: center;
+}
+
+/* node 2873:2286/2287/2288：16px Poppins Regular、#747474、字距 −0.08px。
+   ⚠️ 行高用 28.4px 不是 1.5——Figma 三個標籤框高不一致（Category 是 29 高、
+   Duration/Tool 是 24 高但 y 各自往下偏 2.5），等同「24 的字置中在 29 的列」。
+   同 .av-overview-meta-label 的處理。 */
+.gm-opening-meta-label {
+  display: block;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 28.4px;
+  letter-spacing: -0.08px;
+  color: #747474;
+}
+
+/* node 2873:2289/2290/2291：20px Poppins SemiBold、#353535、行高 28.4px。
+   間距：標籤列底 y=234.4（206 + 28.4）→ 值頂 y=268，相距 33.6px。
+   <dd> 預設有左邊界，清掉。 */
+.gm-opening-meta-value {
+  margin: 33.6px 0 0;
+  font-size: clamp(17px, 1.3889vw, 20px);
+  font-weight: 600;
+  line-height: 28.4px;
+  color: #353535;
+}
+
+/* ==================== overview（node 3337:3227）====================
+   Figma：x=78.5 y=1209，1283×217。x=78.5 表示左右各留 78.5px，置中。
+
+   ⚠️ 上緣間距刻意不走通用節奏（clamp(48px, 6vw, 96px)，1440 下只有 86.4）。
+   這是「封面轉場間距」，性質上就該比一般段落間距大——同 AERO V 把
+   hero→overview 特別拉開的道理。之後疊圖比對看到這個數字，
+   **不要當成 bug 改回通用節奏**。
+
+   ⚠️ Figma 原本是 384（Frame 98 底 825 → overview 頂 1209），那是設計稿上
+   「先留寬保險」的值；2026-09-02 實機比對 240 / 280 / 320 三版之後改成
+   **280**，理由是它與 aero-v.css 的 .av-section--after-hero 同一個數字，
+   兩頁在同一個位置用同一個節奏。**不要照 Figma 的 384 改回去。**
+
+   ⚠️ meta 三欄置頂對齊、行數不同，底緣參差（Duration 比最低的 Tool 高 85px）。
+   這個 280 是從最低點量的。實際閱讀動線走中軸，中間的 Category 欄只比最低點
+   高 28px，所以中軸上的觀感空白約 308，與 aero-v 平底的 280 相當。
+   左側 Duration 下方看起來像 365 是三欄長短不一的自然結果，不是 bug。
+
+   用 clamp 讓窄螢幕自己收：280/1440 = 19.4vw，1440 剛好 280、1155 約 224、
+   再窄收到 160 保底（視窗窄於約 825px 時觸底）。 */
+.gm-overview {
+  margin-block-start: clamp(160px, 19.4vw, 280px);
+}
+
+.gm-overview-inner {
+  max-width: calc(1283px + var(--page-gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--page-gutter);
+  display: flex;
+  flex-direction: column;
+  /* node 3337:3227 的 gap：eyebrow → 底下那組 10px */
+  gap: 10px;
+}
+
+/* node 2924:2316：24px Poppins Bold、#c90000、大寫、行高 40.4px。
+   ⚠️ 這裡「不」重用 .ss-eyebrow——那支是 margin 0 0 24px、字距 1px，
+   跟這一區的 gap 10px、無字距不同。數值以 Figma 為準。 */
+.gm-overview-eyebrow {
+  margin: 0;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 40.4px;
+  text-transform: uppercase;
+  color: #c90000;
+}
+
+/* node 3337:3226 的 gap：標題 → 正文 5px */
+.gm-overview-text {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* node 2924:2317：24px Poppins SemiBold、黑、大寫、行高 40.4px。
+   82 字元、在 1283 框裡剛好一行——Figma 就是設計成一行，寬度交給父層
+   .gm-overview-inner 的 1283，這一層不另設欄寬。 */
+.gm-overview-heading {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(18px, 1.6667vw, 24px);
+  font-weight: 600;
+  line-height: 40.4px;
+  text-transform: uppercase;
+  color: #000;
+}
+
+/* node 3220:2806：20px Poppins Regular、#5b5b5b。
+   ⚠️ 行高 1.5（=30px）。Figma 這個節點標的是 leading「normal」，不是明訂值，
+   所以要從框高反推——**2026-09-02 更正**：先前寫 40.4 是錯的，當時誤以為這段
+   是 3 行（120 ÷ 3 = 40，又剛好接近同區 kicker/標題明寫的 40.4，就採信了）。
+   實際渲染是 **4 行**（三段分別是 1 / 1 / 2 行），120 ÷ 4 = 30。
+   40.4 會讓框變成 161.6px，對不上 Figma 的 120。
+   輪 2 的兩段正文交叉驗算得到同一個答案，三段獨立算都是 30：
+     輪 1 overview  欄寬 1283  框高 120  4 行 → 30
+     Define         欄寬 1162  框高 180  6 行 → 30
+     Design Process 欄寬 1139  框高 240  8 行 → 30
+   也就是 Poppins 在 Figma 的「normal」= 1.5。kicker 與副標的 40.4 是 Figma
+   明寫的，那兩個維持不變。
+   ⚠️ 欄寬 1283px 就是 Figma 節點 3337:3227 的寬度，嚴格照抄（見檔頭「正文欄寬」
+   那段沿革）。與父層 .gm-overview-inner 的內容寬相同，理由同 .gm-opening-body。
+   ⚠️ 置中，不是靠左：理由同 .gm-opening-body。 */
+.gm-overview-body {
+  /* width:100% 的理由同 .gm-opening-body */
+  width: 100%;
+  margin-inline: auto;
+  max-width: 1283px;
+  text-align: center;
+  font-size: clamp(17px, 1.3889vw, 20px);
+  font-weight: 400;
+  line-height: 1.5;
+  color: #5b5b5b;
+}
+
+/* 同 .gm-opening-body p：Figma 是一個文字節點裡三段，段間沒有額外間距。 */
+.gm-overview-body p {
+  margin: 0;
+}
+
+/* ---------- RWD ----------
+   Figma 只有 1440 一個 frame，以下斷點依全站既有斷點（900 / 600）訂，
+   Figma 沒有對應稿，是假設值。做法同 aero-v.css 的 RWD 段。 */
+@media (max-width: 900px) {
+  .gm-opening-meta {
+    max-width: 100%;
+  }
+  .gm-mark {
+    width: min(175px, 40vw);
+  }
+}
+
+@media (max-width: 600px) {
+  .gm-opening-meta {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .gm-opening-meta-value {
+    margin-top: 8px;
+  }
+  .gm-overview-heading,
+  .gm-overview-eyebrow {
+    line-height: 1.45;
+  }
+  .gm-overview-body {
+    line-height: 1.7;
+  }
+}
+
+/* ====================================================================
+   輪 2：Define Before I Build（3337:3222）與 Design Process（3337:3221）
+
+   兩區的標題群排版完全相同，抽成共用的 .gm-kicker / .gm-subhead / .gm-body，
+   之後幾輪照用，不要再各複製一份。
+   ⚠️ 兩區都**沒有動效**——不要自行加 ScrollTrigger 或進場動畫（使用者
+   2026-09-02 明確指示）。
+   ==================================================================== */
+
+/* 區塊之間的節奏。用全站通用值（同 .av-section / .ss-section）。
+   ⚠️ 與 Figma 有落差，**這是決定過的，不要改回 Figma**（使用者 2026-09-02 裁示）：
+     overview 底(1426) → Define 頂(1811)          Figma 385，這裡 172.8
+     Define 底(2781)   → Design Process 頂(3017)  Figma 236，這裡 172.8
+   判斷依據：同一種邊界，Figma 一個 385 一個 236、差 149px，那不像刻意訂的
+   節奏，比較像排版時的自然結果。AERO V 的既有做法也是一律用通用節奏並在
+   註解標明落差，這裡沿用。
+   ⚠️ 待辦：整頁節奏等六區全部做完之後，從頭捲一次再統一檢視——到那時候
+   如果要調，是「整頁一起調」，不是回頭照 Figma 逐段套。 */
+.gm-section {
+  padding-block: clamp(48px, 6vw, 96px);
+}
+
+/* 標題群與正文的外框。寬度用 .page-container 的內容寬（1440 下 1360）。
+   ⚠️ Figma 的 Frame 107 是 1360、Design Process 是 1366，差 6px；
+   統一成 1360，理由同灰底帶（見 .gm-band）。 */
+.gm-section-inner {
+  max-width: 1440px;
+  margin-inline: auto;
+  padding-inline: var(--page-gutter);
+}
+
+/* kicker：Poppins Bold 24px #c90000 大寫，行高 40.4px（Figma 明寫）。
+   節點：2973:2750（Define）、3253:2849（Design Process）。
+   ⚠️ 與 .gm-overview-eyebrow 是同一組數值——那一支是輪 1 先做的，
+   兩者之後可以合併，這一輪不動輪 1 已驗收的部分。 */
+.gm-kicker {
+  margin: 0;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 40.4px;
+  text-transform: uppercase;
+  color: #c90000;
+}
+
+/* 副標：Poppins SemiBold 24px #000 大寫，行高 40.4px（Figma 明寫）。
+   節點：2973:2752、3253:2851。 */
+.gm-subhead {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(18px, 1.6667vw, 24px);
+  font-weight: 600;
+  line-height: 40.4px;
+  text-transform: uppercase;
+  color: #000;
+}
+
+/* 正文：Poppins Regular 20px #5b5b5b 置中，行高 1.5。
+   行高的推導見 .gm-overview-body 的註解（Figma 標 normal，三段交叉驗算 = 30px）。
+   欄寬各段不同、嚴格照 Figma，寫在下面各自的區塊規則裡。
+   ⚠️ width:100% 是必要的，理由同 .gm-opening-body（flex 子項 + auto 邊界
+   會退成 fit-content）。 */
+.gm-body {
+  width: 100%;
+  margin-inline: auto;
+  text-align: center;
+  font-size: clamp(17px, 1.3889vw, 20px);
+  font-weight: 400;
+  line-height: 1.5;
+  color: #5b5b5b;
+}
+
+/* Figma 是「一個文字節點裡數段」，段間沒有額外間距，只是換行。 */
+.gm-body p {
+  margin: 0;
+}
+
+/* 副標 → 正文 gap 5（Figma：3245:2814 / 3253:2858 的 gap） */
+.gm-section-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+/* 灰底帶。
+   ⚠️ 刻意偏離 Figma：Define 的 Rectangle 293 是 1353 寬、Design Process 的
+   Rectangle 294 是 1366 寬，兩者差 13px。統一成 .page-container 的內容寬
+   （1440 下 1360）——同一種元素，13px 的差會被看成沒對齊（使用者
+   2026-09-02 裁示）。**不要照 Figma 改回 1353 / 1366。**
+   高度不寫死，由內距 + 內容自然撐出來，剛好等於 Figma 的 658 / 802
+   （各自的算式寫在下面）。 */
+.gm-band {
+  background: #fafafa;
+  /* ⚠️ 底色帶自己的寬度就是 1360，不是「1440 外框 + 40 內距」——背景會鋪滿
+     padding，寫成後者的話看到的灰帶是 1440 寬（實測過）。所以這裡直接讓
+     元素本身收成 1360，左右靠 gutter 讓位。 */
+  width: calc(100% - var(--page-gutter) * 2);
+  max-width: 1360px;
+  margin-inline: auto;
+}
+
+/* 圖說：16px #5b5b5b、字距 −0.43px、置中。
+   ⚠️ Figma 標的字體是 Noto Sans，這裡用全站的 Poppins——為一行圖說多載一支
+   字體不划算（規格書 §8 效能預算）。使用者 2026-09-02 確認。 */
+.gm-figcaption {
+  margin: 0;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: -0.43px;
+  color: #5b5b5b;
+}
+
+/* ---------- A：Define Before I Build（3337:3222）---------- */
+
+/* Figma：kicker 頂 0 → Frame 106 頂 51。kicker 行高 40.4，所以間距 10.6。 */
+.gm-define .gm-section-text {
+  margin-top: 10.6px;
+}
+
+/* 節點 2973:2753：欄寬 1162 */
+.gm-define .gm-body {
+  max-width: 1162px;
+}
+
+/* Figma：標題群底 272 → 帶頂 312，間距 40。 */
+.gm-define-band {
+  margin-top: 40px;
+  /* 帶高 658 = 74（上內距）+ 510（圖）+ 30（圖→圖說）+ 22（圖說行高）+ 22（下內距） */
+  padding-top: 74px;
+  padding-bottom: 22px;
+}
+
+/* 兩張圖並排、整組置中，間距 10.85（Figma：spec-1 右緣 699.911 → spec-2 左緣 710.761）。
+   ⚠️ 兩張 PNG 是 989×1020 與 868×1020，剛好是顯示尺寸 494.451×510 / 433.779×510
+   的 2 倍——已經照 Figma 的裁切框輸出好了，所以直接以原比例放進去，**不要**再
+   重現 Figma 那層 112.66% / 110.71% 的縮放位移，那會變成裁兩次
+   （使用者 2026-09-02 指示）。 */
+/* <figure> 預設帶 margin: 1em 40px，會把圖往內推 40、上下各多 16px
+   （實測：帶頂→圖頂變成 90 而不是 74，帶高變成 690.34 而不是 658）。清掉。 */
+.gm-define-figure {
+  margin: 0;
+}
+
+.gm-define-figures {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 10.85px;
+  margin-bottom: 30px;
+}
+
+.gm-define-figures img {
+  display: block;
+  height: auto;
+  border-radius: 10px;
+}
+
+/* 顯示寬度照 Figma；窄螢幕時兩張一起等比縮小，靠 flex 的收縮與 max-width。 */
+.gm-define-fig--1 {
+  width: 494.451px;
+  max-width: 53.29%; /* 494.451 / (494.451 + 10.85 + 433.779) */
+}
+
+.gm-define-fig--2 {
+  width: 433.779px;
+  max-width: 46.75%; /* 433.779 / 939.08 */
+}
+
+/* ---------- B：Design Process（3337:3221）---------- */
+
+/* Figma：kicker 頂 0 → Frame 114 頂 46。kicker 行高 40.4，所以間距 5.6。 */
+.gm-process .gm-section-text {
+  margin-top: 5.6px;
+}
+
+/* 節點 3253:2852：欄寬 1139 */
+.gm-process .gm-body {
+  max-width: 1139px;
+}
+
+/* Figma：標題群底 332 → 帶頂 367，間距 35。 */
+.gm-process-band {
+  margin-top: 35px;
+  /* 帶高 802 = 83（上內距）+ 647（流程圖）+ 72（下內距） */
+  padding-top: 83px;
+  padding-bottom: 72px;
+  /* Figma：流程圖在 1366 寬的帶子裡 x=60、寬 1246.91（右側剩 59.09）。
+     帶子統一成 1360 之後左右各留 60，內容寬 1240——比 Figma 的 1246.91 少
+     6.91px，在 8px 容忍內。 */
+  padding-inline: 60px;
+}
+
+/* 流程圖的捲動容器。
+   ⚠️ 為什麼不讓它等比縮小：圖裡最小的字是 10px，1247px 的圖在 1155 視窗下會
+   縮到約 86%，10px 變 8.6px，讀不到。所以改成「寬螢幕正常顯示、窄螢幕左右
+   滑動」——內層保底 1150px，外層 overflow-x:auto（使用者 2026-09-02 指示）。
+   ⚠️ 可捲動的區域必須能用鍵盤操作：JSX 那邊有 tabindex="0" 與 role="region"
+   + aria-label，不要拿掉，否則只有滑鼠使用者能看到右半邊。 */
+.gm-flow-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.gm-flow-scroll:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+/* ⚠️ 1150 是決定過的取捨，**不要改成 1249**（使用者 2026-09-02 裁示）。
+   1249 是 SVG 的 viewBox 寬，設成 1249 才會 1:1、圖裡 10px 的字剛好 10px；
+   但那要在 1155 視窗多付約 100px 的橫向捲動（179 → 278）。
+   維持 1150 的話縮放比 1150/1249 = 0.92，10px 渲染成 9.21px——差 8%，
+   肉眼分辨不出來；真正讀不到的是「讓它跟著容器縮到 86%」的 8.6px，
+   而那個問題已經被這個 min-width 解決了。 */
+.gm-flow-inner {
+  min-width: 1150px;
+}
+
+.gm-flow-inner svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ---------- RWD（同檔頭：Figma 只有 1440 一個 frame，斷點是假設值）---------- */
+@media (max-width: 600px) {
+  .gm-define-figures {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  .gm-define-fig--1,
+  .gm-define-fig--2 {
+    width: 100%;
+    max-width: 100%;
+  }
+  .gm-kicker,
+  .gm-subhead {
+    line-height: 1.45;
+  }
+}
+
+/* ====================================================================
+   輪 3：Making assets with AI · 01（3337:3223，x=48 y=4422，1344×937）
+   ＋ 前後對比滑軌（Figma 上沒有，使用者 2026-09-02 另外指定的新元件）
+   ==================================================================== */
+
+/* ⚠️ 這一區的欄寬是 1344，不是前兩區的 1360。
+   Figma：section x=48、寬 1344（1440 frame 左右各留 48）。標題群、對比圖、
+   滑軌三者都是 1344，使用者明確指定過三次。與 Define/Process 的灰底帶
+   1360 差 16px——那是「各區寬度刻意不一致」的既有原則（見檔頭），不要統一。 */
+.gm-assets01-inner {
+  width: calc(100% - var(--page-gutter) * 2);
+  max-width: 1344px;
+  margin-inline: auto;
+}
+
+/* Figma：kicker 頂 0 → Frame 109 頂 51。kicker 行高 40.4，所以間距 10.6。
+   （使用者說「距 kicker 10px」，那是從 kicker 的文字框 41 量的；用 10.6 才
+   會讓副標的絕對位置落在 Figma 的 y=51。差 0.6px。） */
+.gm-assets01 .gm-section-text {
+  margin-top: 10.6px;
+}
+
+/* 節點 3245:2827：欄寬 1224 */
+.gm-assets01 .gm-body {
+  max-width: 1224px;
+}
+
+/* ---------- 對比圖區（Group 37009 / 3331:3191）---------- */
+
+.gm-assets01-figure {
+  margin: 0;
+}
+
+/* Figma：標題群 0–247，圖區頂 y=313 → 距區塊頂 313。
+   標題群實際高度由內容決定，所以這裡用 margin-top 補到 313 的差額；
+   實測後若有偏差以量到的為準（見回報的對照表）。 */
+.gm-compare {
+  margin-top: 66px; /* 313 − 247（Figma 標題群框高） */
+  display: flex;
+  /* Figma：左圖 left 0、右圖 left 673.63，圖寬 670.37 → 間距 3.26 */
+  gap: 3.26px;
+}
+
+/* 每一格是一個定尺寸的盒子，兩組照片疊在裡面用 opacity 交叉淡入。
+   Figma：670.37 × 603.007。用 aspect-ratio 而不是寫死高度，窄螢幕才會等比縮。 */
+.gm-compare-cell {
+  position: relative;
+  flex: 1 1 0;
+  aspect-ratio: 670.37 / 603.007;
+  overflow: hidden;
+}
+
+.gm-compare-cell img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* ⚠️ 只動 opacity（CLAUDE.md 動效硬規則）。5s 停留 / 600ms 交叉淡入，
+     與首頁 §6.2 中央輪播同一組節奏。 */
+  opacity: 0;
+  transition: opacity 600ms ease;
+}
+
+.gm-compare-cell img[data-active='true'] {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* 停在第 1 組不輪播——JS 那邊不會啟動 interval，這裡把過場也拿掉。 */
+  .gm-compare-cell img {
+    transition: none;
+  }
+}
+
+/* 圖說 Fig 2（3336:3215）。
+   Figma：圖區底 y=916（313 + 603.007）→ 圖說中心線 y=946，行高 22
+   → 圖說框頂 y=935，也就是距圖區底 19px。 */
+.gm-assets01 .gm-figcaption {
+  margin-top: 19px;
+  line-height: 22px;
+}
+
+/* ---------- 前後對比滑軌（Figma：after 3395:3482 / before 3395:3489）----------
+   2026-09-02 改成新設計。行為（hover 跟隨、rAF 節流、input[type=range]、
+   觸控維持拖曳、移出不彈回、prefers-reduced-motion）完全沒動，只換視覺。 */
+
+/* 外框。
+   ⚠️ 寬度用 1344 不是 Figma 的 1350：它就疊在上面 1344 寬的對比圖區下面，
+   差 6px 會被看成沒對齊（使用者 2026-09-02 裁示）。內距維持左右各 50px，
+   圖片框因此是 1344 − 100 = 1244（Figma 是 1250，同樣等比收 6）。
+   ⚠️ 圓角：Figma 兩個節點不一致（after 40 / before 24），使用者 2026-09-02
+   裁示統一為 40。兩層必須完全一致，否則滑動時 clip 的切邊會露出圓角不齊。
+   ⚠️ 底色 / 邊框 / 圓角 / overflow 全部只掛在這一層。裡面的 before 與 after
+   兩層只放圖和標籤，各自不再畫一次邊框——畫兩次的話 clip 的切邊會出現兩條線。 */
+.gm-slider {
+  position: relative;
+  width: 100%;
+  max-width: 1344px;
+  margin: 40px auto 0;
+  aspect-ratio: 1344 / 755;
+  background: #fafafa;
+  border: 1px solid #d9d9d9;
+  border-radius: 40px;
+  overflow: hidden;
+  touch-action: pan-y; /* 垂直捲動仍交給頁面，水平留給滑軌 */
+  /* ⚠️ 裡面所有尺寸都用 cqw（相對這個容器的寬度），不是固定 px。
+     外框用 aspect-ratio 會跟著視窗縮，內容如果寫死 px 就會溢出被裁——
+     1155 下圖片框仍是 1244 寬、外框只剩 1090.8（實測過）。
+     這一區不需要 transform 縮放，全部都是單純的尺寸，所以 cqw 就夠，
+     不必像 §02 那三個框那樣用 JS 算係數。
+     換算基準是設計寬 1344：1244/1344 = 92.5595cqw，依此類推。 */
+  container-type: inline-size;
+}
+
+/* 兩層疊在同一個位置。下層＝Before（整張完整），上層＝After（用 clip-path
+   露出左側 --gm-slider-pos%）。0% 全是 Before、100% 全是 After。 */
+.gm-slider-layer {
+  position: absolute;
+  inset: 0;
+}
+
+/* ⚠️ 只動 clip-path，不動 width / left（CLAUDE.md 硬規則）。
+   ⚠️⚠️ clip 的方向與規格書字面不同，這是**刻意的**，理由如下（2026-09-02）：
+   規格寫的是 `inset(0 X% 0 0)`（從右邊裁），那會讓 After 出現在**左半邊**。
+   但標籤的位置是「Before 靠左 58 / After 靠右 50」，而且驗收條件寫明
+   「50% 那張要看得到兩個標籤同時在」——
+     用「從右邊裁」：50% 時 After 層只剩左半，靠右的 After 標籤整個被裁掉，
+       畫面上只看得到 Before 一個標籤，而且它還壓在 After 的內容上。
+     用「從左邊裁」（這裡的做法）：分隔線左邊永遠是 Before、右邊永遠是 After，
+       兩個標籤各自待在自己的半邊，50% 時同時看得到 ✅
+   所以 --gm-slider-pos 的語意是「分隔線距左緣的百分比」（＝游標位置），
+   把手也直接用同一個值定位，拖到哪裡分隔線就在哪裡。
+   副作用：0% 時全是 After、100% 時全是 Before，與規格書寫的端點相反。
+   已回報，要改成規格的端點語意只需把 input 的 value 換算成 100 − pos。 */
+.gm-slider-layer--after {
+  clip-path: inset(0 0 0 calc(var(--gm-slider-pos) * 1%));
+  /* ⚠️ 上層必須是不透明的，clip 才真的等於「遮住／露出」。
+     只給底色，**不**給邊框或圓角——那三樣只掛在最外層 .gm-slider，
+     兩層各畫一次的話 clip 的切邊會出現兩條線（使用者 2026-09-02 指示）。
+     沒有底色的話：0%（全 After）時上層在沒有圖的地方是透明的，
+     底下 Before 層的標籤會從標籤帶那一區透出來，畫面上同時看到兩個標籤
+     （實測過）。 */
+  background: #fafafa;
+}
+
+/* 圖片框：1244 × 592，距外框上緣 112px。
+   ⚠️ before 那一框水平不是置中，是 calc(50% + 8px)——見下方裁切參數的說明。 */
+.gm-slider-media {
+  position: absolute;
+  top: 8.3333cqw;   /* 112/1344 */
+  left: 50%;
+  width: 92.5595cqw;  /* 1244/1344 */
+  height: 44.0476cqw; /* 592/1344 */
+  transform: translateX(-50%);
+  overflow: hidden;
+}
+
+.gm-slider-layer--before .gm-slider-media {
+  left: calc(50% + 0.5952cqw); /* 8/1344 */
+}
+
+/* ⚠️⚠️ 兩張圖的裁切參數在 Figma 上**刻意不同**，這裡原樣照做，
+   **不要「統一成滿版」**：
+     after ：寬 100%、高 114.24%、top −14.23%
+     before：寬 111.51%、高 132.35%、top −20.9%、left −5.8%
+   原因：這樣兩張的四宮格在視覺上才會對齊。滑軌最怕的就是兩張沒對齊——
+   滑過去的瞬間內容會跳，對比就失去意義（使用者 2026-09-02 指示照抄）。 */
+.gm-slider-media img {
+  position: absolute;
+  display: block;
+  max-width: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.gm-slider-layer--after .gm-slider-media img {
+  width: 100%;
+  height: 114.24%;
+  top: -14.23%;
+  left: 0;
+}
+
+.gm-slider-layer--before .gm-slider-media img {
+  width: 111.51%;
+  height: 132.35%;
+  top: -20.9%;
+  left: -5.8%;
+}
+
+/* 標籤膠囊 124×44、圓角 50、#DCE8EF、距外框上緣 48。
+   Before 距左 58、After 距右 50。
+   ⚠️ 文字用 flex 置中，不用 Figma 那個 left 82 / left 1210 的絕對座標
+   ——那只是 "Before" 與 "After" 字寬不同造成的，置中就會自動對
+   （使用者 2026-09-02 指示）。
+   ⚠️ 兩個標籤分別住在自己那一層裡，不拉出來共用——上層被 clip 時，
+   After 的標籤要跟著一起被切掉才對。 */
+.gm-slider-tag {
+  position: absolute;
+  top: 3.5714cqw;      /* 48/1344 */
+  width: 9.2262cqw;    /* 124/1344 */
+  height: 3.2738cqw;   /* 44/1344 */
+  border-radius: 3.7202cqw; /* 50/1344 */
+  background: #dce8ef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.7857cqw; /* 24/1344 */
+  font-weight: 400;
+  color: #000;
+  pointer-events: none;
+}
+
+.gm-slider-tag--before { left: 4.3155cqw; } /* 58/1344 */
+.gm-slider-tag--after { right: 3.7202cqw; } /* 50/1344 */
+
+/* 把手。
+   ⚠️ 位移只用 transform：這一層是 100% 寬的空殼，translateX 的百分比相對
+   「自己的寬度」，而自己的寬度就是容器寬度，所以 translateX(pos%) 剛好等於
+   容器的 pos% 位置。不用 left，避免觸發 layout。
+   視覺目前是「一條 2px 白線 + 一點陰影」，使用者 2026-09-02 說之後再調。 */
+.gm-slider-handle {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+  transform: translateX(calc(var(--gm-slider-pos) * 1%));
+  /* 60ms 幾乎察覺不到，拖曳時不會有延遲感，但鍵盤一格一格移動時比較順。
+     reduced-motion 下整個拿掉，讓把手即時跟隨指標。 */
+  transition: transform 60ms linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gm-slider-handle { transition: none; }
+}
+
+.gm-slider-handle-bar {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 2px;
+  background: #fff;
+  transform: translateX(-50%);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+/* 真正的控制項：一個蓋滿整個盒子的 <input type="range">。
+   ⚠️ 刻意不用 div 手刻 role="slider"——原生 range 直接給到鍵盤左右鍵、
+   Home/End、螢幕閱讀器的數值播報，以及「點盒子任一點跳到該位置」的行為。
+   ⚠️ 用 opacity:0 而不是 display:none / visibility:hidden：後兩者會把它移出
+   焦點序，鍵盤使用者就完全操作不到。 */
+.gm-slider-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: ew-resize;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+}
+
+.gm-slider-input::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 40px;
+  height: 100%;
+}
+
+.gm-slider-input::-moz-range-thumb {
+  width: 40px;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+}
+
+/* 焦點指示要畫在看得見的東西上——input 本身是透明的。 */
+.gm-slider:has(.gm-slider-input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+@media (max-width: 600px) {
+  .gm-compare {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+/* ====================================================================
+   輪 4：Making assets with AI · 02（3337:3224，x=103 y=5595，1234×1593）
+
+   ⚠️ 三個展示框裡是「原元件的副本」在跑，不是截圖。三份副本在
+   components/work/goodmood/motion/，各自的檔頭寫了相對原檔改了哪些地方。
+   ==================================================================== */
+
+/* Figma：section x=103、寬 1234（1440 frame 左右各留 103）。
+   又是一個跟前幾區不同的欄寬（1360 / 1344 / 1234），維持不統一。 */
+.gm-assets02-inner {
+  width: calc(100% - var(--page-gutter) * 2);
+  max-width: 1234px;
+  margin-inline: auto;
+}
+
+/* Figma：kicker 頂 0 → Frame 109 頂 51，扣 40.4 行高 = 10.6 */
+.gm-assets02 .gm-section-text {
+  margin-top: 10.6px;
+}
+
+/* 節點 3245:2834：欄寬 1234（＝整個區塊寬） */
+.gm-assets02 .gm-body {
+  max-width: 1234px;
+}
+
+/* 三個框的舞台。Figma 的座標是絕對定位，這裡用 grid 還原：
+     第 1 列 ① 598 + 間距 38 + ② 598 = 1234
+     第 2 列 ③ 跨兩欄，1234
+   ⚠️ 間距 38 = ② 的 left 636 − ① 的寬 598。 */
+.gm-assets02-stage {
+  margin-top: 71px; /* 標題群框高 277 → ① 的 top 348 */
+  display: grid;
+  grid-template-columns: 598fr 598fr;
+  column-gap: 38px;
+  /* ① top 348 / ② top 338，兩者差 10——② 那格用 margin-top 補回來，
+     所以列與列之間只需要處理 ③ 的位置（見 .gm-fig--warmup）。 */
+  align-items: start;
+}
+
+.gm-fig {
+  margin: 0;
+  min-width: 0;
+}
+
+/* ② 在 Figma 比 ① 高 10px */
+.gm-fig--onboarding {
+  margin-top: -10px;
+}
+
+/* ③ 跨兩欄。Figma：① 底 348+574=922 → ③ 頂 976，相距 54。
+   ② 底 338+574=912，但列高由較高的 ① 決定。 */
+.gm-fig--warmup {
+  grid-column: 1 / -1;
+  margin-top: 54px;
+}
+
+/* 共用的框 */
+.gm-frame {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* ① 598×574，裡面是 942×575 的內容置中裁切（Figma：內容 left −172，
+   而 (942 − 598) / 2 = 172，所以就是置中）。
+   ⚠️ 這是「裁切成小窗」不是「整個縮小」——使用者 2026-09-02 決策。
+   窄螢幕時框會跟著縮，但裡面的內容維持原尺寸，等於露出更少，構圖不變形。 */
+.gm-frame--hero {
+  aspect-ratio: 598 / 574;
+}
+
+.gm-frame-crop {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  /* ⚠️ 這裡是 1440×900（HeroLoop 的基準視窗原尺寸），再 scale 成 Figma 那張
+     942 寬的內容：0.6542 = 942/1440。
+     **不要**把這一層改成 942×575 然後在 HeroLoop 裡寫死縮小過的常數——
+     那會讓 --col-h 與 --logo-w 失去共同基準（見 hero-loop.css 檔頭）。
+     縮完是 942 × 588.6，外框 598×574 再裁一次：
+       水平 (942 − 598)/2 = 172，正好等於 Figma 標的 left −172 ✅ */
+  width: 1440px;
+  height: 900px;
+  /* ⚠️ 垂直多推 29px，不是純置中。
+     Figma 3292:2937 那張 942×575 是「1440×900 的 hero 擷取出來的一塊」，
+     不是重新以 942×575 渲染一次——所以 logo 在那張圖裡並不在垂直中央。
+     疊圖實測（2026-09-02）：純置中時我們的 icon 落在 y 209–320，
+     Figma 是 y 238–350，我們高了 29px。水平方向本來就吻合
+     （我們 x 243–354，Figma x 241–352，差 2px）。
+     所以這裡只補垂直的 29px，水平維持置中。 */
+  transform: translate(-50%, calc(-50% + 29px)) scale(0.6542);
+}
+
+/* ② #FAFAFA 底 598×574，手機本體 229×490（實際 232.4，見 OnboardingLoop
+   檔頭：Figma 的 229 是四捨五入，硬壓會削掉圓角外框）。
+   Figma：手機 left 814 − 框 left 636 = 178；框寬 598、手機寬 229
+   → (598 − 229) / 2 = 184.5，差 6.5px，視為置中處理。
+   垂直：手機 top 389 − 框 top 338 = 51。 */
+.gm-frame--onboarding {
+  aspect-ratio: 598 / 574;
+  background: #fafafa;
+}
+
+/* ⚠️ --gm-a02-k：這一區的響應式縮放係數 = 舞台實際寬 / 設計寬 1234，
+   由 MakingAssets02.jsx 的 ResizeObserver 寫在 .gm-assets02-stage 上。
+   為什麼需要 JS：框本身用 aspect-ratio 會跟著視窗縮，但框裡的內容是
+   固定 px 的設計稿尺寸（手機 232.4×490、暖手操 stage 707×763.36），
+   純 CSS 沒辦法從「容器寬 ÷ 設計寬」算出一個**無單位**的 scale 係數
+   （calc() 不能用長度除長度得到純數字，container query 也只能給長度）。
+   不修正的話 1155 下手機會撐破框（實測過）。
+   fallback 1：JS 還沒跑到之前用設計尺寸，1440 下本來就是 1。 */
+.gm-frame-phone {
+  position: absolute;
+  top: calc(51px * var(--gm-a02-k, 1));
+  left: 50%;
+  width: 232.4px;
+  height: 490px;
+  transform: translateX(-50%) scale(var(--gm-a02-k, 1));
+  transform-origin: 50% 0;
+}
+
+/* ③ #FAFAFA 底 1234×574，內容 707×570。
+   ⚠️ 兩層縮放（使用者 2026-09-02 決策）：
+     內層 .screen 402×874 由副本自己的 ResizeObserver 依 .phone 寬度 fit；
+     外層這一層再一個 transform: scale() 把整個 .stage 收進 570 高。
+   純粹整體縮小，動畫構圖完全不變——刻意**不**改副本的 .stage padding / gap，
+   那是改構圖。
+   ⚠️ transform-origin: 0 0，而且縮放後的元素**仍佔原本的版面空間**，
+   所以外框一定要有明確的尺寸 + overflow:hidden 把它包住，否則會把下面的
+   東西頂開（使用者 2026-09-02 提醒）。 */
+.gm-frame--warmup {
+  aspect-ratio: 1234 / 574;
+  background: #fafafa;
+}
+
+.gm-frame-warmup-scale {
+  position: absolute;
+  top: calc(-15.5px * var(--gm-a02-k, 1));
+  left: 50%;
+  /* 寬度取 Figma 標的 707。副本的 .stage 是 flex + justify-content:center，
+     手機大小由它自己的 --screen-w:272px 決定（不隨容器變），所以自然結構是定值：
+       上內距 68 + 手機 607.36 + 下內距 88 = 763.36
+
+     ⚠️ scale = 0.8166 = 496 / 607.36——**對齊的是「手機本體」的高度**，
+     不是整個 stage。推導與實測（2026-09-02 疊 Figma 3337:3224 比對）：
+       先前用 570/763.36 = 0.7467（把含空白下內距的整個 stage 收進 570）的話，
+       手機只有 453.5 高、兩支合計 492 寬，而 Figma 是 496 高 / 539 寬
+       ——差 43 與 47px，遠超過 8px 的容忍。
+       原因：Figma 那張是 HandWarmUp 的擷取圖，它的內距比例跟元件自然構圖
+       不同，用「整個 stage 塞進 570」這個條件去反推倍率必然偏小。
+       改成對齊手機本體之後：高 496.0（Figma 496）、寬 538（Figma 539）。
+     ⚠️ scale 後 stage 總高 623.4 > 框高 574，超出的 33.9px **全部是空白的
+     下內距**，被 overflow:hidden 裁掉不影響任何畫面內容（手機底緣落在 536）。
+     ⚠️ top: -15.5px 是把上內距 68×0.8166=55.5 修正成 Figma 的 40。
+     ⚠️ transform-origin 用 50% 0：縮放後以水平中心對齊、上緣不動。
+     ⚠️ 縮放後的元素仍佔原本的版面空間，所以這一層是 position:absolute，
+     外框 .gm-frame--warmup 有明確尺寸 + overflow:hidden 把它包住，
+     不會把下面的東西頂開。 */
+  width: 707px;
+  transform-origin: 50% 0;
+  /* ⚠️ 水平不是置中：Figma 的內容框在 1234 的帶子裡是 left 244、寬 707
+     （中心 597.5，比帶子中心 617 偏左 19.5）。疊圖實測兩支手機的中心差
+     23.5px，取實測值。 */
+  transform: translateX(calc((-50% - 23.5px) * var(--gm-a02-k, 1))) scale(calc(0.8166 * var(--gm-a02-k, 1)));
+}
+
+/* 三段圖說。Figma 給的是「中心線」的 y，所以用中心對位。 */
+.gm-figcaption--hero,
+.gm-figcaption--onboarding,
+.gm-figcaption--warmup {
+  line-height: 22px;
+}
+
+/* Fig 3：框底 922 → 中心 956，相距 34；扣半個行高 11 → 框頂距 23 */
+.gm-figcaption--hero {
+  margin-top: 23px;
+  text-align: left;
+  /* Figma left 110（相對區塊），框 left 0 → 縮排 110 */
+  padding-left: 110px;
+}
+
+/* Fig 4：框底 912 → 中心 944，相距 32；扣 11 → 21 */
+.gm-figcaption--onboarding {
+  margin-top: 21px;
+  text-align: left;
+  /* Figma left 813（相對區塊），② 框 left 636 → 縮排 177 */
+  padding-left: 177px;
+}
+
+/* Fig 5：框底 976+574=1550 → 中心 1582，相距 32；扣 11 → 21。置中。 */
+.gm-figcaption--warmup {
+  margin-top: 21px;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .gm-assets02-stage {
+    grid-template-columns: 1fr;
+    row-gap: 40px;
+  }
+  .gm-fig--onboarding,
+  .gm-fig--warmup {
+    margin-top: 0;
+  }
+  .gm-figcaption--hero,
+  .gm-figcaption--onboarding {
+    padding-left: 0;
+    text-align: center;
+  }
+}

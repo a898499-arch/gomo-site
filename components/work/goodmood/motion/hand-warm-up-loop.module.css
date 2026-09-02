@@ -1,0 +1,161 @@
+/* ==========================================================
+   暖手操動畫 —— **components/HandWarmUp/HandWarmUp.module.css 的副本**
+
+   ⚠️ 這是 components/HandWarmUp/HandWarmUp.module.css 的副本，原檔在
+   components/HandWarmUp/（由 components/work/sui-sui/SuiSuiPage.jsx:95 使用）。
+   兩邊是**刻意分開維護**的：改原檔不會同步過來，改這裡也不會影響
+   Sui-Sui 頁。使用者 2026-09-02 裁示。
+
+   ⚠️ 這一份 CSS **一個字都沒改**，是逐位元組複製。所有時間軸變數
+   （--t-arrow / --t-loop …）都定義在 .section 上，副本的 JSX 因此保留
+   .section 這一層——只丟掉原檔外面那個 <section> 上的 ss-* class 與整個
+   標題區，不是丟掉 .section 本身。丟掉的話動畫全壞。
+
+   縮放是兩層（使用者 2026-09-02 決策）：
+     內層 .screen 402×874 + transform-origin:0 0，由 JSX 的 ResizeObserver
+       依 .phone 的實際寬度自動 fit——這一層維持原檔行為。
+     外層 再一個 transform: scale(...) 把整個 .stage 收進 707×570 的框。
+       純粹整體縮小，動畫構圖完全不變。
+   ⚠️ 刻意**不**改這裡的 .stage padding / gap：改那些是改構圖（手機與周圍
+   留白的關係會變），副本就不再是「同一個動畫的縮小版」而是另一種排法。
+   ========================================================== */
+
+/* ═══════════════════════════════════════════════════════════
+   Function 3 — Hand warm-up
+   時間軸與版面全部集中在 .section 的變數,改這裡就好(單位:秒)
+   ═══════════════════════════════════════════════════════════ */
+.section{
+  --t-arrow:        .3s;   /* A:箭頭開始畫 */
+  --t-arrow-dur:    .8s;   /* 箭頭畫完要多久 */
+  --t-dots:        1.3s;   /* A:手部圓圈淡入 */
+  --t-toast:       1.3s;   /* A:reminder 出現 */
+  --t-blink:         1s;   /* 圓圈閃爍週期 */
+
+  --t-b-arrow:     5.4s;   /* B:箭頭開始畫 */
+  --t-b-toast:     6.4s;   /* B:Great! 出現 */
+  --t-b-bar:       6.9s;   /* B:進度條延伸 */
+  --t-b-bar-dur:    .6s;
+  --t-b-flower:    7.5s;   /* B:第三朵花長出來 */
+  --t-b-flower-dur: .6s;
+  --t-loop:       11.1s;   /* 一輪總長 */
+
+  --progress-fill:#B8001F; /* 進度條紅色填色 */
+  --screen-w:272px;        /* 螢幕寬度 = Figma 灰色區塊 */
+  --bezel:8px;             /* 手機外框厚度 */
+
+  color:#1a1a1a;
+}
+.section *{box-sizing:border-box}
+.section img{display:block;max-width:none}
+
+/* 2026-08-24:標題區改用 sui-sui.css 既有的 .ss-section /
+   .ss-section-inner / .ss-fn1-* 那一套(跟 Function 1、2 同源),這裡
+   原本自己的 .head/.eyebrow/.title/.desc 已刪除,不要再加回來。
+   整區背景也拿掉(原本 --page #F2F4F8 / --cream #FFFDF8),維持頁面
+   底色——跟 Function 1 同樣的處理,見 Function1.jsx 檔頭。
+   font-family 一併移除,繼承全站字體。 */
+
+.stage{display:flex;justify-content:center;align-items:flex-start;
+       gap:calc(96px - var(--bezel)*2);padding:68px 24px 88px}
+.slot{width:calc(var(--screen-w) + var(--bezel)*2);flex:0 0 auto}
+
+/* ── 手機外框 ── */
+.device{position:relative;padding:var(--bezel);border-radius:calc(var(--bezel)*5.4);
+        background:linear-gradient(160deg,#3a3d42 0%,#1b1d21 38%,#121317 100%);
+        box-shadow:0 0 0 1px rgba(255,255,255,.10) inset,
+                   0 1px 0 rgba(255,255,255,.16) inset,
+                   0 22px 48px rgba(18,22,34,.26),
+                   0 4px 12px rgba(18,22,34,.14)}
+.device::before,.device::after{content:"";position:absolute;width:2px;border-radius:2px;
+        background:linear-gradient(180deg,#3f434a,#232629)}
+.device::before{left:-2px;top:22%;height:8%;box-shadow:0 20px 0 #2b2e33,0 46px 0 #2b2e33}
+.device::after {right:-2px;top:26%;height:13%}
+
+/* ── 螢幕:內層固定 402×874,整體縮放,所有座標直接對應 Figma ── */
+.phone{position:relative;width:100%;aspect-ratio:402/874;overflow:hidden;background:#000;
+       border-radius:calc(var(--bezel)*4.2)}
+.screen{position:absolute;top:0;left:0;width:402px;height:874px;transform-origin:0 0;
+        overflow:hidden;background:#fff}
+.layer{position:absolute;inset:0}
+
+/* ── 底部面板 ── */
+.panel{position:absolute;left:0;top:699px;width:402px;height:175px;background:#fafaf8;
+       box-shadow:0 -3px 24px rgba(0,0,0,.1)}
+.panelB{top:700px;height:174px}
+.caption{position:absolute;left:89px;top:717px;width:224px;text-align:center;
+         font-family:"Lora",serif;font-size:20px;color:#1a1a1a;white-space:nowrap}
+/* 每個數字是 24px 寬的置中框,框的中心 = 那一格花/圓點的中心 */
+.num{position:absolute;top:795px;width:24px;margin-left:-12px;text-align:center;
+     font-family:"DM Sans",sans-serif;font-weight:500;font-size:14px;line-height:1}
+.numOn{color:#000}
+.numOff{color:#c4c4c4}
+
+/* 進度條:軌道 → 紅色填色 → 花,花永遠在最上面 */
+.pbTrack{position:absolute;left:30px;top:767px;width:343px;height:16px}
+.pbFill {position:absolute;left:30px;top:767px;width:343px;height:16px;overflow:visible}
+.pbFill line{stroke:var(--progress-fill);stroke-width:8;stroke-linecap:round}
+.flower{position:absolute;top:731.854px;width:85.713px;height:84.975px}
+.f1{left:-1.405px}
+.f2{left:74.595px}
+.f3{left:159.51px;transform:scale(0);transform-origin:50% 58%}
+
+/* ── 手機 1 ── */
+/* 影片節點在 Figma 是 548×974,座標 (-73, -50) */
+.p1Video{position:absolute;left:-73px;top:-50px;width:548px;height:974px;object-fit:cover}
+.p1Card{position:absolute;left:46px;top:672px;width:309px;height:149px}
+.p1CardNext{position:absolute;left:371px;top:676px;width:31px;height:141px}
+
+/* ── 共用 chrome ── */
+.chromeStatus{position:absolute;left:0;top:0;width:402px;height:62px}
+.chromeBtns{position:absolute;left:16px;top:66px;width:370px;height:51px}
+.bg{position:absolute;left:0;top:0;width:402px;height:699px;object-fit:cover}
+
+/* ── 箭頭:遮罩由起點往終點抹開,模擬「畫出來」 ── */
+.arrow{position:absolute;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+       -webkit-mask-size:250% 250%;mask-size:250% 250%}
+.arrow img{width:100%;height:100%}
+.up{-webkit-mask-image:linear-gradient(to top,#000 40%,transparent 52%);
+    mask-image:linear-gradient(to top,#000 40%,transparent 52%);
+    -webkit-mask-position:0 -150%;mask-position:0 -150%}
+.down{-webkit-mask-image:linear-gradient(to bottom,#000 40%,transparent 52%);
+      mask-image:linear-gradient(to bottom,#000 40%,transparent 52%);
+      -webkit-mask-position:0 250%;mask-position:0 250%}
+
+.toast{position:absolute;opacity:0}
+.handmark{position:absolute;width:92px;height:92px;opacity:0}
+
+/* ═══════════ keyframes ═══════════ */
+@keyframes wipeUp  {from{-webkit-mask-position:0 -150%;mask-position:0 -150%}
+                    to  {-webkit-mask-position:0 100%;mask-position:0 100%}}
+@keyframes wipeDown{from{-webkit-mask-position:0 250%;mask-position:0 250%}
+                    to  {-webkit-mask-position:0 0%;mask-position:0 0%}}
+@keyframes fadeIn{to{opacity:1}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+@keyframes toastIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+@keyframes barGrow{from{stroke-dashoffset:var(--dash)}to{stroke-dashoffset:0}}
+@keyframes flowerGrow{0%{transform:scale(0)}70%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes screenA{0%,40.5%{opacity:1}45.9%,94.6%{opacity:0}100%{opacity:1}}
+@keyframes screenB{0%,40.5%{opacity:0}45.9%,94.6%{opacity:1}100%{opacity:0}}
+
+/* 每一輪由 JS 重新加上 .run,所以上面的秒數怎麼改都不用重算百分比 */
+.run .layerA{animation:screenA var(--t-loop) linear both}
+.run .layerB{animation:screenB var(--t-loop) linear both}
+
+.run .layerA .up{animation:wipeUp var(--t-arrow-dur) ease-out var(--t-arrow) both}
+.run .layerA .handmark{animation:fadeIn .3s ease-out var(--t-dots) both,
+                       blink var(--t-blink) ease-in-out var(--t-dots) infinite}
+.run .layerA .toast{animation:toastIn .35s cubic-bezier(.2,.9,.3,1.15) var(--t-toast) both}
+
+.run .layerB .down{animation:wipeDown var(--t-arrow-dur) ease-out var(--t-b-arrow) both}
+.run .layerB .handmark{opacity:1;animation:none}      /* B 畫面:圓圈靜態顯示,不閃 */
+.run .layerB .toast{animation:toastIn .35s cubic-bezier(.2,.9,.3,1.15) var(--t-b-toast) both}
+.run .layerB .pbFill line{animation:barGrow var(--t-b-bar-dur) cubic-bezier(.3,.8,.4,1) var(--t-b-bar) both}
+.run .layerB .f3{animation:flowerGrow var(--t-b-flower-dur) cubic-bezier(.34,1.4,.5,1) var(--t-b-flower) both}
+
+@media (prefers-reduced-motion:reduce){
+  .section *{animation-duration:.001s !important;animation-iteration-count:1 !important}
+}
+@media (max-width:760px){
+  .section{--screen-w:min(42vw,272px);--bezel:6px}
+  .stage{gap:24px;padding:40px 16px 56px}
+}
