@@ -457,7 +457,9 @@
   background: #fafafa;
   background-clip: padding-box;
   border: 1px solid #d9d9d9;
-  border-radius: 40px;
+  /* ⚠️ 20，不是 40：2026-09-02 使用者裁示 40 → 20，六處一起改。
+     spec-1 / spec-2 那兩張圖的 10px 圓角是另一回事，不在這個範圍內。 */
+  border-radius: 20px;
   overflow: hidden;
 }
 
@@ -701,7 +703,9 @@
    Figma：圖區底 y=916（313 + 603.007）→ 圖說中心線 y=946，行高 22
    → 圖說框頂 y=935，也就是距圖區底 19px。 */
 .gm-assets01 .gm-figcaption {
-  margin-top: 19px;
+  /* ⚠️ 10，全站統一（2026-09-02 使用者裁示：圖說一律距上方那個框 10px）。
+     舊值 19 來自 Figma 的絕對座標，不再使用。 */
+  margin-top: 10px;
   line-height: 22px;
 }
 
@@ -1098,26 +1102,27 @@
   line-height: 22px;
 }
 
-/* Fig 3：① 框底 335+574=909 → 中心 956，相距 47；扣半個行高 11 → 框頂距 36
-   （2026-09-02 隨 ① 上移 13px 重算，舊值 23） */
+/* Fig 3。⚠️ 10，全站統一（2026-09-02 使用者裁示）。
+   Figma 的絕對座標算出來是 36（① 框底 909 → 圖說中心 956，扣半行高 11），
+   不再使用——七個圖說一律 10。 */
 .gm-figcaption--hero {
-  margin-top: 36px;
+  margin-top: 10px;
   text-align: left;
   /* Figma left 110（相對區塊），框 left 0 → 縮排 110 */
   padding-left: 110px;
 }
 
-/* Fig 4：框底 912 → 中心 944，相距 32；扣 11 → 21 */
+/* Fig 4。⚠️ 10，全站統一（2026-09-02 使用者裁示）。Figma 座標算出來是 21。 */
 .gm-figcaption--onboarding {
-  margin-top: 21px;
+  margin-top: 10px;
   text-align: left;
   /* Figma left 813（相對區塊），② 框 left 636 → 縮排 177 */
   padding-left: 177px;
 }
 
-/* Fig 5：框底 976+574=1550 → 中心 1582，相距 32；扣 11 → 21。置中。 */
+/* Fig 5。⚠️ 10，全站統一（2026-09-02 使用者裁示）。Figma 座標算出來是 21。置中。 */
 .gm-figcaption--warmup {
-  margin-top: 21px;
+  margin-top: 10px;
   text-align: center;
 }
 
