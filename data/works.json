@@ -10,7 +10,7 @@
       "Vibe Coding"
     ],
     "group": [
-      "personal"
+      "uiux"
     ],
     "year": null,
     "cover": "/work/hover/goodmood-1.webp",
@@ -29,7 +29,7 @@
       "Health"
     ],
     "group": [
-      "product"
+      "uiux"
     ],
     "year": null,
     "cover": "/work/covers/sui-sui.webp",
@@ -47,7 +47,7 @@
       "UI/UX"
     ],
     "group": [
-      "product"
+      "uiux"
     ],
     "year": null,
     "cover": "/work/covers/wanderbuddy.webp",
@@ -138,7 +138,7 @@
       "Health"
     ],
     "group": [
-      "product"
+      "uiux"
     ],
     "year": null,
     "cover": "/work/covers/ehms.webp",
@@ -197,6 +197,7 @@
       "Children's Products"
     ],
     "group": [
+      "uiux",
       "product"
     ],
     "year": null,
@@ -236,7 +237,7 @@
       "Craft"
     ],
     "group": [
-      "product"
+      "reflective"
     ],
     "year": null,
     "cover": null,
@@ -255,7 +256,7 @@
       "Publication"
     ],
     "group": [
-      "product"
+      "reflective"
     ],
     "year": null,
     "cover": null,

@@ -12,13 +12,27 @@ if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger, Flip);
 }
 
+// ⚠️ 2026-09-03 改分法：原本是 All Works / Product design / Personal Work，
+// 但實際資料撐不起來——六件上線作品裡只有 goodmood 是 personal（點進去只有
+// 一張卡），而「Product design」對 sui-sui 與 wanderbuddy 是錯的，那兩件是
+// App 的 UI/UX 不是產品設計。改成 UI/UX vs Product Design，六件剛好 3 比 3。
+//
+// ⚠️ 'product' 這個 id **沿用但意義變了**：原本涵蓋五件，現在只涵蓋三件
+// （aero-v / blossom-care / mvs）。data/works.json 的 group 已同步改過。
+//
+// ⚠️ ?filter=personal 這個網址從此失效（會被 VALID 擋掉、退回 all）。
+// 網站還沒上線、沒有外部連結會壞，所以不做轉址（使用者 2026-09-03 裁示）。
+//
+// 之後創作類作品（trace-of-conversation / conversation，group 是 reflective）
+// 上線時會再加第三個頁籤。現在 reflective 沒有對應頁籤，那兩件只會出現在
+// All Works——這是預期的，matches() 對未知 group 值本來就安全（見下）。
 const FILTERS = [
   { id: 'all', label: 'All Works' },
-  { id: 'product', label: 'Product design' },
-  { id: 'personal', label: 'Personal Work' },
+  { id: 'uiux', label: 'UI/UX' },
+  { id: 'product', label: 'Product Design' },
 ];
 
-const VALID = new Set(['product', 'personal']);
+const VALID = new Set(['uiux', 'product']);
 
 function readFilterFromURL() {
   if (typeof window === 'undefined') return 'all';
@@ -26,6 +40,9 @@ function readFilterFromURL() {
   return VALID.has(f) ? f : 'all';
 }
 
+// ⚠️ 對未知的 group 值是安全的：includes() 找不到就回 false，那張卡在該
+// 頁籤下被隱藏，不會丟例外。所以 works.json 可以先標上還沒有頁籤的 group
+// （例如 reflective），等頁籤加上去自然就生效。
 function matches(work, filter) {
   return filter === 'all' || (work.group || []).includes(filter);
 }

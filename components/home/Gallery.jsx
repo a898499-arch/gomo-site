@@ -479,11 +479,18 @@ export default function Gallery() {
   return (
     <section className="gallery-outer" id="gallery" ref={outerRef}>
       <h2 className="gallery-title" id="gallery-title" ref={titleRef}>
+        {/* ⚠️ 2026-09-03 改文案：原本列的 CAD / Craft / Reflective Design /
+            APP Design，六件上線作品裡一件對應的都沒有。新的四個詞在六件的
+            tags 裡全都有實例。
+            ⚠️ 分隔用的斜線統一成前後都有空格（詞 / 詞）——原本
+            「Product Design/」沒空格、「APP Design /」有空格，兩種混用。
+            「UI/UX」裡面那條斜線維持不加空格：那是詞本身的一部分，
+            不是分隔符號。 */}
         <span className="reveal-mask">
-          <span className="reveal-inner">UIUX/ Product Design/ APP Design /</span>
+          <span className="reveal-inner">UI/UX / Product Design /</span>
         </span>
         <span className="reveal-mask">
-          <span className="reveal-inner">CAD/ Craft/ Reflective Design +more</span>
+          <span className="reveal-inner">Health / Environment + more</span>
         </span>
       </h2>
 
