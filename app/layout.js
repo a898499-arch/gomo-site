@@ -32,13 +32,20 @@ const poppins = Poppins({
 // og:image / twitter:image **不寫在這裡**：App Router 會自動認
 // app/opengraph-image.jpg（1200×630）這個檔名並產生兩組標籤，
 // 手動再寫一次反而會重複。網站圖示同理，來自 app/icon.svg。
+// ⚠️ 站名是「Maida Hu」，不是「GOMO」（2026-09-03 改）。
+// 首頁不加「頁名 — 站名」的格式，站名本身就夠了；其餘各頁是「頁名 — Maida Hu」。
+// 為什麼換掉：分頁很窄，「GOMO — Maida Hu」會被截成「GOMO — Maid…」，
+// 名字剛好被切掉。而分頁上已經有 app/icon.svg 的 GOMO 圖示負責品牌識別，
+// 標題文字就該負責圖示做不到的事——告訴人這是**誰**的作品集。
+// ⚠️ 這是「站名」的改動，不是拿掉 GOMO 這個識別：標誌元件
+// components/GomoMark.jsx 與 app/icon.svg 都保留。
 export const metadata = {
   metadataBase: new URL('https://maidahu.com'),
-  title: 'GOMO — Maida Hu',
+  title: 'Maida Hu',
   description:
     'Maida Hu — product and UI/UX designer. Case studies in product design, app design, and a portfolio site she designed, specced, and built herself.',
   openGraph: {
-    title: 'GOMO — Maida Hu',
+    title: 'Maida Hu',
     description:
       'Maida Hu — product and UI/UX designer. Case studies in product design, app design, and a portfolio site she designed, specced, and built herself.',
     type: 'website',

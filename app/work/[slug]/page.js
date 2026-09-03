@@ -42,8 +42,8 @@ export async function generateMetadata({ params }) {
   if (!work || !PAGES[slug]) return {};
 
   // 每頁用自己的標題與副標。先前六頁共用根層的 metadata，搜尋結果會出現
-  // 六筆一模一樣的「GOMO — Maida Hu」＋同一句 description。
-  const title = `${work.title} — GOMO`;
+  // 六筆一模一樣的「Maida Hu」＋同一句 description。
+  const title = `${work.title} — Maida Hu`;
   const description = work.description;
   return {
     title,

@@ -10,7 +10,7 @@ import WorkIndex from '@/components/work-index/WorkIndex';
 // 從這個前提算出來的（126 + 75 = 201，對上 Figma node 3:281 的實測值）。
 // ⚠️ description 是英文，理由同 app/about/page.js。
 export const metadata = {
-  title: 'Works — GOMO',
+  title: 'Works — Maida Hu',
   description:
     'Selected work by Maida Hu — product design, app and UI/UX design, and self-initiated projects.',
 };

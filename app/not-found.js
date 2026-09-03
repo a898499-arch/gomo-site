@@ -11,7 +11,7 @@ import Link from 'next/link';
 // 空殼，那對搜尋引擎是 soft-404（會被收錄），對使用者是看到一句開發中的話。
 // 現在 app/work/[slug]/page.js 查不到頁面就 notFound()，落到這裡。
 export const metadata = {
-  title: 'Page not found — GOMO',
+  title: 'Page not found — Maida Hu',
   description: 'This page does not exist.',
 };
 

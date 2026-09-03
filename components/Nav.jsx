@@ -190,7 +190,7 @@ export default function Nav() {
   return (
     <nav className="site-nav" ref={navRef}>
       <div className="nav-inner page-container">
-        <Link href="/" className="nav-logo" aria-label="GOMO — back to home" ref={logoRef}>
+        <Link href="/" className="nav-logo" aria-label="Maida Hu — back to home" ref={logoRef}>
           <GomoMark />
         </Link>
 
