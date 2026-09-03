@@ -1257,3 +1257,49 @@
     row-gap: 4.3428%;
   }
 }
+
+/* ====================================================================
+   輪 6：What This Changed（3245:2843）+ 結尾（3337:3286 / 3337:3283）
+   ==================================================================== */
+
+/* Figma：x=196、寬 1048。又是一個不同的欄寬
+   （1360 / 1344 / 1234 / 1347.5 / 1048），維持不統一。 */
+.gm-changed-inner {
+  width: calc(100% - var(--page-gutter) * 2);
+  max-width: 1048px;
+  margin-inline: auto;
+}
+
+/* Figma：kicker 頂 0 → Frame 109 頂 51，扣 40.4 行高 = 10.6 */
+.gm-changed .gm-section-text {
+  margin-top: 10.6px;
+}
+
+/* 節點 3245:2847：欄寬 1048（＝整個區塊寬） */
+.gm-changed .gm-body {
+  max-width: 1048px;
+}
+
+/* ---------- 結尾：GOMO 標記 + 收尾句 ----------
+   ⚠️ 這一區的節點不在整頁 frame 2343:129 裡（畫布座標差約 1650px），
+   所以只有「標記 → 收尾句」的 40px 量得到；它與上下區塊的距離量不到，
+   走全站通用節奏（.gm-section 的 padding-block）。詳見 Closing.jsx 檔頭。 */
+.gm-closing-inner {
+  max-width: 1440px;
+  margin-inline: auto;
+  padding-inline: var(--page-gutter);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* 標記底 10274 → 收尾句頂 10314（節點 3337:3286 / 3337:3283）
+     ⚠️ 與開場 .gm-opening-inner 的 gap 同樣是 40——一頭一尾同一個節奏。 */
+  gap: 40px;
+}
+
+/* 3337:3284 Frame 115：1128 寬、置中。與開場的 .gm-opening-text 同寬。
+   文字樣式沿用 .gm-opening-tagline（同一句話、同一組數值），
+   這裡只補欄寬與置中。 */
+.gm-closing-line {
+  width: 100%;
+  max-width: 1128px;
+}

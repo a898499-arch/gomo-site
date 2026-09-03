@@ -10,6 +10,9 @@ import DesignProcess from './DesignProcess';
 import MakingAssets01 from './MakingAssets01';
 import MakingAssets02 from './MakingAssets02';
 import WhereAIFellShort from './WhereAIFellShort';
+import WhatThisChanged from './WhatThisChanged';
+import Closing from './Closing';
+import NextWork from '@/components/work/NextWork';
 
 // Goodmood 作品詳情頁——這個網站本身的 case study。
 // Figma：檔案 j4saimg2oJWL5tUkBh5Bww，整頁 frame 2343:129（1440×11831）。
@@ -46,13 +49,16 @@ export default function GoodmoodPage() {
       {/* 3337:3228  y=8174  1347×1762  四支嘗試影片 + 最終版錄影 + Fig 6/7 */}
       <WhereAIFellShort />
 
-      {/* 之後分輪接進來，順序與 Figma 由上而下一致：
-          <WhatThisChanged />     3245:2843  y=9598  1048×247   純文字
-          <Closing />             3337:3286 標記 + 3337:3283 收尾句
-          <NextWork currentSlug="goodmood" />   ← 用共用的 components/work/NextWork.jsx
+      {/* 3245:2843  y=10348  1048×247  純文字，沒有圖也沒有動效 */}
+      <WhatThisChanged />
 
-          素材都已經在 public/work/goodmood/（spec-1/2、compare-1-*、
-          process-flow.svg、fell-short-*.mp4、slider-*）。 */}
+      {/* 標記 3337:3286 + 收尾句 3337:3283/3285。
+          ⚠️ 這三個節點不在整頁 frame 裡，座標系不同——見 Closing.jsx 檔頭。 */}
+      <Closing />
+
+      {/* 全站共用的那一支，不為這一頁另做（3337:3287「More Project」）。 */}
+      <NextWork currentSlug="goodmood" />
+
     </div>
   );
 }
