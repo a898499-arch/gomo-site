@@ -20,8 +20,12 @@ const poppins = Poppins({
 // 搜尋結果摘要與社群分享卡片都會直接顯示這一句——寫中文等於把中文摘要
 // 送到英文讀者眼前（2026-09-03 使用者指示）。
 //
-// ⚠️ metadataBase 是**目前的 Vercel 網址**。之後如果綁了自訂網域，這裡要
-// 跟著改——否則 og:image、twitter:image 與 sitemap 全都會指向舊網址。
+// ⚠️ metadataBase 是正式網址（Cloudflare 註冊、Vercel 部署）。
+// www.maidahu.com 會 308 轉址到這裡，所以 canonical 一律用**不帶 www** 的
+// 版本——兩種都送給搜尋引擎會被當成兩個網站。
+// 舊的 gomo-site.vercel.app 保留當備用，但不再出現在任何 metadata 裡。
+// 之後如果再換網域，這裡要跟著改——否則 og:image、twitter:image 與 sitemap
+// 全都會指向舊網址。
 // 這一個值同時是 app/robots.js 與 app/sitemap.js 的網址來源（兩支都讀
 // 這裡的 metadata.metadataBase），所以只有這一個地方要改。
 //
@@ -29,7 +33,7 @@ const poppins = Poppins({
 // app/opengraph-image.jpg（1200×630）這個檔名並產生兩組標籤，
 // 手動再寫一次反而會重複。網站圖示同理，來自 app/icon.svg。
 export const metadata = {
-  metadataBase: new URL('https://gomo-site.vercel.app'),
+  metadataBase: new URL('https://maidahu.com'),
   title: 'GOMO — Maida Hu',
   description:
     'Maida Hu — product and UI/UX designer. Case studies in product design, app design, and a portfolio site she designed, specced, and built herself.',
