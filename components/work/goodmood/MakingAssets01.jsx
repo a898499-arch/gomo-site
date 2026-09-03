@@ -175,7 +175,7 @@ export default function MakingAssets01() {
             ⚠️ 真正的控制項是最底下那個 <input type="range">，蓋滿整個盒子、
             opacity:0。拖曳、點盒子任一點跳位、鍵盤左右鍵 / Home / End、
             螢幕閱讀器播報數值全部由原生行為提供。 */}
-        <div className="gm-slider" ref={sliderRef} style={{ '--gm-slider-pos': sliderPos }}>
+        <div className="gm-panel gm-slider" ref={sliderRef} style={{ '--gm-slider-pos': sliderPos }}>
           {/* 下層：Before —— AI 直接生成的粗版 */}
           <div className="gm-slider-layer gm-slider-layer--before">
             <div className="gm-slider-media">

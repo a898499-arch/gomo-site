@@ -20,6 +20,10 @@ import HandWarmUpLoop from './motion/HandWarmUpLoop';
 //   Fig 4    3337:3217  left 813   中心 top 944
 //   Fig 5    3337:3218  中心 top 1582，置中
 //
+// 三個框的底色 / 邊框 / 圓角 / overflow 來自共用的 .gm-panel（見 goodmood.css）——
+// Figma 2026-09-02 把全站灰塊統一加了 1px #D9D9D9 邊框與 40 圓角，
+// ① 的遮罩 2941:2632 也在內，所以左上框現在也是圓角的。
+//
 // ⚠️ 三個框裡放的是「原元件的副本」，不是截圖，也不共用原元件
 // （使用者 2026-09-02 決策）。三份副本各自的檔頭都寫了「改了哪幾個地方」。
 //
@@ -84,7 +88,7 @@ export default function MakingAssets02() {
         <div className="gm-assets02-stage" ref={stageRef}>
           {/* ① WanderBuddy hero —— 裁切成小窗，不是整個縮小 */}
           <figure className="gm-fig gm-fig--hero">
-            <div className="gm-frame gm-frame--hero">
+            <div className="gm-panel gm-frame gm-frame--hero">
               <div className="gm-frame-crop">
                 <HeroLoop />
               </div>
@@ -96,7 +100,7 @@ export default function MakingAssets02() {
 
           {/* ② Suì-Suì onboarding —— #FAFAFA 底，手機置中 */}
           <figure className="gm-fig gm-fig--onboarding">
-            <div className="gm-frame gm-frame--onboarding">
+            <div className="gm-panel gm-frame gm-frame--onboarding">
               <div className="gm-frame-phone">
                 <OnboardingLoop />
               </div>
@@ -108,7 +112,7 @@ export default function MakingAssets02() {
 
           {/* ③ 暖手操 —— #FAFAFA 底，兩支手機並排、外層再整體縮小 */}
           <figure className="gm-fig gm-fig--warmup">
-            <div className="gm-frame gm-frame--warmup">
+            <div className="gm-panel gm-frame gm-frame--warmup">
               <div className="gm-frame-warmup-scale">
                 <HandWarmUpLoop assets="/web-assets" />
               </div>

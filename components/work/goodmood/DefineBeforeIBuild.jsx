@@ -41,7 +41,7 @@ export default function DefineBeforeIBuild() {
         </div>
       </div>
 
-      <div className="gm-band gm-define-band">
+      <div className="gm-panel gm-band gm-define-band">
         {/* ⚠️ 兩張 PNG 已經是「顯示尺寸的 2 倍」（989×1020 / 868×1020），也就是
             Figma 的裁切框已經套過了。直接以原比例放，不要再重現 Figma 那層
             112.66% / 110.71% 的縮放位移，否則等於裁兩次。

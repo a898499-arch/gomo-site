@@ -75,7 +75,7 @@ export default function DesignProcess() {
         </div>
       </div>
 
-      <div className="gm-band gm-process-band">
+      <div className="gm-panel gm-band gm-process-band">
         {/* ⚠️ 圖裡最小的字是 10px。1247px 的圖在 1155 視窗下會縮到約 86%，
             10px 變 8.6px，讀不到——所以這裡「不」等比縮小，改成窄螢幕左右滑動
             （內層 min-width:1150px + 外層 overflow-x:auto，見 goodmood.css）。

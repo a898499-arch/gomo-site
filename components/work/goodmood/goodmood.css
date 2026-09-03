@@ -433,6 +433,34 @@
   gap: 5px;
 }
 
+/* ==========================================================
+   共用：灰色面板 .gm-panel
+   Figma 2026-09-02 把全站的灰色色塊統一加上邊框與圓角。使用者確認過的節點：
+     3288:2898  Define Before I Build 的灰底（1353×658）
+     3288:2900  Design Process 的灰底（1366×802）
+     2941:2632  Making assets 02 ① 左上框的遮罩（598×574）
+     3220:2810  Making assets 02 ② 右上框（598×574）
+     3220:2811  Making assets 02 ③ 下方框（1234×574）
+   ＋ 前後對比滑軌的外框 .gm-slider（Figma 沒有這個節點，但視覺是同一組）。
+   後兩個節點 Figma 回傳的是 SVG 不是 rect，**不要真的去嵌那張 SVG**，用 CSS 畫。
+
+   ⚠️ 這四行只准寫在這裡。六個地方各寫各的遲早會漂移——同一種元件在同一頁
+   長不一樣，比任何還原度誤差都明顯（使用者 2026-09-02 指示）。
+   要改邊框顏色或圓角，改這一個地方，六處一起動。
+
+   ⚠️ background-clip: padding-box 是必要的，不是裝飾：
+   `border` + `border-radius` + `overflow:hidden` 疊在一起時，子元素被裁切到
+   **padding box** 的圓角，而元素自己的背景預設鋪到 **border box**。在圓角處
+   兩者的反鋸齒不會完全重合，底色會從內容與邊框之間透出一條髮絲線。
+   收成 padding-box 之後底色與裁切邊界同一條，縫就不存在了。 */
+.gm-panel {
+  background: #fafafa;
+  background-clip: padding-box;
+  border: 1px solid #d9d9d9;
+  border-radius: 40px;
+  overflow: hidden;
+}
+
 /* 灰底帶。
    ⚠️ 刻意偏離 Figma：Define 的 Rectangle 293 是 1353 寬、Design Process 的
    Rectangle 294 是 1366 寬，兩者差 13px。統一成 .page-container 的內容寬
@@ -441,7 +469,7 @@
    高度不寫死，由內距 + 內容自然撐出來，剛好等於 Figma 的 658 / 802
    （各自的算式寫在下面）。 */
 .gm-band {
-  background: #fafafa;
+  /* 底色 / 邊框 / 圓角 / overflow 全部來自 .gm-panel，這裡只管尺寸。 */
   /* ⚠️ 底色帶自己的寬度就是 1360，不是「1440 外框 + 40 內距」——背景會鋪滿
      padding，寫成後者的話看到的灰帶是 1440 寬（實測過）。所以這裡直接讓
      元素本身收成 1360，左右靠 gutter 讓位。 */
@@ -687,7 +715,8 @@
    圖片框因此是 1344 − 100 = 1244（Figma 是 1250，同樣等比收 6）。
    ⚠️ 圓角：Figma 兩個節點不一致（after 40 / before 24），使用者 2026-09-02
    裁示統一為 40。兩層必須完全一致，否則滑動時 clip 的切邊會露出圓角不齊。
-   ⚠️ 底色 / 邊框 / 圓角 / overflow 全部只掛在這一層。裡面的 before 與 after
+   ⚠️ 底色 / 邊框 / 圓角 / overflow 全部只掛在這一層，而且是**由 .gm-panel 提供**
+   （2026-09-02 抽成共用 class，與五個灰塊同一組數值）。裡面的 before 與 after
    兩層只放圖和標籤，各自不再畫一次邊框——畫兩次的話 clip 的切邊會出現兩條線。 */
 .gm-slider {
   position: relative;
@@ -695,10 +724,6 @@
   max-width: 1344px;
   margin: 40px auto 0;
   aspect-ratio: 1344 / 755;
-  background: #fafafa;
-  border: 1px solid #d9d9d9;
-  border-radius: 40px;
-  overflow: hidden;
   touch-action: pan-y; /* 垂直捲動仍交給頁面，水平留給滑軌 */
   /* ⚠️ 裡面所有尺寸都用 cqw（相對這個容器的寬度），不是固定 px。
      外框用 aspect-ratio 會跟著視窗縮，內容如果寫死 px 就會溢出被裁——
@@ -932,11 +957,11 @@
   margin-top: 54px;
 }
 
-/* 共用的框 */
+/* 共用的框。底色 / 邊框 / 圓角 / overflow 全部來自 .gm-panel（三個框在 JSX
+   都同時掛 gm-frame + gm-panel），這裡只管定位與尺寸。 */
 .gm-frame {
   position: relative;
   width: 100%;
-  overflow: hidden;
 }
 
 /* ① 598×574，裡面是 942×575 的內容置中裁切（Figma：內容 left −172，
@@ -976,7 +1001,6 @@
    垂直：手機 top 389 − 框 top 338 = 51。 */
 .gm-frame--onboarding {
   aspect-ratio: 598 / 574;
-  background: #fafafa;
 }
 
 /* ⚠️ --gm-a02-k：這一區的響應式縮放係數 = 舞台實際寬 / 設計寬 1234，
@@ -1008,7 +1032,6 @@
    東西頂開（使用者 2026-09-02 提醒）。 */
 .gm-frame--warmup {
   aspect-ratio: 1234 / 574;
-  background: #fafafa;
 }
 
 .gm-frame-warmup-scale {
