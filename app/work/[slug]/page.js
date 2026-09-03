@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import works from '@/data/works.json';
 import WanderBuddyPage from '@/components/work/wanderbuddy/WanderBuddyPage';
 import SuiSuiPage from '@/components/work/sui-sui/SuiSuiPage';
 import AeroVPage from '@/components/work/aero-v/AeroVPage';
@@ -28,6 +29,22 @@ const PAGES = {
 // ⚠️ 判斷依據是 PAGES 而不是 works.json：works.json 裡有 13 筆，但只有 6 筆
 // 真的有詳情頁。其餘 7 筆都是 hidden + ready:false，畫面上連結不出來，
 // 網址被猜到時應該回真正的 404，而不是一個空頁面。
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+  const work = works.find((w) => w.slug === slug);
+  if (!work || !PAGES[slug]) return {};
+
+  // 每頁用自己的標題與副標。先前六頁共用根層的 metadata，搜尋結果會出現
+  // 六筆一模一樣的「GOMO — Maida Hu」＋同一句 description。
+  const title = `${work.title} — GOMO`;
+  const description = work.description;
+  return {
+    title,
+    description,
+    openGraph: { title, description, type: 'article' },
+  };
+}
+
 export default async function WorkDetailPage({ params }) {
   const { slug } = await params;
   const Page = PAGES[slug];
