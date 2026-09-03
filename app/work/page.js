@@ -8,9 +8,11 @@ import WorkIndex from '@/components/work-index/WorkIndex';
 // 「不要」加 data-nav-bleed：這一頁沒有滿版 Hero，需要 .page-content 幫固定
 // 導覽列預留的那 126px（= 116 + --nav-top-gap），簡介區的 padding-top 75px 就是
 // 從這個前提算出來的（126 + 75 = 201，對上 Figma node 3:281 的實測值）。
+// ⚠️ description 是英文，理由同 app/about/page.js。
 export const metadata = {
   title: 'Works — GOMO',
-  description: 'Maida Hu 的作品列表',
+  description:
+    'Selected work by Maida Hu — product design, app and UI/UX design, and self-initiated projects.',
 };
 
 // ⚠️ 從這裡就把 hidden 濾掉，不是在 WorkIndex 裡濾。
