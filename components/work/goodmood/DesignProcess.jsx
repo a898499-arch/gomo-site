@@ -33,7 +33,9 @@ function readProcessFlow() {
       .replace(
         /<svg([^>]*)>/,
         '<svg$1 role="img" aria-labelledby="gm-flow-title">' +
-          '<title id="gm-flow-title">設計流程圖：規格書、Figma、Cursor + Claude 與素材生成之間的協作迴圈</title>'
+          // ⚠️ lang="zh-Hant"：整站是 <html lang="en">，這行 <title> 是中文，
+          // 不標語言的話英文語音的螢幕閱讀器會唸不出來（2026-09-03 補）。
+          '<title id="gm-flow-title" lang="zh-Hant">設計流程圖：規格書、Figma、Cursor + Claude 與素材生成之間的協作迴圈</title>'
       )
   );
 }
@@ -98,7 +100,7 @@ export default function DesignProcess() {
         {/* CLAUDE.md 的匯出圖無障礙補償：圖之外再給一份純文字敘述。
             SVG 本身是 role="img" + <title>，輔助技術只會讀到那一行名稱，
             完整流程由這裡提供。 */}
-        <p className="visually-hidden">
+        <p className="visually-hidden" lang="zh-Hant">
           流程分成三條線。主線：開發規格書（站台結構、內容層級、關鍵互動、設計 token、動效規則、
           每一區的驗收條件）先寫好，AI 每接一個新任務前都要先讀；標記 ⚠️ 的地方一律停下來問，
           不自行編造。接著在 Figma 完成版面與視覺，透過 Figma MCP 傳進 Cursor，由 Claude 建置成品；

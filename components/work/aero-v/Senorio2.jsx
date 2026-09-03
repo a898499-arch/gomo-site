@@ -26,6 +26,7 @@ export default function Senorio2() {
           height={913}
           loading="lazy"
           decoding="async"
+          lang="zh-Hant"
           alt="米白色調的髮廊室內，畫面中央是一張 AERO V 白色圓座凳，鍍鉻五爪滾輪底座與透明集髮罩清晰可見。左右兩側各有一面落地鏡與米色理髮椅，一位身著棕色上衣、黑色長裙的人正從座凳後方走過，身影帶著動態模糊。"
         />
       </div>

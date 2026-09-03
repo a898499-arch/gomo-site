@@ -57,6 +57,7 @@ export default function Dimensions() {
             height={681}
             loading="lazy"
             decoding="async"
+            lang="zh-Hant"
             alt="AERO V 座凳的完整結構渲染圖，由上而下依序是白色圓形座墊、伸縮柱身、淺綠色的 HEPA 濾芯、圓盤狀氣流導板，以及裝有集髮罐的五爪滾輪底座。"
           />
 

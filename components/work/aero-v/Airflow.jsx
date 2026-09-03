@@ -57,6 +57,7 @@ export default function Airflow() {
               height={594}
               loading="lazy"
               decoding="async"
+              lang="zh-Hant"
               alt="AERO V 座凳的剖視示意圖：座面下方以藍色標示 HEPA 濾芯位置、柱身中段以橘色標示氣流導引風扇、底盤上方以黃色標示穩流支架，箭頭標出空氣由座面兩側排出、沿柱身上行、以及由底部四周吸入的路徑。"
             />
 

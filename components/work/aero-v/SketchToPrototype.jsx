@@ -81,6 +81,7 @@ export default function SketchToPrototype() {
             height={287}
             loading="lazy"
             decoding="async"
+            lang="zh-Hant"
             alt="九幅手繪概念草稿的拼貼，用鉛筆與紅藍原子筆畫出凳子的各種氣流方案：座面下的風扇與濾網、柱身裡的集髮容器、底座周圍的進氣口，並標註 fans、filter、intake、hair container 等字樣。"
           />
 
@@ -104,7 +105,7 @@ export default function SketchToPrototype() {
           {/* 依 CLAUDE.md 的無障礙補償：輪播的 <img> 都是 alt="" + aria-hidden
               （中途換 alt 螢幕閱讀器不會重讀，做成 live region 又會變噪音），
               九張照片的內容改由這一份視覺隱藏的純文字交代。 */}
-          <div className="visually-hidden">
+          <div className="visually-hidden" lang="zh-Hant">
             <p>此區有三組會自動輪播的照片，各三張。</p>
             <p>
               3D 建模：一、SolidWorks 中的凳子座面與底座模型，旁邊有手寫的中文設計註記。

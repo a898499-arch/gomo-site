@@ -45,6 +45,7 @@ export default function Background() {
             height={978}
             loading="lazy"
             decoding="async"
+            lang="zh-Hant"
             alt="髮廊裡兩位髮型師正在為一位顧客上染劑，顧客的頭髮被分成多束處理。畫面經過去彩與暗化處理，呈現沙龍作業時瀰漫化學藥劑的環境。"
           />
 

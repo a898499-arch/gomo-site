@@ -49,6 +49,7 @@ export default function LogoOverview() {
             height={65}
             loading="lazy"
             decoding="async"
+            lang="zh-Hant"
             alt="兩枚得獎標章：red dot award product design 紅點設計獎，以及 2022 奇想設計大賽 GREAT DESIGN 獎。"
           />
         </div>

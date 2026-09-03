@@ -145,6 +145,9 @@ export default function MakingAssets01() {
                     key={set[side]}
                     src={set[side]}
                     srcSet={srcSetFor(set[side])}
+                    // ⚠️ alt 來自 COMPARE_SETS，是中文；整站是 lang="en"，
+                    // 不標語言英文語音會唸不出來（2026-09-03 補）
+                    lang="zh-Hant"
                     alt={set[side === 'left' ? 'leftAlt' : 'rightAlt']}
                     width={671}
                     height={604}
@@ -183,6 +186,7 @@ export default function MakingAssets01() {
               <img
                 src="/work/goodmood/slider-before.webp"
                 srcSet={srcSetFor('/work/goodmood/slider-before.webp')}
+                lang="zh-Hant"
                 alt="AI 直接生成的粗版四宮格：構圖對了，但細節與質感還沒到可用的程度。"
                 loading="lazy"
                 decoding="async"
@@ -198,6 +202,7 @@ export default function MakingAssets01() {
               <img
                 src="/work/goodmood/slider-after.webp"
                 srcSet={srcSetFor('/work/goodmood/slider-after.webp')}
+                lang="zh-Hant"
                 alt="最終版四宮格：經過我自己修圖與調整之後的成品。"
                 loading="lazy"
                 decoding="async"

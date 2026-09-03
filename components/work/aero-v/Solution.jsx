@@ -72,6 +72,7 @@ export default function Solution() {
               height={405}
               loading="lazy"
               decoding="async"
+              lang="zh-Hant"
               alt="左半是室內地板上的直立式空氣清淨機，右半是人字拼木地板上的無線吸塵器吸頭，兩者並置對應淨化空氣與收集落髮兩件事。畫面經過去彩處理，中央有一道灰色漸層紗罩。"
             />
             <p className="av-sol-eyebrow av-sol-eyebrow--solution av-entrance-item">SOLUTION</p>
@@ -94,6 +95,7 @@ export default function Solution() {
               height={420}
               loading="lazy"
               decoding="async"
+              lang="zh-Hant"
               alt="髮型師在沙龍中為顧客洗頭的側面畫面，背景是鏡台與吹風機。整張覆蓋一層青色調，呼應乾淨空氣的意象。"
             />
             <p className="av-sol-eyebrow av-sol-eyebrow--goal av-entrance-item">goal</p>

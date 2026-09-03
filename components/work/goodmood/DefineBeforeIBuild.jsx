@@ -54,6 +54,7 @@ export default function DefineBeforeIBuild() {
             <img
               className="gm-define-fig--1"
               src="/work/goodmood/spec-1.png"
+              lang="zh-Hant"
               alt="開發規格書的一頁：說明這份文件怎麼用，以及這個網站要達成什麼。"
               width={494}
               height={510}
@@ -64,6 +65,7 @@ export default function DefineBeforeIBuild() {
             <img
               className="gm-define-fig--2"
               src="/work/goodmood/spec-2.png"
+              lang="zh-Hant"
               alt="開發規格書的另一頁：色彩與字體規則。"
               width={434}
               height={510}

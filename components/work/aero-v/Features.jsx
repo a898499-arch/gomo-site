@@ -44,6 +44,9 @@ export default function Features() {
               <div className={`av-feat-card av-entrance-item`} key={c.key}>
                 <div className="av-feat-photo">
                   <img
+                    // ⚠️ lang="zh-Hant"：alt 來自 CARDS，是中文；整站是
+                    // <html lang="en">，不標語言英文語音會唸不出來（2026-09-03 補）
+                    lang="zh-Hant"
                     className="av-feat-img"
                     src={`/work/aero-v/${c.img}.webp`}
                     srcSet={`/work/aero-v/${c.img}.webp 1x, /work/aero-v/${c.img}@2x.webp 2x`}

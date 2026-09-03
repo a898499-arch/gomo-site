@@ -27,6 +27,7 @@ export default function Senorio() {
           height={913}
           loading="lazy"
           decoding="async"
+          lang="zh-Hant"
           alt="明亮的髮廊室內情境，米白色調的空間中央擺著一張 AERO V 白色圓座凳，五爪滾輪底座為鍍鉻材質。左側是理髮椅與整面落地鏡，右側有兩面環形燈鏡台，後方一位髮型師走動的身影帶著動態模糊。"
         />
       </div>

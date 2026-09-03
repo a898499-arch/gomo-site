@@ -31,6 +31,7 @@ export default function Hero() {
            的知情偏離，不是漏做。 */
         fetchPriority="high"
         decoding="async"
+        lang="zh-Hant"
         alt="一位身穿黑色上衣與長褲的髮型師背對鏡頭，側坐在 AERO V 淨化理髮椅上。椅子有白色圓形坐墊、金屬升降柱與五星腳輪底座，背景是純淨的淺灰色攝影棚。"
       />
 

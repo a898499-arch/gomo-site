@@ -170,7 +170,8 @@ export default function WhereAIFellShort() {
             <div className="gm-panel gm-fellshort-card gm-fellshort-card--attempts" ref={attemptsCardRef}>
               {/* 影片是示範內容、沒有聲音，結論已經寫在 Fig 6 的圖說裡。
                   這一段純文字副本讓螢幕閱讀器與搜尋引擎照樣讀得到四次嘗試各是什麼。 */}
-              <p className="visually-hidden">
+              {/* ⚠️ lang="zh-Hant"：整站 lang="en"，這段是中文（2026-09-03 補）。 */}
+              <p className="visually-hidden" lang="zh-Hant">
                 四段並排的示範影片，分別是四次讓 AI 生成「甩手運動」動畫的嘗試：
                 {ATTEMPTS.map((a) => a.label).join(' ')}
               </p>
@@ -184,6 +185,7 @@ export default function WhereAIFellShort() {
                     key={a.src}
                     ref={attempts.register(i)}
                     src={attempts.armed ? a.src : undefined}
+                    lang="zh-Hant"
                     aria-label={a.label}
                     muted
                     playsInline
@@ -212,6 +214,7 @@ export default function WhereAIFellShort() {
               ref={final.register(0)}
               className="gm-fellshort-final"
               src={final.armed ? FINAL.src : undefined}
+              lang="zh-Hant"
               aria-label={FINAL.label}
               muted
               playsInline

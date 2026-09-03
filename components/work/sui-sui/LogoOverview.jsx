@@ -34,7 +34,7 @@ export default function LogoOverview() {
             一個空格，是同一個連續文字塊自然換成 4 行，不是段落間距。用
             單一 <p> 交給瀏覽器在正確寬度下自然換行，才會跟 Figma 一致。 */}
         <p className="ss-overview-body ss-entrance-item">
-          Sui-Sui is a home-based wellness app that brings cosmetic therapy into the daily lives of older women. Through structured, guided sessions, from hand warm-ups to skincare and makeup, it turns a clinical practice into a personal ritual, slowing cognitive decline and restoring confidence one session at a time. Sui-Sui (媠) means beautiful in Taiwanese, a reminder that it&rsquo;s never too late to bloom.
+          Sui-Sui is a home-based wellness app that brings cosmetic therapy into the daily lives of older women. Through structured, guided sessions, from hand warm-ups to skincare and makeup, it turns a clinical practice into a personal ritual, slowing cognitive decline and restoring confidence one session at a time. Sui-Sui (<span lang="zh-Hant">媠</span>) means beautiful in Taiwanese, a reminder that it&rsquo;s never too late to bloom.
         </p>
       </div>
 

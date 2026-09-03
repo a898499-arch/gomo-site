@@ -60,8 +60,9 @@ export default function PhotoStack({ base, photos, slug }) {
             聽完整份摘要，比在圖與文之間來回跳更好懂。
             .visually-hidden 是絕對定位，不佔 flex 版面、不會多出一個 gap。 */}
         <div className="visually-hidden">
-          <h2>圖片內容摘要</h2>
-          <dl>
+          {/* ⚠️ lang="zh-Hant"：標題與摘要都是中文，理由同上面 <img> 的註解。 */}
+          <h2 lang="zh-Hant">圖片內容摘要</h2>
+          <dl lang="zh-Hant">
             {photos.map((p) => (
               <div key={p.file}>
                 <dt>{p.heading}</dt>
@@ -87,6 +88,10 @@ function PhotoStackItem({ base, file, alt, eager }) {
   return (
     <img
       ref={ref}
+      // ⚠️ lang="zh-Hant"：整站是 <html lang="en">，但 alt 是中文。不標語言的話
+      // 英文語音的螢幕閱讀器會用英文發音唸中文字，等於唸不出來。lang 掛在元素上
+      // 會一併套用到它的 alt 屬性（2026-09-03 補）。
+      lang="zh-Hant"
       className="work-photo-stack-item"
       src={`${base}/${file}.webp`}
       srcSet={`${base}/${file}.webp 1x, ${base}/${file}@2x.webp 2x`}
