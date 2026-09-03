@@ -70,6 +70,18 @@ export default function RootLayout({ children }) {
       <body>
         <LenisProvider>
           <NavBehaviorProvider>
+            {/* ⚠️ 跳至主要內容（2026-09-03 補）。
+                鍵盤使用者每進一頁都得先 Tab 過導覽列的 logo + 三個連結才碰得到
+                內容，每一頁都要重來一次。這條連結平常用 .skip-link 移出畫面，
+                只有被 Tab 到（:focus）時才滑進來。
+                ⚠️ 必須放在 <Nav /> **之前**——它要是 body 裡第一個可聚焦的元素，
+                放在後面就失去意義了。
+                ⚠️ 目標 #main-content 是 <main> 的 id，配 tabIndex={-1}：
+                <main> 本身不可聚焦，不加的話 Safari/Chrome 會把焦點留在原地，
+                只有捲動位置變了，接下來按 Tab 又跳回導覽列。 */}
+            <a href="#main-content" className="skip-link">
+              Skip to main content
+            </a>
             <Nav />
             {/* 滿版 Hero 頁面（首頁 / sui-sui / wanderbuddy）不需要這層的
                 padding-top。判斷完全交給 globals.css 的
@@ -77,7 +89,9 @@ export default function RootLayout({ children }) {
                 第一次排版就生效；用 context 在 hydration 之後翻 class 會
                 造成 126px 的 layout shift（詳見 globals.css 該段註解）。
                 所以這裡是死的 className，不要再包成 client component。 */}
-            <main className="page-content">{children}</main>
+            <main className="page-content" id="main-content" tabIndex={-1}>
+              {children}
+            </main>
             <Footer />
           </NavBehaviorProvider>
         </LenisProvider>

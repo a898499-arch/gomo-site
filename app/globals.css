@@ -893,3 +893,40 @@ body:has(.page-content > [data-nav-bleed]) .site-nav {
   color: #353535;
   text-decoration: none;
 }
+
+/* ---------- 跳至主要內容（2026-09-03）----------
+   ⚠️ 用 transform 移出畫面，不是 display:none 也不是 visibility:hidden——
+   那兩種會把元素從焦點順序裡拿掉，等於這條連結永遠 Tab 不到，白做。
+   .visually-hidden 也不行（它是 clip + 1px，聚焦時沒有可視的框可以滑進來）。
+   ⚠️ z-index 要高於導覽列（1000），否則滑進來會被蓋住。 */
+.skip-link {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1100;
+  padding: 12px 20px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom-right-radius: 8px;
+  transform: translateY(-120%);
+  transition: transform 160ms ease-out;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+/* <main> 只是為了讓 skip link 能把焦點交過去才可聚焦，本身不該畫焦點框
+   （使用者不是「聚焦到內容區」，而是「跳過導覽列」）。 */
+.page-content:focus {
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skip-link {
+    transition: none;
+  }
+}
