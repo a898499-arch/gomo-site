@@ -1136,3 +1136,119 @@
     text-align: center;
   }
 }
+
+/* ====================================================================
+   輪 5：Where AI Fell Short（3337:3228，x=46.5 y=8174，1347×1762）
+
+   ⚠️ 兩張卡片用共用的 .gm-panel（#FAFAFA / 1px #D9D9D9 / 圓角 40 /
+   overflow:hidden），這一節只寫尺寸與內距，不要再寫一次那四個值。
+   ==================================================================== */
+
+/* Figma：section x=46.5、寬 1347.5。又是一個不同的欄寬
+   （1360 / 1344 / 1234 / 1347.5），維持不統一。 */
+.gm-fellshort-inner {
+  width: calc(100% - var(--page-gutter) * 2);
+  max-width: 1347.5px;
+  margin-inline: auto;
+}
+
+/* 「卡片 + 圖說」為一組，組內 gap 10（Figma 兩組都是 flex-col gap 10）。 */
+.gm-fellshort-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* 第一組底 992 → 第二組頂 1051 */
+.gm-fellshort-group + .gm-fellshort-group {
+  margin-top: 59px;
+}
+
+/* Figma 3245:2835 是 flex-col gap 10（kicker → 副標群）。
+   ⚠️ 前面幾區用的是 10.6（那是從絕對座標 51 扣行高 40.4 反推的），
+   這一區 Figma 直接寫了 gap 10，就照 10，不要為了一致改成 10.6。 */
+.gm-fellshort .gm-section-text {
+  margin-top: 10px;
+}
+
+/* 節點 3245:2839：欄寬 1347.5（＝整個區塊寬） */
+.gm-fellshort .gm-body {
+  max-width: 1347.5px;
+}
+
+/* ---------- 卡片一：四次嘗試（3395:3484，1347.5×623）----------
+   內距 72 / 27 / 52 / 29（使用者 2026-09-03 指定）。
+   ⚠️ 用百分比不用固定 px：百分比內距是相對「containing block 的寬度」，
+   也就是 .gm-fellshort-group 的 1347.5——所以 1440 下剛好還原成 72/27/52/29，
+   窄視窗時整張卡片連內距一起等比收，四支影片不會被擠爆。
+     72/1347.5 = 5.3432%   27/1347.5 = 2.0037%
+     52/1347.5 = 3.8590%   29/1347.5 = 2.1521%
+   ⚠️ 邊框 1px 是額外的：Figma 標卡片高 623，我們是 2 + 72 + 499 + 52 = 625。
+   差 2px 就是上下各一條邊框——Figma 那張圖裡影片 y=73 = 1(邊框) + 72(內距)，
+   跟我們一致，是 Figma 自己的 623 與 padding 標注差了 1px。不另外補償，
+   補償會讓影片的 y 對不上。 */
+.gm-fellshort-card--attempts {
+  padding: 5.3432% 2.0037% 3.859% 2.1521%;
+}
+
+/* 四支影片並排。Figma：寬 281/281/281/280、間距 56，橫向合計 1291。
+   ⚠️ 用 fr + 百分比 gap，不寫死 px——寫死的話窄視窗會溢出被 overflow 裁掉。
+   grid 的百分比 gap 是相對容器的內容寬（卡片內距內側，1440 下 1289.5），
+   56/1289.5 = 4.3428%。剩下的寬度由 fr 依 281:281:281:280 分配。
+   最後一支 280 是 Figma 的值（不是 281），照抄。 */
+.gm-fellshort-attempts {
+  display: grid;
+  grid-template-columns: 281fr 281fr 281fr 280fr;
+  column-gap: 4.3428%;
+}
+
+.gm-fellshort-attempts video {
+  display: block;
+  width: 100%;
+  /* 高 499、寬 281 → 影片自己的長寬比，容器縮多少就跟著縮多少 */
+  aspect-ratio: 281 / 499;
+  /* ⚠️ 沒有 poster：載入前 <video> 預設是黑的，給底色避免出現黑框
+     （使用者 2026-09-03 指示）。 */
+  background: #fafafa;
+}
+
+/* ⚠️ 第四支 Figma 是 280 寬（不是 281），高度一樣是 499——所以它的長寬比
+   跟前三支不同。不給它自己的 aspect-ratio 的話，它會比隔壁矮 1.7px，
+   四支的底緣就不齊了（實測 496.6 vs 498.3）。 */
+.gm-fellshort-attempts video:last-child {
+  aspect-ratio: 280 / 499;
+}
+
+/* ---------- 卡片二：最後採用的版本（3336:3212，1347×689）----------
+   影片距卡片上緣 35，下方同樣剩 35（689 − 35 − 619 = 35），所以是對稱內距。
+   35/1347.5 = 2.5974%，理由同上（要跟著縮）。 */
+.gm-fellshort-card--final {
+  padding-block: 2.5974%;
+}
+
+/* Figma 3336:3213：993×619，left = calc(50% + 2px)。
+   ⚠️ 百分比的基準是**卡片的內容寬 1345.5**（= 1347.5 − 左右各 1px 邊框），
+   不是 1347.5。一開始用 1347.5 算，影片渲染出來只有 991.5 寬（差 1.5px）。
+     993/1345.5 = 73.7941%      2/1345.5 = 0.1486%
+   ⚠️ 那 2px 也寫成百分比，否則窄視窗下偏移量不成比例。
+   用 position:relative + left 做靜態偏移——不是動畫，沒有違反「只動
+   transform/opacity」那條（那條規範的是動畫，不是靜態版面）。 */
+.gm-fellshort-final {
+  display: block;
+  width: 73.7941%;
+  aspect-ratio: 993 / 619;
+  margin-inline: auto;
+  position: relative;
+  left: 0.1486%;
+  background: #fafafa;
+}
+
+/* ---------- RWD ---------- */
+@media (max-width: 700px) {
+  /* 四支並排在小螢幕會小到看不清動作（1291 → 620 時每支只剩 135 寬）。
+     改成兩排兩支，間距沿用同一個比例。 */
+  .gm-fellshort-attempts {
+    grid-template-columns: 1fr 1fr;
+    row-gap: 4.3428%;
+  }
+}

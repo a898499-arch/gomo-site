@@ -9,6 +9,7 @@ import DefineBeforeIBuild from './DefineBeforeIBuild';
 import DesignProcess from './DesignProcess';
 import MakingAssets01 from './MakingAssets01';
 import MakingAssets02 from './MakingAssets02';
+import WhereAIFellShort from './WhereAIFellShort';
 
 // Goodmood 作品詳情頁——這個網站本身的 case study。
 // Figma：檔案 j4saimg2oJWL5tUkBh5Bww，整頁 frame 2343:129（1440×11831）。
@@ -42,8 +43,10 @@ export default function GoodmoodPage() {
           components/work/goodmood/motion/ 各檔的檔頭。 */}
       <MakingAssets02 />
 
+      {/* 3337:3228  y=8174  1347×1762  四支嘗試影片 + 最終版錄影 + Fig 6/7 */}
+      <WhereAIFellShort />
+
       {/* 之後分輪接進來，順序與 Figma 由上而下一致：
-          <WhereAIFellShort />    3337:3228  y=7424  1347×1762  四段影片+錄影+Fig 6/7
           <WhatThisChanged />     3245:2843  y=9598  1048×247   純文字
           <Closing />             3337:3286 標記 + 3337:3283 收尾句
           <NextWork currentSlug="goodmood" />   ← 用共用的 components/work/NextWork.jsx
