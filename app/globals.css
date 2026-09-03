@@ -855,3 +855,41 @@ body:has(.page-content > [data-nav-bleed]) .site-nav {
 @media (prefers-reduced-motion: reduce) {
   .site-nav { transform: translateY(0) !important; }
 }
+
+/* ---------- 404（app/not-found.js，2026-09-03）----------
+   ⚠️ 樣式放在 globals 而不是自己的 css 檔：這一頁只有三個元素，
+   為它多開一支樣式表不划算，而且 404 可能在任何路由下被觸發，
+   放全站樣式表最單純。 */
+.not-found {
+  min-height: 52vh;
+  padding-block: clamp(48px, 6vw, 96px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 24px;
+}
+
+.not-found-title {
+  margin: 0;
+  font-size: clamp(64px, 9vw, 128px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--accent);
+}
+
+.not-found-text {
+  margin: 0;
+  max-width: 46ch;
+  font-size: clamp(17px, 1.3889vw, 20px);
+  line-height: 1.5;
+  color: #5b5b5b;
+}
+
+.not-found-link {
+  font-size: clamp(17px, 1.3889vw, 20px);
+  font-weight: 600;
+  color: #353535;
+  text-decoration: none;
+}
