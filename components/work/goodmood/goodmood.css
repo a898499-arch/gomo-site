@@ -710,7 +710,8 @@
 }
 
 /* 兩層疊在同一個位置。下層＝Before（整張完整），上層＝After（用 clip-path
-   露出左側 --gm-slider-pos%）。0% 全是 Before、100% 全是 After。 */
+   露出右側）。--gm-slider-pos 是分隔線的位置（0 = 最左，100 = 最右），
+   所以 0% 看到的是整片 After、100% 是整片 Before——見下面那段長註解。 */
 .gm-slider-layer {
   position: absolute;
   inset: 0;
@@ -740,8 +741,7 @@
   background: #fafafa;
 }
 
-/* 圖片框：1244 × 592，距外框上緣 112px。
-   ⚠️ before 那一框水平不是置中，是 calc(50% + 8px)——見下方裁切參數的說明。 */
+/* 圖片框：1244 × 592，距外框上緣 112px。兩層都是單純置中，沒有任何偏移。 */
 .gm-slider-media {
   position: absolute;
   top: 8.3333cqw;   /* 112/1344 */
@@ -752,36 +752,23 @@
   overflow: hidden;
 }
 
-.gm-slider-layer--before .gm-slider-media {
-  left: calc(50% + 0.5952cqw); /* 8/1344 */
-}
-
-/* ⚠️⚠️ 兩張圖的裁切參數在 Figma 上**刻意不同**，這裡原樣照做，
-   **不要「統一成滿版」**：
-     after ：寬 100%、高 114.24%、top −14.23%
-     before：寬 111.51%、高 132.35%、top −20.9%、left −5.8%
-   原因：這樣兩張的四宮格在視覺上才會對齊。滑軌最怕的就是兩張沒對齊——
-   滑過去的瞬間內容會跳，對比就失去意義（使用者 2026-09-02 指示照抄）。 */
+/* ⚠️⚠️ 兩層都是單純滿版、完全對齊，**沒有任何偏移或縮放**。
+   曾照 Figma 的裁切百分比實作（after 100%/114.24%/top −14.23%；
+   before 111.51%/132.35%/top −20.9%/left −5.8%，外加圖片框
+   calc(50% + 8px)），導致放大裁切，四格只看得到兩格。
+   2026-09-02 改為兩層滿版對齊。**不要再照 Figma 那組百分比改回去。**
+   為什麼那組百分比是錯的：來源圖 2700×1280（比例 2.109）與顯示框
+   1244×592（比例 2.101）幾乎相同，任何非 100% 的縮放都只是放大再裁掉。
+   Figma 上那些數字是畫布操作的殘留值，不是規格。 */
 .gm-slider-media img {
   position: absolute;
+  inset: 0;
   display: block;
-  max-width: none;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   user-select: none;
   -webkit-user-drag: none;
-}
-
-.gm-slider-layer--after .gm-slider-media img {
-  width: 100%;
-  height: 114.24%;
-  top: -14.23%;
-  left: 0;
-}
-
-.gm-slider-layer--before .gm-slider-media img {
-  width: 111.51%;
-  height: 132.35%;
-  top: -20.9%;
-  left: -5.8%;
 }
 
 /* 標籤膠囊 124×44、圓角 50、#DCE8EF、距外框上緣 48。
@@ -794,14 +781,17 @@
 .gm-slider-tag {
   position: absolute;
   top: 3.5714cqw;      /* 48/1344 */
-  width: 9.2262cqw;    /* 124/1344 */
-  height: 3.2738cqw;   /* 44/1344 */
-  border-radius: 3.7202cqw; /* 50/1344 */
+  /* ⚠️ 寬度自動、由內距撐開，不再寫死 124×44（使用者 2026-09-02）。
+     ⚠️ 單位仍用 cqw 而不是字面的 px：外框會跟著視窗等比縮，標籤寫死 px
+     的話在 1155 會相對變大、跟旁邊的圖失去比例關係。換算基準同樣是 1344。 */
+  height: 2.381cqw;         /* 32/1344 */
+  padding-inline: 1.1905cqw; /* 16/1344 */
+  border-radius: 3.7202cqw;  /* 50/1344，高度 32 之下等於全圓角 */
   background: #dce8ef;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.7857cqw; /* 24/1344 */
+  font-size: 1.1905cqw; /* 16/1344 */
   font-weight: 400;
   color: #000;
   pointer-events: none;

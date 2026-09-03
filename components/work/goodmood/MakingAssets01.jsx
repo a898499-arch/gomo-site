@@ -163,8 +163,11 @@ export default function MakingAssets01() {
         </figure>
 
         {/* ---------- 前後對比滑軌（Figma：after 3395:3482 / before 3395:3489）----------
-            ⚠️ 疊層順序：下層 Before（整張完整）、上層 After（clip-path 露出左側）。
-            0% 全是 Before、100% 全是 After。
+            ⚠️ 疊層順序：下層 Before（整張完整）、上層 After（clip-path 露出右側）。
+            --gm-slider-pos 是分隔線的位置（0 = 最左，100 = 最右）。
+            左側顯示 Before、右側顯示 After，所以 0% 看到的是整片 After、
+            100% 是整片 Before。這是分隔線位置的必然結果，不是端點寫反。
+            不要改成 100 - pos——那會讓把手的移動方向和拉桿相反。
             ⚠️ 兩個標籤各自住在自己那一層裡，不拉出來共用——上層被 clip 的時候，
             After 的標籤要跟著一起被切掉才對。
             ⚠️ 底色 / 邊框 / 圓角 / overflow 只掛在最外層 .gm-slider，
@@ -188,7 +191,7 @@ export default function MakingAssets01() {
             <span className="gm-slider-tag gm-slider-tag--before">Before</span>
           </div>
 
-          {/* 上層：After —— 最終版，用 clip-path 露出左側 sliderPos% */}
+          {/* 上層：After —— 最終版，用 clip-path 露出右側 (100 - sliderPos)% */}
           <div className="gm-slider-layer gm-slider-layer--after">
             <div className="gm-slider-media">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -207,6 +210,9 @@ export default function MakingAssets01() {
             <span className="gm-slider-handle-bar" />
           </div>
 
+          {/* ⚠️ aria-label 用文字描述方向，不要只讓螢幕閱讀器播報一個容易誤解的數字：
+              這個 <input> 的值是**分隔線位置**，不是「完成度百分比」，單念「80%」
+              會被理解成反的（使用者 2026-09-02 指示）。 */}
           <input
             className="gm-slider-input"
             type="range"
@@ -215,7 +221,7 @@ export default function MakingAssets01() {
             step={1}
             value={sliderPos}
             onChange={(e) => setSliderPos(Number(e.target.value))}
-            aria-label="Before and after comparison: drag to reveal more of the raw AI output on the left, or the finished version on the right"
+            aria-label="Before and after comparison slider position. Move left to see the finished version, move right to see the raw AI output."
           />
         </div>
       </div>
