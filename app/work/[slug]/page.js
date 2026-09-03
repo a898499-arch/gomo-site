@@ -14,7 +14,14 @@ import BlossomCarePage from '@/components/work/blossom-care/BlossomCarePage';
 // 包含 works.json 裡 7 筆還沒做的、以及根本不存在的 slug——對搜尋引擎是
 // soft-404（會被收錄），對使用者是看到一句開發中的中文。整段刪掉，改成
 // 查不到就 notFound()。
-const PAGES = {
+// ⚠️ export 出去給 app/sitemap.js 用（2026-09-03）。sitemap 需要「哪些作品頁
+// 真的存在」的清單，而那個答案就是這張表的 keys。**不要**讓 sitemap 改去用
+// works.json 的 ready/hidden 條件重新篩一次——那等於有了第二份「哪些頁存在」
+// 的定義，兩邊遲早走鐘：某天有人只改了 works.json 卻忘了加進這張表，
+// sitemap 就會把一個會 404 的網址送給 Google，而且不會有任何錯誤訊息。
+// 同一份 keys 同時決定「這個網址回不回 404」與「這個網址進不進 sitemap」，
+// 結構上就不可能不一致。
+export const PAGES = {
   wanderbuddy: WanderBuddyPage,
   'sui-sui': SuiSuiPage,
   'aero-v': AeroVPage,

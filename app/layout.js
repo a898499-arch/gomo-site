@@ -20,16 +20,16 @@ const poppins = Poppins({
 // 搜尋結果摘要與社群分享卡片都會直接顯示這一句——寫中文等於把中文摘要
 // 送到英文讀者眼前（2026-09-03 使用者指示）。
 //
-// ⚠️ TODO：等 Vercel 給了正式網址，把 metadataBase 補上：
-//     metadataBase: new URL('https://<正式網址>'),
-// 沒有它的話 og:image / twitter:image 會是相對路徑，有些平台（部分
-// 社群預覽爬蟲）讀不到。本機開發時 Next.js 會退回 localhost 並在 build
-// 時印一行提示，那是預期的，不是錯誤。
+// ⚠️ metadataBase 是**目前的 Vercel 網址**。之後如果綁了自訂網域，這裡要
+// 跟著改——否則 og:image、twitter:image 與 sitemap 全都會指向舊網址。
+// 這一個值同時是 app/robots.js 與 app/sitemap.js 的網址來源（兩支都讀
+// 這裡的 metadata.metadataBase），所以只有這一個地方要改。
 //
 // og:image / twitter:image **不寫在這裡**：App Router 會自動認
 // app/opengraph-image.jpg（1200×630）這個檔名並產生兩組標籤，
 // 手動再寫一次反而會重複。網站圖示同理，來自 app/icon.svg。
 export const metadata = {
+  metadataBase: new URL('https://gomo-site.vercel.app'),
   title: 'GOMO — Maida Hu',
   description:
     'Maida Hu — product and UI/UX designer. Case studies in product design, app design, and a portfolio site she designed, specced, and built herself.',
