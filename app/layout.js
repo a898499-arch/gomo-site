@@ -42,8 +42,11 @@ const poppins = Poppins({
 //
 // ⚠️ title 與 openGraph.title **刻意是不同的值**，不是漏改（2026-09-03）：
 //   title（瀏覽器分頁）  分頁很窄，長標題會被截斷，所以只放站名。
-//   openGraph.title（連結預覽卡）  分享到 LINE / iMessage / Slack 時看到的
-//     那張卡片有空間，應該一句話講完「誰 + 做什麼」。
+//   openGraph.title（連結預覽卡）  講完「誰的 + 什麼類型 + 作品集」。
+// ⚠️ og:title 有長度上限：連結預覽的標題在窄的對話框裡大約 30 個字元就會被
+// 截斷。'Maida Hu — Design Portfolio' 是 27 字元，剛好完整顯示；先前用的
+// 'Maida Hu — Product & UI/UX Designer' 是 35 字元，尾巴會被切掉。
+// 之後要改這句，先數字元。
 // 之後改其中一個時想一下另一個要不要跟，但別把它們合併成同一個值。
 export const metadata = {
   metadataBase: new URL('https://maidahu.com'),
@@ -54,7 +57,7 @@ export const metadata = {
   description:
     'Product and UI/UX designer based in London. Six case studies across product, app, and interface design — including this site, designed, specced, and built from scratch.',
   openGraph: {
-    title: 'Maida Hu — Product & UI/UX Designer',
+    title: 'Maida Hu — Design Portfolio',
     // 與上面的 description 同一句，改一邊要兩邊一起改。
     description:
       'Product and UI/UX designer based in London. Six case studies across product, app, and interface design — including this site, designed, specced, and built from scratch.',
