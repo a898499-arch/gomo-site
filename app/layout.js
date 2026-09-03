@@ -39,15 +39,25 @@ const poppins = Poppins({
 // 標題文字就該負責圖示做不到的事——告訴人這是**誰**的作品集。
 // ⚠️ 這是「站名」的改動，不是拿掉 GOMO 這個識別：標誌元件
 // components/GomoMark.jsx 與 app/icon.svg 都保留。
+//
+// ⚠️ title 與 openGraph.title **刻意是不同的值**，不是漏改（2026-09-03）：
+//   title（瀏覽器分頁）  分頁很窄，長標題會被截斷，所以只放站名。
+//   openGraph.title（連結預覽卡）  分享到 LINE / iMessage / Slack 時看到的
+//     那張卡片有空間，應該一句話講完「誰 + 做什麼」。
+// 之後改其中一個時想一下另一個要不要跟，但別把它們合併成同一個值。
 export const metadata = {
   metadataBase: new URL('https://maidahu.com'),
   title: 'Maida Hu',
+  // ⚠️ 「Six case studies」這個數字跟 app/work/[slug]/page.js 的 PAGES 筆數
+  // 綁在一起（目前 6 筆）。之後作品增加時這句話要跟著改，否則會過時——
+  // 它是搜尋結果與分享卡片上直接看得到的文字，數字錯了會很明顯。
   description:
-    'Maida Hu — product and UI/UX designer. Case studies in product design, app design, and a portfolio site she designed, specced, and built herself.',
+    'Product and UI/UX designer based in London. Six case studies across product, app, and interface design — including this site, designed, specced, and built from scratch.',
   openGraph: {
-    title: 'Maida Hu',
+    title: 'Maida Hu — Product & UI/UX Designer',
+    // 與上面的 description 同一句，改一邊要兩邊一起改。
     description:
-      'Maida Hu — product and UI/UX designer. Case studies in product design, app design, and a portfolio site she designed, specced, and built herself.',
+      'Product and UI/UX designer based in London. Six case studies across product, app, and interface design — including this site, designed, specced, and built from scratch.',
     type: 'website',
   },
 };
