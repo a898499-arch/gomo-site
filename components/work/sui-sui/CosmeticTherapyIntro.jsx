@@ -139,7 +139,8 @@ export default function CosmeticTherapyIntro() {
 
         <div className="ss-cti-frame ss-entrance-item" style={{ aspectRatio: `${FRAME_W} / ${FRAME_H}` }}>
           <img
-            src="/work/sui-sui/cosmetic-therapy-photo@2x.png"
+            src="/work/sui-sui/cosmetic-therapy-photo.webp"
+            srcSet="/work/sui-sui/cosmetic-therapy-photo.webp 1x, /work/sui-sui/cosmetic-therapy-photo@2x.webp 2x"
             alt="An older woman receiving a cosmetic therapy session, having her face gently touched by a caregiver"
             className="ss-cti-photo"
           />

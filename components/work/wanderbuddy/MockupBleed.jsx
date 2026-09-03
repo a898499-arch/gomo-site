@@ -65,6 +65,7 @@ export default function MockupBleed({ src, alt, x, w, h }) {
       >
         <img
           src={src}
+          srcSet={`${src} 1x, ${src.replace(/\.webp$/, '@2x.webp')} 2x`}
           alt={alt}
           className="wb-mockup-bleed-img"
           style={{ left: `${((x / FRAME_W) * 100).toFixed(4)}%`, width: `${((w / FRAME_W) * 100).toFixed(4)}%` }}

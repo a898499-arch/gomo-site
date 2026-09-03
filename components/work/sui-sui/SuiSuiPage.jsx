@@ -109,9 +109,9 @@ export default function SuiSuiPage() {
           （Figma 目前這個 frame 本身量出來是 1454×899）——這裡先維持
           1454×899，等你確認要哪一個再改。淡入淡出動畫比照 WanderBuddy 的
           scrubbed 做法（見 MockupFade.jsx）。 */}
-      <MockupFade src="/work/sui-sui/mockup-1.png" alt="Sui-Sui mockup 1: an older woman using the app while doing her makeup at a mirror" x={109} w={1250} h={937} />
-      <MockupFade src="/work/sui-sui/mockup-2.png" alt="Sui-Sui mockup 2" x={13} w={1434} h={900} />
-      <MockupFade src="/work/sui-sui/mockup-3.png" alt="Sui-Sui mockup 3" x={0} w={1454} h={899} />
+      <MockupFade src="/work/sui-sui/mockup-1.webp" alt="Sui-Sui mockup 1: an older woman using the app while doing her makeup at a mirror" x={109} w={1250} h={937} />
+      <MockupFade src="/work/sui-sui/mockup-2.webp" alt="Sui-Sui mockup 2" x={13} w={1434} h={900} />
+      <MockupFade src="/work/sui-sui/mockup-3.webp" alt="Sui-Sui mockup 3" x={0} w={1454} h={899} />
 
       {/* y=15747 */}
       <WorkFootage />

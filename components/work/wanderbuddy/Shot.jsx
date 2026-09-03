@@ -10,7 +10,11 @@ export default function Shot() {
   return (
     <section className="wb-section">
       <div className="wb-shot" ref={ref}>
-        <img src="/work/wanderbuddy/shot.png" alt="Four iPhone screens from the WanderBuddy sign-up flow shown side by side" />
+        <img
+          src="/work/wanderbuddy/shot.webp"
+          srcSet="/work/wanderbuddy/shot.webp 1x, /work/wanderbuddy/shot@2x.webp 2x"
+          alt="Four iPhone screens from the WanderBuddy sign-up flow shown side by side"
+        />
       </div>
     </section>
   );

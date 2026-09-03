@@ -83,8 +83,8 @@ export default function WanderBuddyPage() {
           mockup-4 維持原本往右出血的 x=526 不變。mockup-2 的 src 副檔名
           是 .jpeg（使用者更新圖檔時給的就是這個格式，不是改成 .png 騙副
           檔名）。 */}
-      <MockupBleed src="/work/wanderbuddy/mockup-2.jpeg" alt="WanderBuddy mock up 2" x={-84} w={1220} h={812} />
-      <MockupBleed src="/work/wanderbuddy/mockup-4.png" alt="WanderBuddy mock up 4" x={526} w={1220} h={814} />
+      <MockupBleed src="/work/wanderbuddy/mockup-2.webp" alt="WanderBuddy mock up 2" x={-84} w={1220} h={812} />
+      <MockupBleed src="/work/wanderbuddy/mockup-4.webp" alt="WanderBuddy mock up 4" x={526} w={1220} h={814} />
 
       {/* y=10969 */}
       <ProjectFootage />

@@ -138,7 +138,12 @@ export default function HandWarmUpLoop({ assets = "/web-assets" }) {
               <div className={s.screen} ref={screenBRef}>
                 {/* ── 畫面 A:提醒 ── */}
                 <div className={`${s.layer} ${s.layerA}`}>
-                  <img className={s.bg} src={a("bg-remind.png")} alt="" />
+                  <img
+                    className={s.bg}
+                    src={a("bg-remind.webp")}
+                    srcSet={`${a("bg-remind.webp")} 1x, ${a("bg-remind@2x.webp")} 2x`}
+                    alt=""
+                  />
 
                   <div
                     className={`${s.arrow} ${s.up}`}
@@ -176,7 +181,12 @@ export default function HandWarmUpLoop({ assets = "/web-assets" }) {
 
                 {/* ── 畫面 B:完成 ── */}
                 <div className={`${s.layer} ${s.layerB}`}>
-                  <img className={s.bg} src={a("bg-correct.png")} alt="" />
+                  <img
+                    className={s.bg}
+                    src={a("bg-correct.webp")}
+                    srcSet={`${a("bg-correct.webp")} 1x, ${a("bg-correct@2x.webp")} 2x`}
+                    alt=""
+                  />
 
                   <div
                     className={`${s.arrow} ${s.down}`}

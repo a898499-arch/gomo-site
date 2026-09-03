@@ -93,3 +93,25 @@ _to_delete/
 # 使用者 2026-08-29 指示「不要動、不要刪」，整理好之後會另外指定去處。
 # 先擋住避免暫存檔誤進 git 歷史——進了就永久拿不掉。
 public/work/work/
+
+# ---------- 已轉成 webp 的來源檔（2026-09-03）----------
+# 這些是上線 webp 的原始檔，留在本機當備份、不進版控——同一條裁示先前已經
+# 套在 mvs / blossom-care 的原始 jpg 與 goodmood 的來源 png 上。
+# 進了 git 歷史就永久拿不掉，而它們合計 54MB。
+#
+# ⚠️ 範圍精確到檔名，**不要**改成 public/work/wanderbuddy/*.png 這種整目錄的
+# 寫法：同目錄下還有 character-*.svg 等上線素材。
+public/work/wanderbuddy/shot.png
+public/work/wanderbuddy/mockup-2.jpeg
+public/work/wanderbuddy/mockup-4.png
+public/work/wanderbuddy/characters-ref-photos@2x.png
+public/work/sui-sui/mockup-1.png
+public/work/sui-sui/mockup-2.png
+public/work/sui-sui/mockup-3.png
+public/work/sui-sui/function2-right-composite@2x.png
+public/work/sui-sui/function2-products-overview.png
+public/work/sui-sui/function2-intro-page.png
+public/work/sui-sui/cosmetic-therapy-photo@2x.png
+public/work/sui-sui/background-ring-chart@2x.png
+public/web-assets/bg-remind.png
+public/web-assets/bg-correct.png

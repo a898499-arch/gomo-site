@@ -88,14 +88,14 @@ const COMPOSITE_H = COMPOSITE_W * COMPOSITE_NATIVE_RATIO; // ≈808.7
 const PHONES = [
   {
     key: 'course',
-    src: '/work/sui-sui/function2-intro-page.png',
+    src: '/work/sui-sui/function2-intro-page.webp',
     alt: 'Phone screen showing a Morning Glow routine preview with toner, face cream, and cotton pad',
     x: 220, y: 349, w: 241, h: 490,
     badge: { label: 'Course preview', dx: 44, dy: -46, w: 154, bold: false },
   },
   {
     key: 'scanning',
-    src: '/work/sui-sui/function2-products-overview.png',
+    src: '/work/sui-sui/function2-products-overview.webp',
     alt: 'Phone screen showing a saved product library with Toner, Cleansing Cream, Facial Oil, and Face Cream',
     x: 595, y: 235, w: 290, h: 590,
     badge: { label: 'Product scanning', dx: 61, dy: -41, w: 167, bold: false },
@@ -190,7 +190,8 @@ export default function Function2() {
             style={{ left: COMPOSITE.x, top: COMPOSITE.y, width: COMPOSITE.w, height: COMPOSITE.h }}
           >
             <img
-              src="/work/sui-sui/function2-right-composite@2x.png"
+              src="/work/sui-sui/function2-right-composite.webp"
+              srcSet="/work/sui-sui/function2-right-composite.webp 1x, /work/sui-sui/function2-right-composite@2x.webp 2x"
               alt="A red gradient backdrop behind a hand holding a phone scanning a skincare product"
               className="ss-fn2-phone"
             />
@@ -225,7 +226,12 @@ export default function Function2() {
               className="ss-fn2-group"
               style={{ left: x, top: y, width: w, height: h }}
             >
-              <img src={src} alt={alt} className="ss-fn2-phone" />
+              <img
+                src={src}
+                srcSet={`${src} 1x, ${src.replace(/\.webp$/, '@2x.webp')} 2x`}
+                alt={alt}
+                className="ss-fn2-phone"
+              />
               <span
                 className="ss-fn2-badge"
                 style={{

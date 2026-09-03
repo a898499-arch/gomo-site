@@ -60,7 +60,12 @@ export default function MockupFade({ src, alt, x = 0, w, h }) {
           style={{ aspectRatio: `${w} / ${h}`, marginLeft: pctX(x), width: pctW(w) }}
           ref={containerRef}
         >
-          <img src={src} alt={alt} className="ss-mockup-img" />
+          <img
+            src={src}
+            srcSet={`${src} 1x, ${src.replace(/\.webp$/, '@2x.webp')} 2x`}
+            alt={alt}
+            className="ss-mockup-img"
+          />
         </div>
       </div>
     </section>

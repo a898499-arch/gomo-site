@@ -40,7 +40,8 @@ export default function Background() {
             <h3 className="ss-background-card-title">Global Female Dementia Population Ratio</h3>
             <p className="ss-background-card-source">Source: Alzheimer&rsquo;s Research UK</p>
             <img
-              src="/work/sui-sui/background-ring-chart@2x.png"
+              src="/work/sui-sui/background-ring-chart.webp"
+              srcSet="/work/sui-sui/background-ring-chart.webp 1x, /work/sui-sui/background-ring-chart@2x.webp 2x"
               alt=""
               aria-hidden="true"
               className="ss-background-chart ss-background-chart--ring"

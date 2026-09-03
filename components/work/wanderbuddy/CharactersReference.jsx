@@ -89,7 +89,8 @@ export default function CharactersReference() {
             8 Activity Categories
           </p>
           <img
-            src="/work/wanderbuddy/characters-ref-photos@2x.png"
+            src="/work/wanderbuddy/characters-ref-photos.webp"
+            srcSet="/work/wanderbuddy/characters-ref-photos.webp 1x, /work/wanderbuddy/characters-ref-photos@2x.webp 2x"
             alt=""
             aria-hidden="true"
             className="wb-charref-photos-img"
