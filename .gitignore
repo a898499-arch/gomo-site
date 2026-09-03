@@ -116,6 +116,20 @@ public/work/sui-sui/background-ring-chart@2x.png
 public/web-assets/bg-remind.png
 public/web-assets/bg-correct.png
 
+# ---------- aero-v 的來源檔（2026-09-03）----------
+# 這一頁的上線素材早就全部是 webp 了，這些 png/jpg 是它們的來源，
+# **沒有任何一支被載入**（逐檔檢查過：24 個檔案在 components/app/lib 裡
+# 的引用全部只出現在註解，沒有一處是 src / srcSet / url()）。
+# 合計 34MB，先前一直在版控裡、會被部署上去卻永遠不會被請求。
+# 留在本機當備份，不進版控——同一條裁示已經套在 mvs / blossom-care 的原始
+# jpg、goodmood 的來源 png、以及 wanderbuddy / sui-sui 這次轉檔的來源上。
+#
+# ⚠️ 範圍精確到副檔名而不是整個目錄：同目錄下有大量 .webp 與 .svg 是上線素材，
+# 而且有些是用樣板字串引用的（sketch-3d-${n}.webp、airflow-arrow-*.svg），
+# 用 grep 找不到字面路徑——**不要**改成 public/work/aero-v/* 這種寫法。
+public/work/aero-v/*.png
+public/work/aero-v/*.jpg
+
 # ---------- warmup 的原始影片（2026-09-03）----------
 # 上線的 warmup.mp4 是 743×1320 / 1.22MB 的壓縮版；這支是它的來源
 # （1080×1920 / 12.84MB）。畫面上只顯示 371×659，原尺寸是 2.9 倍過大。
