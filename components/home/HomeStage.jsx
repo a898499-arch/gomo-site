@@ -151,6 +151,12 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg, dialog
   // PHASE 3 之後會用到：Loading 靜止狀態的 transform，存起來供推軌起點使用
   const loadingXform = useRef({ left: null, right: null });
 
+  // 「Loading 已經離場」的旗標，只給下面的 onResize 判斷用（2026-09-03）。
+  // ⚠️ 用 ref 不用 state：onResize 只需要讀當下的值，改成 state 會讓整個
+  // 掛載 effect 重跑——那個 effect 會 ctx.revert() 掉所有時間軸，等於在
+  // 推軌播到一半時把它殺掉。
+  const loadingDoneRef = useRef(false);
+
   // ---------- Loading 期間的捲動鎖定 ----------
   // ⚠️ 只設 documentElement.overflow = 'hidden' 是不夠的。那條只擋瀏覽器
   // 「原生」的捲動（鍵盤、原生觸控慣性、捲軸拖曳），擋不住 Lenis——Lenis
@@ -478,6 +484,15 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg, dialog
       // 放大倍率（倍率由 measure() 在執行期用 getBoundingClientRect 量
       // loading slot 與 hero 尺寸算出，任一邊改了都會自動正確）。
       const runTransition = () => {
+        // ⚠️ 旗標立在**推軌開始的這一刻**，不是結束時的 onComplete。
+        // 從這裡開始 Loading 的版面就不該再被套回去；等到 onComplete 才立的話，
+        // 推軌進行中（一般路徑約 2 秒）縮放視窗仍會把板凳與 logo 一起打回
+        // Loading 起點，那個 glitch 比原本的還明顯。
+        // ⚠️ runTransition 是 Loading 的唯一出口（計數器到 100 時呼叫，
+        // 全檔只有一個呼叫點），reduced motion 的分支也在這個函式裡面，
+        // 所以立在這裡一個地方就涵蓋兩條路徑。
+        loadingDoneRef.current = true;
+
         const stage = rootRef.current;
 
         // ⚠️ 先殺掉 PHASE 2 的板凳漂移。那是 repeat:-1 + yoyo 的無限補間，
@@ -813,6 +828,19 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg, dialog
     const onResize = () => {
       cancelAnimationFrame(resizeRaf);
       resizeRaf = requestAnimationFrame(() => {
+        // ⚠️ Loading 已經離場就什麼都不做（2026-09-03 修）。
+        // 這整段 rAF 的作用是「把畫面重設成 Loading 的靜止狀態」——板凳落到
+        // 讓開位置、logo 與計數器 opacity 復原成 1。那只在 Loading 還在跑時
+        // 才成立；先前沒有這個判斷，所以進到 Hero 之後只要縮放一次視窗，
+        // 板凳會縮回 0.44 倍飛到 Loading 的位置、logo 與計數器整個蓋回畫面上
+        // （實測：板凳 scale 1 → 0.435、x 0 → 135，logo/計數 opacity 0 → 1）。
+        // ⚠️ 擋的是**整段**，不是只擋 logo 那兩行：板凳與 logo 是同一個目的的
+        // 一體兩面，只擋一半會變成「logo 不見了但板凳飛走」，更難理解。
+        // ⚠️ Loading 結束後不需要任何 resize 處理：Hero 狀態的板凳 transform
+        // 是 identity（x:0 y:0 scale:1），水平位置由 CSS 的百分比 left 決定、
+        // 本來就跟著視窗回流；PHASE 4 的 idle drift 也只動 y。
+        if (loadingDoneRef.current) return;
+
         const bl = benchLeftRef.current;
         const br = benchRightRef.current;
         if (!bl || !br) return;
