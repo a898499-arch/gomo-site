@@ -13,8 +13,8 @@
       "personal"
     ],
     "year": null,
-    "cover": null,
-    "galleryCover": null,
+    "cover": "/work/hover/goodmood-1.webp",
+    "galleryCover": "/work/gallery/goodmood.webp",
     "hoverVideo": null,
     "hoverImages": null,
     "hidden": false
