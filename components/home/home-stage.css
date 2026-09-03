@@ -23,8 +23,11 @@
    已經存在的偏離——原型 prototypes/home.html:102 的 .hero-stage 是
    `position: relative; min-height: 100vh`，不是 fixed。
    當時首頁只有這一段，看不出差別；等 §6.2 接上來才浮現：fixed 不佔文件流
-   高度，所以 #practice-to-work 的 offsetTop 是 0，整段 3308px 被這層不透明
-   的滿版覆蓋永遠蓋住（實測過）。改回原型的寫法就解決。
+   高度，所以後面那一區的 offsetTop 是 0，整段 3308px 被這層不透明的滿版
+   覆蓋永遠蓋住（實測過）。改回原型的寫法就解決。
+   ⚠️ §6.2 已於 2026-09-03 從首頁移除，現在 Hero 之後直接接 Gallery。
+   這一條**仍然必須維持 relative**：同樣的錯誤會讓 Gallery 被蓋住，
+   問題完全一樣，只是換一個受害者。不要因為 §6.2 不見了就改回 fixed。
    底下的 .bench-stage / .loading-slot / .loading-ui / .bench 全是
    position:absolute，定位基準仍然是這一層，盒子尺寸也還是 100vw × 100vh，
    幾何完全沒變；Loading 期間的捲動鎖定本來就靠 JS 的

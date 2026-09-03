@@ -3,7 +3,6 @@
 import { useEffect, useRef } from 'react';
 import { useLenis } from '@/components/LenisProvider';
 import { mainEase } from '@/lib/ease';
-import { ptwGrowthHold } from '@/components/home/PracticeToWork';
 import { getGalleryAnchorY } from '@/lib/galleryMetrics';
 import './scroll-next-button.css';
 
@@ -20,8 +19,8 @@ import './scroll-next-button.css';
  * 兩者共用同一組 anchors，也共用 cancelSnap()——按鈕的 click handler 第一行
  * 就呼叫它，所以本來就分不開，放在同一個元件裡。
  *
- * ⚠️ 這是首頁專屬：anchors 讀的是 §6.2 的 #practice-to-work 與 §6.3 的
- * #gallery，其他頁面沒有那兩個節點。掛載處在 app/page.js。
+ * ⚠️ 這是首頁專屬：anchors 讀的是 §6.3 的 #gallery，其他頁面沒有那個節點。
+ * 掛載處在 app/page.js。
  */
 export default function ScrollNextButton() {
   const btnRef = useRef(null);
@@ -87,26 +86,21 @@ export default function ScrollNextButton() {
     nextBtnFooterObserver.observe(footer);
     cleanups.push(() => nextBtnFooterObserver.disconnect());
 
-    /* anchors, in order: Hero top / §6.2 collage-start / §6.2 hold-start / Gallery / Footer. Recomputed
-       on every click (not cached) so a resize crossing a breakpoint — which changes ptwGrowthHold()'s
-       growth value — stays correct. The hold-start anchor is its own stop (not folded into collage-start
-       or skipped straight to Gallery): jumping from mid-growth should land on the fully-grown video
-       (what the hold segment exists to show), and jumping from inside the hold should advance to
-       Gallery, not re-trigger growth. */
+    /* anchors, in order: Hero top / Gallery / Footer.
+       ⚠️ 2026-09-03：原本是五個停靠點（Hero 頂 / §6.2 拼貼起點 / §6.2 定住起點 /
+       Gallery / Footer）。§6.2 從首頁移除之後，中間那兩個依附於
+       #practice-to-work 與 ptwGrowthHold() 的停靠點一併拿掉，剩三個。
+       仍然「每次點擊重算、不快取」：getGalleryAnchorY() 會依當下視窗高度重新
+       量卡片高度（見 lib/galleryMetrics.js），resize 之後直接用舊值會落錯位置。 */
     function getNextSectionAnchors() {
-      const ptwSection = document.getElementById('practice-to-work');
-      const gh = ptwGrowthHold();
-      const collageStart = ptwSection.offsetTop;
-      const holdStart = collageStart + window.innerHeight * (gh.growth / 100);
-      return [0, collageStart, holdStart, getGalleryAnchorY(), footer.offsetTop];
+      return [0, getGalleryAnchorY(), footer.offsetTop];
     }
 
     // ---------- 煞車（原型 2427–2484），宣告在按鈕之前，因為按鈕要用 cancelSnap ----------
     /* ---------- section-boundary scroll-snap ("brake", new item, 2026-08-09) ----------
-       If the user stops scrolling within ±25vh of one of the same five anchors the button above jumps
+       If the user stops scrolling within ±25vh of one of the same three anchors the button above jumps
        between, ease the rest of the way there — mouse/trackpad scrolling gives no feedback about where
-       a section boundary actually is, so it's easy to overshoot and rest half inside §6.2's video-grow
-       or barely into Gallery. Anywhere else (mid-animation, deliberately) is left alone. Any fresh user
+       a section boundary actually is, so it's easy to overshoot and rest barely into Gallery. Anywhere else (mid-animation, deliberately) is left alone. Any fresh user
        gesture during an in-flight snap cancels it immediately — this must never fight the user for
        control of the scroll. */
     let snapIdleTimer = null;
@@ -195,7 +189,9 @@ export default function ScrollNextButton() {
       /* must go through lenis.scrollTo, never native scrollTo — otherwise it fights the shared Lenis
          instance and jitters (same rule the back-to-top button above already follows). 1200ms so the
          scrubbed animations it passes through (§6.2 collage disperse + video grow) fast-forward
-         smoothly instead of jump-cutting; shortened under reduced motion like the rest of the site. */
+         smoothly instead of jump-cutting; shortened under reduced motion like the rest of the site.
+         ⚠️ §6.2 移除後這一段路上已經沒有 scrubbed 動效了，但 1200ms 維持不變——
+         它是 Hero → Gallery 這段距離的手感，不是為了配合那些動畫才訂的。 */
       lenis.scrollTo(target, { duration: reduceMotion ? 0.3 : 1.2, easing: mainEase });
     });
 

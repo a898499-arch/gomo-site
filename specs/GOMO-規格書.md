@@ -459,6 +459,30 @@ Duration 1300ms，主曲線。**左板凳領先，右板凳晚 80ms**，不要�
 
 ## 6.2 Section 2 — Practice → All Work
 
+> ## ⚠️ 已於 2026-09-03 從首頁移除（使用者裁示）
+>
+> 實作曾完成並通過驗收，**見 git 歷史**。首頁現在是 Hero → Gallery → Footer。
+>
+> 移除時刪掉的檔案（要復原就從 git 取回這兩支）：
+>
+> - `components/home/PracticeToWork.jsx`
+> - `components/home/practice-to-work.css`
+>
+> 同時一起改的地方：
+>
+> - `app/page.js` — 移除 import 與 `<PracticeToWork />`
+> - `components/home/ScrollNextButton.jsx` — 停靠點從五個收成三個
+>   （Hero 頂 / Gallery / Footer），並移除 `ptwGrowthHold` 的 import
+> - 本章下方「§6.4 捲到下一區塊」的錨點清單同步改成三個
+>
+> 素材**沒有**刪，仍在版控裡：`public/assets/svg/` 的 dance woman ×5、
+> `flower_*.svg` ×4、`leave_blue.svg`、`grass.png`，以及
+> `public/assets/img/placeholder-work-1.png`。
+>
+> 本章其餘內容整段保留，作為復原時的規格依據——**不要當成現行實作**。
+> 其他章節裡提到 §6.2 的地方（§3.2 的 ScrollTrigger、§5 導覽列的強制隱藏
+> 覆寫規則、§6.3 之後的驗收清單）同樣是「已移除」狀態。
+
 **難度** ★★★
 
 > 本章取代所有先前版本的「Section 2」與「Section 1.5」。
@@ -655,8 +679,8 @@ Hero 結束後，畫面不是切換，而是一台攝影機持續往前推軌：
 **行為**
 
 - 點擊後用 `lenis.scrollTo()`（**不可用原生 `window.scrollTo`**，否則會跟全站共用的 Lenis instance 互搶造成抖動——與 back-to-top 相同規則，見 §3.2）平滑捲動到「下一個區塊」的起點，duration 1200ms，主曲線。沿途的 scrubbed 動效（§6.2 拼貼散開、影片放大）會跟著快轉播放完，不會跳格或卡住
-- 錨點清單，依序：Hero 頂部 → §6.2 拼貼起點（`#practice-to-work` 頂部）→ §6.2 影片定住區起點（拼貼起點 + 當下斷點的放大段落 vh）→ Gallery（`#gallery` 頂部）→ Footer（`#site-footer` 頂部）
-  - **影片定住區獨立算一站**，不併入拼貼起點、也不直接跳過到 Gallery：使用者若還在放大過程中點擊，應該先看到影片放大完成（定住區存在的目的），而不是直接跳過；使用者若已經在定住區裡點擊，則前進到 Gallery，不會重新觸發放大
+- 錨點清單，依序：Hero 頂部 → Gallery（`#gallery` 頂部）→ Footer（`#site-footer` 頂部）
+  - ⚠️ 2026-09-03 §6.2 從首頁移除後，中間兩站（拼貼起點、影片定住區起點）一併拿掉，從五站變三站。原本的規則是「影片定住區獨立算一站，不併入拼貼起點、也不直接跳過到 Gallery」——復原 §6.2 時要一起復原
 - 每次點擊都即時重新計算錨點（不快取），這樣跨斷點 resize（改變放大段落 vh）時仍然正確
 - 點擊時找出目前捲動位置之後最近的一個錨點，捲過去；已在最後一個錨點（Footer）時等同無操作
 

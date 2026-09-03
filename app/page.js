@@ -1,7 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import HomeStage from '@/components/home/HomeStage';
-import PracticeToWork from '@/components/home/PracticeToWork';
 import Gallery from '@/components/home/Gallery';
 import ScrollNextButton from '@/components/home/ScrollNextButton';
 
@@ -41,15 +40,15 @@ export default function HomePage() {
         // 泡泡寬度由 CSS 固定、高度靠 viewBox 推導，換成取整版會讓高度差 0.26%。
         dialogueSvg={readSvg('message_bubble.svg')}
       />
-      {/* §6.2 PRACTICE → ALL WORK。原型 prototypes/home.html 的排列是
-          hero-stage 之後直接接這一段（1267 → 1364），順序照抄。 */}
-      <PracticeToWork />
-      {/* §6.3 GALLERY。原型排列同樣是 §6.2 之後直接接這一段（1404 → 1405）。 */}
+      {/* §6.3 GALLERY。
+          ⚠️ 2026-09-03：這裡原本先接 §6.2 PRACTICE → ALL WORK（跳舞的人那一區），
+          使用者裁示從首頁移除，現在 Hero 之後直接接 Gallery。
+          規格書 §6.2 保留但已標注移除，實作要復原就從 git 歷史取回。 */}
       <Gallery />
       {/* 「捲到下一區塊」箭頭。原型放在 <nav> 之後、hero-stage 之前
           （1250–1263），但它是 position:fixed，DOM 位置不影響外觀；
-          放在這裡是因為它只屬於首頁——anchors 讀的是 #practice-to-work
-          與 #gallery，其他頁面沒有那兩個節點。 */}
+          放在這裡是因為它只屬於首頁——anchors 讀的是 #gallery，
+          其他頁面沒有那個節點。 */}
       <ScrollNextButton />
     </>
   );
