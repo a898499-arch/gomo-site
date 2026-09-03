@@ -263,6 +263,16 @@
    再窄收到 160 保底（視窗窄於約 825px 時觸底）。 */
 .gm-overview {
   margin-block-start: clamp(160px, 19.4vw, 280px);
+
+  /* ⚠️ 只補「下方」，不要改成套用 .gm-section（2026-09-03 使用者裁示）。
+     這一區沒有 gm-section 這個 class，所以 padding-block 是 0——上緣靠上面
+     那個 margin-block-start 撐（刻意的封面轉場），下緣什麼都沒有，於是
+     Overview → Define 只有 86.4，其餘七組都是 172.8（1440 實測）。
+     套 .gm-section 會連上緣一起加 86.4，把刻意留的 280 變成 366，
+     等於毀掉封面轉場——所以只加 padding-block-end。
+     ⚠️ 這個值必須與 .gm-section 的 padding-block 保持同步：兩者是同一組
+     節奏，改一邊就要改另一邊。 */
+  padding-block-end: clamp(48px, 6vw, 96px);
 }
 
 .gm-overview-inner {
