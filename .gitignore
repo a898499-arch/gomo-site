@@ -115,3 +115,9 @@ public/work/sui-sui/cosmetic-therapy-photo@2x.png
 public/work/sui-sui/background-ring-chart@2x.png
 public/web-assets/bg-remind.png
 public/web-assets/bg-correct.png
+
+# ---------- warmup 的原始影片（2026-09-03）----------
+# 上線的 warmup.mp4 是 743×1320 / 1.22MB 的壓縮版；這支是它的來源
+# （1080×1920 / 12.84MB）。畫面上只顯示 371×659，原尺寸是 2.9 倍過大。
+# 留在本機當備份，不進版控——同一條裁示。
+public/web-assets/warmup-source.mp4
