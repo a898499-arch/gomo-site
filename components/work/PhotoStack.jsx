@@ -1,6 +1,7 @@
 'use client';
 
 import { useStandardEntrance } from '@/lib/useStandardEntrance';
+import works from '@/data/works.json';
 import NextWork from './NextWork';
 import './photo-stack.css';
 
@@ -21,9 +22,23 @@ import './photo-stack.css';
 // 容器頂端一進視窗就會把 10~11 張全部一起播完，捲到下面時早就播完了，
 // 等於只有第一張看得到進場。所以拆成 PhotoStackItem，一張一個觸發點。
 export default function PhotoStack({ base, photos, slug }) {
+  // ⚠️ 標題從 works.json 取，不另外收一個 prop：Next Work 已經靠 slug 讀同一份
+  // 資料，多開一個 prop 只會多一個會漂移的來源。
+  const work = works.find((w) => w.slug === slug);
+
   return (
     <>
       <div className="page-container">
+        {/* ⚠️ 這是整頁唯一的 h1（2026-09-03 補）。這兩頁（MVS / Blossom Care）
+            整頁只有照片，畫面上沒有任何標題文字，所以用 .visually-hidden：
+            視覺完全不變，但螢幕閱讀器與搜尋引擎讀得到頁面主題。
+            先前這兩頁沒有 h1，第一個標題是下面那個「圖片內容摘要」的 h2。 */}
+        {work && (
+          <h1 className="visually-hidden">
+            {work.title} — {work.description}
+          </h1>
+        )}
+
         <div className="work-photo-stack">
           {photos.map((p, i) => (
             <PhotoStackItem

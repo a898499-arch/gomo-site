@@ -23,7 +23,10 @@ export default function Opening() {
           <div className="gm-opening-text-group">
             <div className="gm-opening-text">
               {/* 2873:2283 */}
-              <p className="gm-opening-tagline">I designed this site. Then I built it.</p>
+              {/* ⚠️ 這是整頁唯一的 h1（2026-09-03 從 <p> 改過來）。
+                  視覺樣式完全沒動——.gm-opening-tagline 照舊，只是補上語意。
+                  這一頁先前沒有 h1。 */}
+              <h1 className="gm-opening-tagline">I designed this site. Then I built it.</h1>
 
               {/* 2873:2284 —— Figma 是一個文字節點裡三段，用三個 <p> 表達
                   （分開的句子，語意上本來就是三段）。 */}

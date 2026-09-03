@@ -154,7 +154,10 @@ export default function About() {
         </div>
 
         <div className="about-intro">
-          <span className="about-pill">About</span>
+          {/* ⚠️ 這是整頁唯一的 h1（2026-09-03 從 <span> 改過來）。
+              視覺樣式完全沒動——.about-pill 的樣式照舊，只是把語意補上：
+              先前這一頁沒有任何 h1，螢幕閱讀器與搜尋引擎讀不到頁面主題。 */}
+          <h1 className="about-pill">About</h1>
           <div className="about-bio">
             <p>
               Maida (Lin Wei-Ting) Hu is a Taiwanese Indigenous designer and Goldsmiths graduate
