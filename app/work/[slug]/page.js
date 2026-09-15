@@ -6,6 +6,7 @@ import AeroVPage from '@/components/work/aero-v/AeroVPage';
 import GoodmoodPage from '@/components/work/goodmood/GoodmoodPage';
 import MvsPage from '@/components/work/mvs/MvsPage';
 import BlossomCarePage from '@/components/work/blossom-care/BlossomCarePage';
+import EhmsPage from '@/components/work/ehms/EhmsPage';
 
 // slug → 該作品的詳情頁元件。**這張表就是「哪些作品頁真的存在」的唯一來源。**
 //
@@ -31,6 +32,13 @@ export const PAGES = {
   // 各自的元件裡只有圖片清單與 alt。
   mvs: MvsPage,
   'blossom-care': BlossomCarePage,
+  // ⚠️ 2026-09-15：eHMS 第一輪（骨架 + 文字 + 靜態圖 + 標準進場）。
+  // Hero 視差、Before/After 推桿、Design System 輪播、五個狀態動畫還沒做。
+  // 加進這張表 = 這個網址回 200，**而且會立刻進 sitemap.xml**（見
+  // app/sitemap.js：sitemap 就是用這張表的 keys）。works.json 裡 ehms 仍是
+  // hidden:true / ready:false，所以作品分類頁與 Next Work 都連不到它，
+  // 但 Google 拿得到網址。第二、三輪做完前要不要送出去，見下面的討論。
+  ehms: EhmsPage,
 };
 
 // ⚠️ 判斷依據是 PAGES 而不是 works.json：works.json 裡有 13 筆，但只有 6 筆
