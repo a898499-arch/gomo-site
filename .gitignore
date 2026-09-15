@@ -89,6 +89,14 @@ public/work/goodmood/slider-*.png
 Untitled
 _to_delete/
 
+# 驗收用的截圖輸出（Chrome DevTools MCP 寫進來的，單張整頁截圖可達數十 MB）。
+# 只是比對版面用的中間產物，不是素材，不進版控。
+#
+# ⚠️ 這個目錄必須擋掉還有第二個理由：dev server 的檔案監看會看到新檔案而觸發
+# Fast Refresh，截圖寫入正好會讓當下那一張截到重新掛載中的畫面。驗收截圖請用
+# production build（next build && next start）。
+.shots/
+
 # 使用者的暫存區：還沒整理定位、要放進 work 的照片（11MB）。
 # 使用者 2026-08-29 指示「不要動、不要刪」，整理好之後會另外指定去處。
 # 先擋住避免暫存檔誤進 git 歷史——進了就永久拿不掉。
