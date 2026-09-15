@@ -165,7 +165,7 @@ export default function Footer() {
               and environment through craft and material.
             </p>
             <a
-              href="/cv/cv.pdf"
+              href="/cv/Maida-Hu-CV-2026.pdf"
               download="Maida-Hu-CV-2026.pdf"
               className="cv-download link-underline"
               data-animate
@@ -174,15 +174,19 @@ export default function Footer() {
               {/* 垂直遮罩交換（規格書 §6.4）。與 About 頁 .amd-text-wrap
                   同一套技法（各自的 class，機制與時間刻意相同）。
                   ⚠️ 第二層要 aria-hidden：兩層文字都在 DOM 裡，不隱藏的話
-                  螢幕閱讀器會把「CV Download Download PDF (33KB)」連著唸。
+                  螢幕閱讀器會把「CV Download Download PDF (54KB)」連著唸。
                   連結本身有 aria-label，無障礙名稱由那裡提供。
-                  ⚠️ 檔案大小是實測值：public/cv/cv.pdf = 34,170 bytes。
-                  規格原文寫「(?MB)」，但這個檔連 0.1MB 都不到，寫成
-                  (0.03MB) 會很怪，所以改用 KB（已回報）。換檔案時記得更新。 */}
+                  ⚠️ 檔案大小是實測值：public/cv/Maida-Hu-CV-2026.pdf
+                  = 55,598 bytes = 54KB。規格原文寫「(?MB)」，但這個檔連
+                  0.1MB 都不到，寫成 (0.05MB) 會很怪，所以改用 KB（已回報）。
+                  ⚠️ 換檔案時「三個地方」要一起改：上面的 href、下面這行的
+                  KB 數字、以及 About 頁 §6.6 的 href（components/about/
+                  About.jsx）。2026-09-15 換成 2026 版時就是只換了檔案、
+                  三處都沒改，兩個連結一起 404 了一段時間。 */}
               <span className="cv-text-wrap">
                 <span className="cv-text-default">CV Download</span>
                 <span className="cv-text-hover" aria-hidden="true">
-                  Download PDF (33KB)
+                  Download PDF (54KB)
                 </span>
               </span>
               <span className="cv-arrow" aria-hidden="true">
