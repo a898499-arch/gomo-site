@@ -213,10 +213,13 @@ export default function About() {
       {/* ---------- See More Detail ----------
           §6.6：連到 CV PDF，target="_blank" 開新分頁「預覽」。
           ⚠️ 不可加 download 屬性——那會變成強制存檔。這一點刻意跟 §6.4
-          頁腳的 CV Download（有 download）相反，兩者不共用點擊邏輯。 */}
+          頁腳的 CV Download（有 download）相反，兩者不共用點擊邏輯。
+          ⚠️ 檔名寫全稱而不是 cv.pdf：這個連結是開新分頁預覽，分頁標題就是
+          檔名。換 CV 時這裡與 components/Footer.jsx 的 href 要一起改——
+          2026-09-15 換 2026 版時只換了檔案沒改這兩處，兩邊一起 404。 */}
       <div className="about-more-detail-wrap">
         <a
-          href="/cv/cv.pdf"
+          href="/cv/Maida-Hu-CV-2026.pdf"
           target="_blank"
           rel="noopener noreferrer"
           className="about-more-detail link-underline"
