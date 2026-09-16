@@ -9,15 +9,20 @@
 /* ---------- 資料 ------------------------------------------ */
 
 // 活動卡片：x/y 為旋轉後的 bounding box 左上角
+// ⚠️ 2026-09-16 從 .png 改成 .webp。八張原本是無損 PNG 合計 1.91MB，佔
+// /work/wanderbuddy 整頁傳輸量的 40%，是那一頁最後一塊沒轉檔的素材。
+// quality 82 轉完合計 0.24MB（−87.5%）。尺寸一個像素都沒動，仍是 3x
+// （顯示 177–197 CSS px，檔案 531–593 px），下面的 w/h 不受影響。
+// 原始 PNG 留在本機當備份、不進版控，見 .gitignore。
 const CARDS = [
-  { file:'coffee.png',   label:'Coffee Hopping',    x:-96, y:127, w:177, h:230 },
-  { file:'markets.png',  label:'Markets',           x: 88, y:189, w:177, h:230 },
-  { file:'city.png',     label:'City Walks',        x:271, y:130, w:177, h:230 },
-  { file:'art.png',      label:'Art Shows',         x:186, y:303, w:177, h:230 },
-  { file:'learning.png', label:'Learning & Social', x:-42, y:289, w:197, h:244 },
-  { file:'music.png',    label:'Live Music',        x:365, y:278, w:197, h:244 },
-  { file:'film.png',     label:'Film Nights',       x:512, y:133, w:180, h:232 },
-  { file:'food.png',     label:'Food Tours',        x:562, y:311, w:177, h:230 },
+  { file:'coffee.webp',   label:'Coffee Hopping',    x:-96, y:127, w:177, h:230 },
+  { file:'markets.webp',  label:'Markets',           x: 88, y:189, w:177, h:230 },
+  { file:'city.webp',     label:'City Walks',        x:271, y:130, w:177, h:230 },
+  { file:'art.webp',      label:'Art Shows',         x:186, y:303, w:177, h:230 },
+  { file:'learning.webp', label:'Learning & Social', x:-42, y:289, w:197, h:244 },
+  { file:'music.webp',    label:'Live Music',        x:365, y:278, w:197, h:244 },
+  { file:'film.webp',     label:'Film Nights',       x:512, y:133, w:180, h:232 },
+  { file:'food.webp',     label:'Food Tours',        x:562, y:311, w:177, h:230 },
 ];
 // 一份卡片群的寬度，第 2 幕的無限飄移會用到
 const STRIP_W = 835;

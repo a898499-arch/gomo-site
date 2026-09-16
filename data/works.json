@@ -39,6 +39,30 @@
     "hidden": false
   },
   {
+    "slug": "ehms",
+    "ready": true,
+    "title": "Healthcare Management System (eHMS)",
+    "description": "An app nurses use to control a pressure-relief mattress.",
+    "tags": [
+      "UI/UX",
+      "Medical Design",
+      "Health"
+    ],
+    "group": [
+      "uiux"
+    ],
+    "year": null,
+    "cover": "/work/hover/ehms-1.webp",
+    "galleryCover": "/work/gallery/ehms.webp",
+    "hoverVideo": null,
+    "hoverImages": [
+      "/work/hover/ehms-1.webp",
+      "/work/hover/ehms-2.webp",
+      "/work/hover/ehms-3.webp"
+    ],
+    "hidden": false
+  },
+  {
     "slug": "wanderbuddy",
     "ready": true,
     "title": "WanderBuddy",
@@ -126,26 +150,6 @@
       "/work/hover/mvs-3.webp"
     ],
     "hidden": false
-  },
-  {
-    "slug": "ehms",
-    "ready": false,
-    "title": "Healthcare Management System (eHMS)",
-    "description": "Project description coming soon.",
-    "tags": [
-      "UI/UX",
-      "Medical Design",
-      "Health"
-    ],
-    "group": [
-      "uiux"
-    ],
-    "year": null,
-    "cover": "/work/covers/ehms.webp",
-    "galleryCover": null,
-    "hoverVideo": null,
-    "hoverImages": null,
-    "hidden": true
   },
   {
     "slug": "dh2",

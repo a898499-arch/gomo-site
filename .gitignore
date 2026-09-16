@@ -54,6 +54,21 @@ public/work/sui-sui/Shot.png
 public/work/mvs/*.jpg
 public/work/blossom-care/*.jpg
 
+# 作品卡 hover / cover 的來源大圖（Maida 匯 PNG @2x，上線用的是同目錄壓過的
+# <name>.webp 與 <name>@2x.webp）。原檔留在本機當備份、不進版控——沿用
+# 2026-08-28 對 mvs / blossom-care 原始 jpg 的同一條裁示。
+#
+# ⚠️ 範圍精確到副檔名：這兩個目錄底下上線用的全是 .webp（hover/ 另有
+# sui-sui 與 wanderbuddy 的 .mp4 / .webm），擋 *.png 不會誤傷。
+public/work/hover/*.png
+public/work/covers/*.png
+
+# WanderBuddy 互動 Demo 的活動卡片來源（2026-09-16 轉 webp）。
+# 八張無損 PNG 合計 1.91MB，是 /work/wanderbuddy 最後一塊沒轉檔的素材，
+# 佔整頁傳輸量 40%。上線用的是同目錄的 <name>.webp（合計 0.24MB），
+# public/flow.js 的 CARDS 已改讀 .webp。
+public/flow/cards/*.png
+
 # 首頁 Gallery 卡片的直式來源大圖（1065×1440，各 1.7–3.0MB）。
 # 上線用的是同目錄壓過的 <slug>.webp（532×720）與 <slug>@2x.webp（1065×1440），
 # 六張合計約 600KB。原始 PNG 留在本機當備份，不進版控——進了 git 歷史就
@@ -89,6 +104,14 @@ public/work/goodmood/slider-*.png
 Untitled
 _to_delete/
 
+# 驗收用的截圖輸出（Chrome DevTools MCP 寫進來的，單張整頁截圖可達數十 MB）。
+# 只是比對版面用的中間產物，不是素材，不進版控。
+#
+# ⚠️ 這個目錄必須擋掉還有第二個理由：dev server 的檔案監看會看到新檔案而觸發
+# Fast Refresh，截圖寫入正好會讓當下那一張截到重新掛載中的畫面。驗收截圖請用
+# production build（next build && next start）。
+.shots/
+
 # 使用者的暫存區：還沒整理定位、要放進 work 的照片（11MB）。
 # 使用者 2026-08-29 指示「不要動、不要刪」，整理好之後會另外指定去處。
 # 先擋住避免暫存檔誤進 git 歷史——進了就永久拿不掉。
@@ -113,6 +136,20 @@ public/work/sui-sui/function2-products-overview.png
 public/work/sui-sui/function2-intro-page.png
 public/work/sui-sui/cosmetic-therapy-photo@2x.png
 public/work/sui-sui/background-ring-chart@2x.png
+
+# ---------- sui-sui Function 2 的切圖殘骸（2026-09-16 刪除）----------
+# 這三個檔案在 repo 裡待了一個月，合計 8.7MB，**一次都沒有被引用過**
+# （刪除前 grep 過 components/ app/ lib/ 全部，三個字串零命中）。
+# 會被部署上去、佔掉 sui-sui 素材總量的 65%，但永遠不會有人請求。
+#
+# ⚠️ function2-bg-vector 的 .png 與 .svg 位元組大小完全相同（3193224），
+# 是同一份檔案存了兩個副檔名——切圖時的誤操作，不是兩種格式的版本。
+#
+# 擋起來避免再次誤放。Function 2 那一區實際在用的是同目錄的
+# function2-*.webp，不受影響。
+public/work/sui-sui/function2-bg-vector.png
+public/work/sui-sui/function2-bg-vector.svg
+public/work/sui-sui/function2-phone-main.png
 public/web-assets/bg-remind.png
 public/web-assets/bg-correct.png
 
@@ -129,6 +166,16 @@ public/web-assets/bg-correct.png
 # 用 grep 找不到字面路徑——**不要**改成 public/work/aero-v/* 這種寫法。
 public/work/aero-v/*.png
 public/work/aero-v/*.jpg
+
+# eHMS 五個狀態動畫的原始來源（2026-09-16）。
+# 站上載入的是 public/work/ehms/states/mattress-animations.html，那份是這支的
+# 複製 + 兩處經 Maida 批准的整合用修改（play/pause 接口、prefers-reduced-motion）。
+# 這裡這份是未改動的原稿，留在本機當備份、不進版控——同一條裁示先前已經套在
+# mvs / blossom-care 的原始 jpg、goodmood 的來源 png、aero-v 的 png/jpg 上。
+#
+# ⚠️ 原本的資料夾名稱結尾多一個冒號（`ehms-states:`），是建立時誤打的，
+# 2026-09-16 已改名為 ehms-states。
+ehms-states/
 
 # ---------- warmup 的原始影片（2026-09-03）----------
 # 上線的 warmup.mp4 是 743×1320 / 1.22MB 的壓縮版；這支是它的來源

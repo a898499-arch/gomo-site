@@ -1,0 +1,113 @@
+/* ====================================================================
+   前後對比推桿（共用元件）— components/shared/CompareSlider.jsx
+
+   ⚠️⚠️ 這裡的推桿邏輯與 components/work/goodmood/goodmood.css 的
+   .gm-slider 相同。改動其中一邊時要評估另一邊。Goodmood 尚未遷移過去，
+   原因是該頁已上線且驗收過。
+
+   這支只放「機制」——疊層、clip-path、把手、input、焦點指示。
+   外框尺寸、長寬比、底色、邊框、圓角、以及兩層裡面的東西，全部由呼叫端
+   自己的 class 提供。Goodmood 是 1344 設計寬、eHMS 是 1088.485×639，
+   幾何共用只會變成一堆互相打架的覆寫。
+   ==================================================================== */
+
+.cs {
+  position: relative;
+  width: 100%;
+  touch-action: pan-y; /* 垂直捲動仍交給頁面，水平留給推桿 */
+  container-type: inline-size;
+}
+
+/* 兩層疊在同一個位置。下層＝before（整張完整），上層＝after（用 clip-path
+   露出右側）。--cs-pos 是分隔線的位置（0 = 最左，100 = 最右）。 */
+.cs-layer {
+  position: absolute;
+  inset: 0;
+}
+
+/* ⚠️ 只動 clip-path，不動 width / left（CLAUDE.md 硬規則）。
+   ⚠️⚠️ 從**左邊**裁，不是從右邊。這是刻意的：
+     從右邊裁 → after 出現在左半邊，靠右的 after 標籤在 50% 時會被整個切掉。
+     從左邊裁（這裡）→ 分隔線左邊永遠是 before、右邊永遠是 after，
+       兩個標籤各自待在自己的半邊，50% 時同時看得到。
+   副作用：0% 時全是 after、100% 時全是 before。
+   不要改成 100 - pos——那會讓把手的移動方向和拉桿相反。 */
+.cs-layer--after {
+  clip-path: inset(0 0 0 calc(var(--cs-pos) * 1%));
+  /* ⚠️ 上層必須是不透明的，clip 才真的等於「遮住／露出」。
+     沒有底色的話：0%（全 after）時上層在沒有圖的地方是透明的，底下 before 層
+     的標籤會透出來，畫面上同時看到兩個標籤。
+     ⚠️ 只給底色，**不**給邊框或圓角——那些只掛在最外層，兩層各畫一次的話
+     clip 的切邊會出現兩條線。 */
+  background: #fafafa;
+}
+
+/* 把手。
+   ⚠️ 位移只用 transform：這一層是 100% 寬的空殼，translateX 的百分比相對
+   「自己的寬度」，而自己的寬度就是容器寬度，所以 translateX(pos%) 剛好等於
+   容器的 pos% 位置。不用 left，避免觸發 layout。 */
+.cs-handle {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+  transform: translateX(calc(var(--cs-pos) * 1%));
+  /* 60ms 幾乎察覺不到，拖曳時不會有延遲感，但鍵盤一格一格移動時比較順。
+     reduced-motion 下整個拿掉，讓把手即時跟隨指標。 */
+  transition: transform 60ms linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cs-handle {
+    transition: none;
+  }
+}
+
+.cs-handle-bar {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 2px;
+  background: #fff;
+  transform: translateX(-50%);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+/* 真正的控制項：一個蓋滿整個盒子的 <input type="range">。
+   ⚠️ 刻意不用 div 手刻 role="slider"——原生 range 直接給到鍵盤左右鍵、
+   Home/End、螢幕閱讀器的數值播報，以及「點盒子任一點跳到該位置」的行為。
+   ⚠️ 用 opacity:0 而不是 display:none / visibility:hidden：後兩者會把它移出
+   焦點序，鍵盤使用者就完全操作不到。 */
+.cs-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: ew-resize;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+}
+
+.cs-input::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 40px;
+  height: 100%;
+}
+
+.cs-input::-moz-range-thumb {
+  width: 40px;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+}
+
+/* 焦點指示要畫在看得見的東西上——input 本身是透明的。 */
+.cs:has(.cs-input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}

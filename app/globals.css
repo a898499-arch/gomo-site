@@ -68,6 +68,21 @@
   --site-max: 1600px;
 
   --nav-top-gap: 10px;
+
+  /* 「導覽列不佔版面」的作品頁（data-nav-bleed + startHidden）Hero 距頁面
+     頂端的高度。目前 /work/sui-sui 與 /work/ehms 兩頁共用。
+     132 = 導覽列 116 + 間隙 16，來自 sui-sui 的 Figma 稿。
+     132/1440 = 9.1667vw，所以視窗比 1440 窄時等比縮小（1155 時 105.875px）。
+
+     ⚠️ 為什麼要共用而不是各寫一份：這兩頁的條件完全相同——導覽列都是
+     透明、進頁時隱藏、不佔版面高度，所以「Hero 從多高開始」在視覺上是
+     同一個決定，不是兩個巧合相等的數字（Maida 2026-09-16 裁示）。改一邊
+     兩邊要同步。
+     ⚠️ 數值本身是 sui-sui 既有的實作值，一個像素都沒動，只是搬到這裡具名。
+     ⚠️ 兩頁套用的屬性不同（sui-sui 是 .ss-hero 的 padding-top，eHMS 是
+     .eh-hero 的 margin-top），因為兩邊的 Hero 結構不同；得到的「Hero 視覺
+     上緣距頁面頂端」是同一個值，實測 1440→132.00 / 1155→105.88，兩頁一致。 */
+  --case-hero-top: min(9.1667vw, 132px);
 }
 
 * {
@@ -228,10 +243,27 @@ body:has(.page-content > [data-nav-bleed]) .site-nav {
   height: 100%;
 }
 
+/* ⚠️ 間距 48px → 32px（2026-09-16）。
+   48px 來自 prototypes/，但那是舊版三項（Works / about me / Contact Me）的值。
+   導覽列改成 Home / Works / About Me 後字變短，32px 才能讓整組寬度（324.8）
+   貼近原設計的 326。Maida 2026-09-16 裁示，有意識覆蓋原型移植原則。
+
+   量測依據（Figma node 912:93 / 3:137，兩個都是舊版三項）：
+     Figma 舊三項  墨跡 65 + 102 + 121 = 288，間距 20 ×2 → 整組 326
+     線上新三項    墨跡 72.6 + 72.6 + 115.6 = 260.8（短 27px）
+                   間距 20 ×2 → 整組 300.8（比原設計窄 25px）
+                   間距 32 ×2 → 整組 324.8（≈ 326）✅
+   取的是「整組的視覺份量與原設計一致」，不是「間距數字與 Figma 一致」。
+
+   ⚠️ 下面兩個斷點必須跟著改，否則 900px 的 32 會等於基準、遞減關係消失。
+   維持原型那條已驗收的曲線 1 : 0.667 : 0.333，只換基準：
+     48 → 32   32 → 21.3 → 21   16 → 10.7 → 11
+   刻意**不**改成「gap 跟字級等比」：現行的 gap ÷ 字級是 2.0 / 1.78 / 1.14，
+   原型是刻意讓間距縮得比字級還快，固定比例會抹掉那個設計意圖。 */
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 48px;
+  gap: 32px;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -254,14 +286,14 @@ body:has(.page-content > [data-nav-bleed]) .site-nav {
 @media (max-width: 900px) {
   .site-nav { height: 96px; }
   .nav-logo { width: 72px; height: 73px; }
-  .nav-links { gap: 32px; }
+  .nav-links { gap: 21px; } /* 32 × 0.667，見上方基準的註解 */
   .nav-links a { font-size: 18px; }
 }
 
 @media (max-width: 600px) {
   .site-nav { height: 72px; }
   .nav-logo { width: 47px; height: 48px; }
-  .nav-links { gap: 16px; }
+  .nav-links { gap: 11px; } /* 32 × 0.333，見上方基準的註解 */
   .nav-links a { font-size: 14px; }
 }
 
