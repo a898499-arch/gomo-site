@@ -68,69 +68,89 @@
    左右留白 179 vs 197 不對稱——那不是刻意的第二種窄度，是沒對齊，
    使用者指示統一成 1085。
    ==================================================================== */
-/* ⚠️ 長寬比不是 Figma 的 1064/736，而是 1064/677.12 = 1064/(736 × 0.92)。
-   第二輪加了捲動視差：拼貼要能上下移動又不露出空白，它就必須比視窗高。
-   這裡讓 Hero 只顯示拼貼的 92%（上下各裁 4%），使用者 2026-09-15 裁示
-   ——±60px 會切進上下兩排照片，±15px 幾乎看不出視差，取中間。
-   ⚠️ 裁切與圓角都掛在這一層，拼貼自己不再畫一次——視差層要能溢出被裁掉。 */
+/* 長寬比 = Figma 拼貼的原始比例 1064/736，**拼貼 100% 完整顯示，四邊都不裁**。
+   ⚠️ 2026-09-16 Maida 裁示：拿掉拼貼的捲動視差，只留文字層的輕微位移。
+   沿革（不要再繞回去）：
+     第二輪  1064/677.12（只顯示 92%）+ 拼貼 ±4% 視差。視差要能上下移動又
+             不露出空白，圖就必須比框高，於是永遠有 60px 被裁在某一邊——
+             到站裁上緣、捲到底裁下緣。
+     中途    把 60px 全挪到下緣（第一眼不裁上緣），但「永」那張字體樣張被
+             攔腰切斷，比原本更明顯。
+     現行    **拼貼完全不動**。上緣完整與下緣完整不可能同時成立是視差的幾何
+             必然，唯一的解是拼貼不參與視差。文字層疊在拼貼上方，它自己移動
+             不需要裁切拼貼。
+   ⚠️ overflow:hidden 已移除——那是為了裁掉溢出的視差層而存在的，現在沒有
+   任何東西會溢出，留著反而會把文字層 ±10px 的位移裁掉。圓角改由 <img> 自己
+   畫（.eh-hero-collage 的 border-radius: inherit）。 */
 .eh-hero {
   position: relative;
-  aspect-ratio: 1064 / 677.12;
-  overflow: hidden;
+  aspect-ratio: 1064 / 736;
   border-radius: 12px;
-  /* ⚠️ 導覽列是 position:fixed、高 116、top:10，下緣正好落在 126；而
-     .page-content 的 padding-top 也是 126——兩者**零間距貼齊**，Hero 這張
-     圓角卡看起來就像被導覽列壓著。這一頁的 Hero 不是滿版出血（沒有
-     data-nav-bleed），所以導覽列不該貼在它上面。用既有級距的 --eh-gap-sm
-     把整張卡往下推，不新增級距。
+  /* 頁面頂端到 Hero 的間距。與 /work/sui-sui「完全一樣」——共用 globals.css
+     的 --case-hero-top（1440 時 132px，窄視窗等比縮成 9.1667vw）。
+     Maida 2026-09-16 裁示：兩頁的導覽列條件相同（data-nav-bleed + 透明 +
+     startHidden + 不佔版面），Hero 從多高開始就是同一個設計決定，不該各寫
+     一套數值。要調就改 globals.css 那個變數，兩頁同步。
 
-     ⚠️ Figma 為 8px，但 Figma 的導覽列是實心 116px 高的 bar，實作的導覽列
-     是透明且有 --nav-top-gap: 10，兩套系統不同。64px 是為了讓 Hero 不被
-     導覽列遮到而刻意偏離。（Figma 的 8px 換算到實作是 -2px，等於重疊。） */
-  margin-top: var(--eh-gap-sm);
+     ⚠️ 不是 Figma 這一頁的 8px。這頁 Figma 上 Hero 在 y=124（導覽列 116 +
+     間隙 8），但導覽列既然不佔版面，沿用 sui-sui 的 132 而不是 8 或 124。
 
-  /* ---------- Hero 文字的關係定位用的兩個錨點 ----------
-     兩個都是「佔 Hero 高度的百分比」，所以任何視窗寬度下都成立。
+     ⚠️ 沿革（2026-09-16 同一天改過四次，不要再繞回去）：
+       第二輪  --eh-gap-sm（64px）——當時導覽列 fixed、靠 .page-content 的
+               padding 保留空間，Hero 上緣與導覽列下緣貼齊看起來被壓著
+       中途    data-nav-inflow（sticky 佔版面）+ 8px —— 已整個撤銷
+       中途    data-nav-bleed + 8px（貼近畫面頂端）—— 該指示已作廢
+       現行    data-nav-bleed + startHidden + var(--case-hero-top) */
+  margin-top: var(--case-hero-top);
 
-     --eh-icon-bottom  拼貼裡 app icon 方塊的下緣。
-       Figma 量得方塊本體 y 280–431（x 50–201，151×151，與 frame 一致；
-       下方還有約 4.5px 是陰影外溢，不算在內）。
-       換算：Hero 只顯示拼貼的 92%、視差層基準上偏 4.348%，所以
-       (431 − 0.04348 × 677.12) / 677.12 = 59.303%
+  /* ---------- Hero 文字的關係定位錨點 ----------
+     --eh-icon-center  拼貼裡 app icon 方塊的**中心線**，用「佔 Hero 高度的
+     百分比」表示，所以任何視窗寬度下都成立。
 
-     --eh-baseline-offset  tagline 的基線距「文字區塊頂端」的距離。
-       實測值（不是用字型 metrics 推的）：1440 時 114.68px / Hero 高 690.48
-       = 16.608%。標題行高、tagline 的負 margin、半行距與 ascent 都含在內，
-       所以改動標題或 tagline 的字級/行高之後要重新量這個值。 */
-  --eh-icon-bottom: 59.303%;
-  --eh-baseline-offset: 16.608%;
+     Figma 量得方塊本體 y 280–431（x 50–201，151×151，與 frame 一致；下方
+     還有約 4.5px 是陰影外溢，不算在內），中心 = 355.5，拼貼原生高 736。
+     拼貼現在 100% 完整填滿 Hero、也不再有任何位移，所以直接就是
+     355.5 / 736 = 48.3016%
+
+     ⚠️ 這個值 2026-09-16 一天內動過三次，都只是因為「拼貼相對 Hero 的基準」
+     在變，icon 在拼貼裡的位置從頭到尾沒變過：
+       48.154%   顯示 92% + 視差層 top:-4.348%
+       52.5017%  顯示 92% + 視差層 top:0
+       48.3016%  顯示 100% + 無視差（現行）
+     ⚠️ 對齊點是 **scroll 0**：拼貼永遠不動，文字層的行程起點是 0，所以
+     「剛進頁面的第一眼」就是兩條中心線精準重合的那一刻。
+     捲動過程中文字會漂移最多 20px（見 .eh-hero-text-parallax）。 */
+  --eh-icon-center: 48.3016%;
 
   /* 標題與 tagline 的字級改用 cqw，基準就是這個容器的寬度——見下面
      .eh-hero-title 的註解。 */
   container-type: inline-size;
 }
 
-/* 視差層。比 .eh-hero 高 8.696%（= 100/92），上下各多 4.348%，
-   剛好等於 GSAP 那邊 ±4% 的行程，所以任何捲動位置都不會露出空白。
-   ⚠️ 這一層只被視差寫 transform；裡面的 <img> 由標準進場寫 transform。
-   兩者是不同節點，不會互相覆蓋。 */
-.eh-hero-parallax {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: -4.348%;
-  height: 108.696%;
-}
-
+/* 拼貼。2026-09-16 起**不參與任何捲動視差**，只保留標準進場。
+   ⚠️ 原本外面還包了一層 .eh-hero-parallax（absolute + height:108.696%）
+   專門承接視差的 transform，那一層已經整個刪掉——沒有視差就沒有第二個
+   transform 擁有者，不需要再分層。img 自己的 transform 仍然只由標準進場寫。
+   長寬比與 .eh-hero 一致（都是 1064/736），object-fit:cover 實際上不會裁到
+   任何一邊，寫著是防呆。
+   圓角原本由 .eh-hero 的 overflow:hidden 裁出來，那個 overflow 已移除
+   （會裁掉文字層的位移），改成這裡自己繼承同一個半徑。 */
 .eh-hero-collage {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: inherit;
 }
 
-/* 文字的視差層。幅度只有 ±10px（拼貼是 ±30px），三倍差距造成景深——
-   跑得慢的在後面。同樣是獨立節點，寫 transform 不會碰到裡面的遮罩揭露。 */
+/* 文字的視差層。行程 0 → −20px。這是整個 Hero 唯一還會動的東西。
+   ⚠️ 拼貼已經完全不動（見 .eh-hero-collage），所以這 20px 不再是「兩層的
+   速度差」，而是文字相對整個頁面稍微跑快一點——文字因此讀起來浮在拼貼前面。
+   ⚠️ 幅度維持原本的 20px 總行程，只是起點放在 0：scroll 0 時 transform 為 0，
+   文字群組與 icon 中心線精準重合，捲動中最多漂移 20px。
+   ⚠️ 文字層不需要任何裁切。它疊在拼貼上方，自己移動不影響拼貼——這正是
+   「拼貼完整」與「文字有位移」能同時成立的原因。
+   同樣是獨立節點，寫 transform 不會碰到裡面的遮罩揭露。 */
 .eh-hero-text-parallax {
   position: absolute;
   inset: 0;
@@ -140,23 +160,24 @@
    左緣照 Figma：912:371 / 912:370 的墨跡左緣都在 x=406（Hero 相對 227），
    227/1064 = 21.33%，兩行齊平。
 
-   ⚠️⚠️ 垂直位置**刻意偏離 Figma 座標**，改用「tagline 基線對齊 icon 下緣」
-   的關係定位。Maida 2026-09-16 裁示。
+   ⚠️⚠️ 文字群組與 icon 垂直置中對齊。Maida 2026-09-16 修訂，取代先前的
+   「tagline 基線對齊 icon 下緣」。
 
-   背景：Figma 的絕對座標做出來，tagline 基線在 y=412、icon 下緣在 y=431，
-   基線比下緣「高」19px（逐像素量 Figma 自己的渲染，兩種算法一致）。
-   那組數值忠實照做出來的視覺關係不是要的，以口頭指定的關係為準。
-
-   算法：文字區塊的 top = icon 下緣 − 基線距區塊頂端的距離。
-   兩個錨點都定義在 .eh-hero 上（見該處註解），都是 Hero 高度的百分比。
-   ⚠️ 對齊定義在「視差中點」——拼貼與文字的視差幅度不同（±30 vs ±10），
+   「文字群組」= 標題 + tagline 兩行當作一個整體，它的中心線 = icon 的中心線。
+   做法刻意用 top + translateY(-50%) 而不是算好的偏移量：這樣群組多高都自動
+   置中，之後改標題或 tagline 的字級、行高都不必回來重算。
+   ⚠️ translateY(-50%) 掛在這一層是安全的——視差的 transform 寫在外層的
+   .eh-hero-text-parallax，兩者是不同節點，不會互相覆蓋。
+   ⚠️ 對齊定義在「視差中點」：拼貼與文字的視差幅度不同（±30 vs ±10），
    本來就只能在一個捲動位置上精準重合，取中點（兩者 transform 都是 0）。
-   ⚠️ 標題與 tagline 之間的關係沒有動，仍是 Figma 的 −12px（見
-   .eh-hero-tagline 的 margin-top），整組一起往下移。 */
+   ⚠️ 標題與 tagline 之間先前是 −12px，2026-09-16 改成 0（見
+   .eh-hero-tagline 的 margin）。群組因此高了 12px，但因為用的是
+   translateY(-50%) 而不是算死的偏移量，置中關係自動維持，這裡不必改。 */
 .eh-hero-text {
   position: absolute;
   left: 21.33%;
-  top: calc(var(--eh-icon-bottom) - var(--eh-baseline-offset));
+  top: var(--eh-icon-center);
+  transform: translateY(-50%);
   right: 8%;
 }
 
@@ -182,11 +203,19 @@
   }
 }
 
-/* 標題 — Figma node 912:371：74px / Regular / line-height 1.45 /
-   字距 −0.37px / 白色。
+/* 標題 — Figma node 912:371：x=406 y=423 326×107，
+   74px / Regular / line-height 145%（=107.3px）/ 字距 −0.37px / 白色。
+   −0.37/74 = −0.005em，所以下面寫 em 而不是 px——字級縮放時字距跟著縮。
    ⚠️ font-weight 是 400 不是 600。Figma 讀到的是
    'Microsoft Sans Serif:**Regular**'（字體名稱是缺字型的代換結果，字重不是）。
    先前用 600 是我看錯，實際比 Figma 粗很多。字體仍用全站的 Poppins。
+
+   ⚠️ text-align 刻意**不照** Figma 的 center。Figma 上這兩個文字框都是
+   hug 寬度（標題 326、tagline 441，左緣同樣在 x=406），置中對齊在那裡看不
+   出效果；但這邊的容器是從 21.33% 一路到 right:8% 的寬塊，套 center 會把
+   兩行推到塊中央，先前驗證過的「兩行左緣齊平於 x=227」就破了。
+   維持靠左。（Maida 2026-09-16 提供的 Figma CSS 含 text-align:center，
+   此處為明示偏離。）
 
    ⚠️ 字級用 cqw 不用 vw。基準是 .eh-hero 的寬度（= 內容欄寬），不是視窗寬。
    原因：內容欄有 max-width:1085，視窗超過 1440 之後欄寬就不再長大，但 vw
@@ -202,15 +231,20 @@
   color: #ffffff;
 }
 
-/* tagline — Figma node 912:370：16px / Regular / line-height 1.5 /
-   字距 −0.08px / 白色 / 不換行。16/1064 = 1.5038cqw。
-   ⚠️ margin-top 是**負的**。Figma：標題文字框 y 423–530（74×1.45=107.3 高），
-   tagline 文字框 y 518——比標題框的底還高 12px。那 12px 是標題行高的下半個
-   行距（half-leading），tagline 要塞進去才會「緊接在標題下方」。
-   先前用 +0.4em 等於在已經有的行距上再加一段，實測位置低了 16.8px。
-   −12/16 = −0.75em（em 取 tagline 自己的字級，所以跟著一起縮放）。 */
+/* tagline — Figma node 912:370：x=406 y=518 441×24，
+   16px / Regular / line-height 150%（=24px）/ 字距 −0.08px / 白色 / 不換行。
+   16/1064 = 1.5038cqw；−0.08/16 = −0.005em（與標題同一個比值）。
+
+   ⚠️⚠️ margin-top 是 **0**，不是負值。Maida 2026-09-16 裁示：兩行的文字框
+   不可以重疊。
+   Figma 上的實際數值是 **−12px**：標題框 y 423–530、tagline 框 y 518，
+   tagline 的頂比標題的底還高 12px，**Figma 自己就是重疊的**。那 12px 是標題
+   行高的下半個行距（half-leading），Figma 讓 tagline 塞進那段空白裡。
+   照抄會讓兩個文字框在 DOM 上真的疊在一起，所以這裡不照抄——line-height
+   145% 已經含了下方行距，不需要再往上拉。
+   代價講清楚：tagline 因此比 Figma 低 12px，是刻意的取捨，不是誤差。 */
 .eh-hero-tagline {
-  margin: -0.75em 0 0;
+  margin: 0;
   font-size: max(11px, 1.5038cqw);
   font-weight: 400;
   line-height: 1.5;
@@ -390,6 +424,19 @@
   line-height: 1.7;
   letter-spacing: 0.015em;
   color: var(--eh-ink);
+}
+
+/* 07 Outcome 結尾連到 eBio 官網的那一行（2026-09-16 取代不可點的
+   「→ Read the manual」，見 Outcome.jsx 檔頭）。
+   ⚠️ color 必須明寫。.eh-body 底下先前一個 <a> 都沒有，所以沒有任何規則
+   設定連結顏色，實測掉回瀏覽器預設的 rgb(0,0,238) 藍。全站其他的
+   .link-underline 都住在有設 color 的容器裡（Footer、Nav、About），
+   這裡是第一個例外。
+   底線擦除 hover 由全站的 .link-underline 提供，底線用 currentColor，
+   所以設了顏色底線也跟著對。 */
+.eh-outcome-link a {
+  color: var(--eh-ink);
+  text-decoration: none;
 }
 
 /* ---------- 小節標題（Step 1 — … / Putting the patient… / 卡片標題）---------- */

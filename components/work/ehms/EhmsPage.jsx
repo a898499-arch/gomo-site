@@ -36,9 +36,25 @@ import NextWork from '@/components/work/NextWork';
 //          After 在檔案 j4saimg2oJWL5tUkBh5Bww 的 node 4020:5191）
 //   第三輪 Design System 輪播（共 8 頁，node id 見 DesignSystem.jsx）、
 //          五個狀態動畫（幀序列，素材待放進 public/work/ehms/states/）
+// 導覽列（Maida 2026-09-16 裁示，這一頁是全站唯一的組合）：
+//   data-nav-bleed  → .page-content 不留 126px 上留白、導覽列背景**完全透明**
+//   不呼叫 useNavBehavior → 走全站預設：**進頁就顯示**、往下滾隱藏、往上滾
+//                          出現、fixed 不佔版面空間
+//
+// ⚠️ 刻意**沒有** startHidden。sui-sui / aero-v / wanderbuddy 那三頁是
+// 「透明 + 進頁先隱藏」，這一頁是「透明 + 進頁就顯示」。不要看到 nav-bleed
+// 就順手把 startHidden 加回來，那三頁維持現狀，只有這一頁不一樣。
+// ⚠️ 也沒有任何背景色或毛玻璃——透明是要的效果，不是漏掉。
+// ⚠️ 2026-09-16 曾短暫改成 data-nav-inflow（sticky、實體佔版面高度），
+// 該做法已整個撤銷，globals.css 那兩條規則也一併移除。
+//
+// ⚠️ 上留白必須由 data-nav-bleed 的 :has() 規則處理，不可以改成用 hook 在
+// hydration 之後翻 class——SSR 的 HTML 沒有那個 class，會先用 126px 排一次
+// 版再跳成 0，實測三頁都吃到 CLS（見 globals.css 該段註解）。
 export default function EhmsPage() {
   return (
-    <div className="eh-case">
+    // data-nav-bleed 必須留在最外層（globals.css 用直接子層選擇器選它）
+    <div className="eh-case" data-nav-bleed>
       {/* y=124 — node 912:59（拼貼）+ 912:371 / 912:370（疊在上面的標題與 tagline）*/}
       <Hero />
 
