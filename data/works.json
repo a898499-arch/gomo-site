@@ -55,7 +55,11 @@
     "cover": "/work/hover/ehms-1.webp",
     "galleryCover": "/work/gallery/ehms.webp",
     "hoverVideo": null,
-    "hoverImages": null,
+    "hoverImages": [
+      "/work/hover/ehms-1.webp",
+      "/work/hover/ehms-2.webp",
+      "/work/hover/ehms-3.webp"
+    ],
     "hidden": false
   },
   {
