@@ -52,8 +52,8 @@
       "uiux"
     ],
     "year": null,
-    "cover": null,
-    "galleryCover": null,
+    "cover": "/work/hover/ehms-1.webp",
+    "galleryCover": "/work/gallery/ehms.webp",
     "hoverVideo": null,
     "hoverImages": null,
     "hidden": false
