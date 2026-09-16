@@ -54,6 +54,15 @@ public/work/sui-sui/Shot.png
 public/work/mvs/*.jpg
 public/work/blossom-care/*.jpg
 
+# 作品卡 hover / cover 的來源大圖（Maida 匯 PNG @2x，上線用的是同目錄壓過的
+# <name>.webp 與 <name>@2x.webp）。原檔留在本機當備份、不進版控——沿用
+# 2026-08-28 對 mvs / blossom-care 原始 jpg 的同一條裁示。
+#
+# ⚠️ 範圍精確到副檔名：這兩個目錄底下上線用的全是 .webp（hover/ 另有
+# sui-sui 與 wanderbuddy 的 .mp4 / .webm），擋 *.png 不會誤傷。
+public/work/hover/*.png
+public/work/covers/*.png
+
 # 首頁 Gallery 卡片的直式來源大圖（1065×1440，各 1.7–3.0MB）。
 # 上線用的是同目錄壓過的 <slug>.webp（532×720）與 <slug>@2x.webp（1065×1440），
 # 六張合計約 600KB。原始 PNG 留在本機當備份，不進版控——進了 git 歷史就
@@ -121,6 +130,20 @@ public/work/sui-sui/function2-products-overview.png
 public/work/sui-sui/function2-intro-page.png
 public/work/sui-sui/cosmetic-therapy-photo@2x.png
 public/work/sui-sui/background-ring-chart@2x.png
+
+# ---------- sui-sui Function 2 的切圖殘骸（2026-09-16 刪除）----------
+# 這三個檔案在 repo 裡待了一個月，合計 8.7MB，**一次都沒有被引用過**
+# （刪除前 grep 過 components/ app/ lib/ 全部，三個字串零命中）。
+# 會被部署上去、佔掉 sui-sui 素材總量的 65%，但永遠不會有人請求。
+#
+# ⚠️ function2-bg-vector 的 .png 與 .svg 位元組大小完全相同（3193224），
+# 是同一份檔案存了兩個副檔名——切圖時的誤操作，不是兩種格式的版本。
+#
+# 擋起來避免再次誤放。Function 2 那一區實際在用的是同目錄的
+# function2-*.webp，不受影響。
+public/work/sui-sui/function2-bg-vector.png
+public/work/sui-sui/function2-bg-vector.svg
+public/work/sui-sui/function2-phone-main.png
 public/web-assets/bg-remind.png
 public/web-assets/bg-correct.png
 
