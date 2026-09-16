@@ -228,10 +228,27 @@ body:has(.page-content > [data-nav-bleed]) .site-nav {
   height: 100%;
 }
 
+/* ⚠️ 間距 48px → 32px（2026-09-16）。
+   48px 來自 prototypes/，但那是舊版三項（Works / about me / Contact Me）的值。
+   導覽列改成 Home / Works / About Me 後字變短，32px 才能讓整組寬度（324.8）
+   貼近原設計的 326。Maida 2026-09-16 裁示，有意識覆蓋原型移植原則。
+
+   量測依據（Figma node 912:93 / 3:137，兩個都是舊版三項）：
+     Figma 舊三項  墨跡 65 + 102 + 121 = 288，間距 20 ×2 → 整組 326
+     線上新三項    墨跡 72.6 + 72.6 + 115.6 = 260.8（短 27px）
+                   間距 20 ×2 → 整組 300.8（比原設計窄 25px）
+                   間距 32 ×2 → 整組 324.8（≈ 326）✅
+   取的是「整組的視覺份量與原設計一致」，不是「間距數字與 Figma 一致」。
+
+   ⚠️ 下面兩個斷點必須跟著改，否則 900px 的 32 會等於基準、遞減關係消失。
+   維持原型那條已驗收的曲線 1 : 0.667 : 0.333，只換基準：
+     48 → 32   32 → 21.3 → 21   16 → 10.7 → 11
+   刻意**不**改成「gap 跟字級等比」：現行的 gap ÷ 字級是 2.0 / 1.78 / 1.14，
+   原型是刻意讓間距縮得比字級還快，固定比例會抹掉那個設計意圖。 */
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 48px;
+  gap: 32px;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -254,14 +271,14 @@ body:has(.page-content > [data-nav-bleed]) .site-nav {
 @media (max-width: 900px) {
   .site-nav { height: 96px; }
   .nav-logo { width: 72px; height: 73px; }
-  .nav-links { gap: 32px; }
+  .nav-links { gap: 21px; } /* 32 × 0.667，見上方基準的註解 */
   .nav-links a { font-size: 18px; }
 }
 
 @media (max-width: 600px) {
   .site-nav { height: 72px; }
   .nav-logo { width: 47px; height: 48px; }
-  .nav-links { gap: 16px; }
+  .nav-links { gap: 11px; } /* 32 × 0.333，見上方基準的註解 */
   .nav-links a { font-size: 14px; }
 }
 
