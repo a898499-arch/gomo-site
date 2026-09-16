@@ -63,6 +63,12 @@ public/work/blossom-care/*.jpg
 public/work/hover/*.png
 public/work/covers/*.png
 
+# WanderBuddy 互動 Demo 的活動卡片來源（2026-09-16 轉 webp）。
+# 八張無損 PNG 合計 1.91MB，是 /work/wanderbuddy 最後一塊沒轉檔的素材，
+# 佔整頁傳輸量 40%。上線用的是同目錄的 <name>.webp（合計 0.24MB），
+# public/flow.js 的 CARDS 已改讀 .webp。
+public/flow/cards/*.png
+
 # 首頁 Gallery 卡片的直式來源大圖（1065×1440，各 1.7–3.0MB）。
 # 上線用的是同目錄壓過的 <slug>.webp（532×720）與 <slug>@2x.webp（1065×1440），
 # 六張合計約 600KB。原始 PNG 留在本機當備份，不進版控——進了 git 歷史就
