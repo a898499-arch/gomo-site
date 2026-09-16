@@ -753,6 +753,10 @@
    ⚠️ 底色 / 邊框 / 圓角 / overflow 全部只掛在這一層，而且是**由 .gm-panel 提供**
    （2026-09-02 抽成共用 class，與五個灰塊同一組數值）。裡面的 before 與 after
    兩層只放圖和標籤，各自不再畫一次邊框——畫兩次的話 clip 的切邊會出現兩條線。 */
+/* ⚠️⚠️ 這裡的推桿邏輯與 components/shared/compare-slider.css 的 .cs 相同。
+   改動其中一邊時要評估另一邊。Goodmood 尚未遷移過去，原因是該頁已上線且
+   驗收過（2026-09-15）。共用元件只搬了機制（疊層／clip-path／把手／input），
+   幾何沒有共用——那邊是 1088.485×639，跟這裡的 1344 設計寬無關。 */
 .gm-slider {
   position: relative;
   width: 100%;

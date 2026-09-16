@@ -64,6 +64,11 @@ export default function MakingAssets01() {
     return () => clearInterval(id);
   }, []);
 
+  /* ⚠️⚠️ 這裡的推桿邏輯與 components/shared/CompareSlider.jsx 相同。
+     改動其中一邊時要評估另一邊。Goodmood 尚未遷移過去，原因是該頁已上線
+     且驗收過（2026-09-15）。共用元件是照這一份逐字建立的，手感、節流方式、
+     --pos 的語意完全一致，只是把圖說／文案／輪播留在各自的頁面。 */
+
   /* ---------- 滑軌：滑鼠滑過去就跟著動，不用按住拖曳（2026-09-02）----------
      ⚠️ 只在 (hover: hover) and (pointer: fine) 啟用。觸控裝置沒有 hover，
      游標「經過」這件事不存在，維持原本的拖曳／點擊行為（那是 <input> 的
