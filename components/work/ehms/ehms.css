@@ -68,11 +68,58 @@
    左右留白 179 vs 197 不對稱——那不是刻意的第二種窄度，是沒對齊，
    使用者指示統一成 1085。
    ==================================================================== */
+/* ⚠️ 長寬比不是 Figma 的 1064/736，而是 1064/677.12 = 1064/(736 × 0.92)。
+   第二輪加了捲動視差：拼貼要能上下移動又不露出空白，它就必須比視窗高。
+   這裡讓 Hero 只顯示拼貼的 92%（上下各裁 4%），使用者 2026-09-15 裁示
+   ——±60px 會切進上下兩排照片，±15px 幾乎看不出視差，取中間。
+   ⚠️ 裁切與圓角都掛在這一層，拼貼自己不再畫一次——視差層要能溢出被裁掉。 */
 .eh-hero {
   position: relative;
-  /* 736/1064 是 Figma 拼貼的長寬比。用 aspect-ratio 讓拼貼與疊在上面的
-     文字一起等比縮放，1155 與 1440 只是同一張構圖的兩個尺寸。 */
-  aspect-ratio: 1064 / 736;
+  aspect-ratio: 1064 / 677.12;
+  overflow: hidden;
+  border-radius: 12px;
+  /* ⚠️ 導覽列是 position:fixed、高 116、top:10，下緣正好落在 126；而
+     .page-content 的 padding-top 也是 126——兩者**零間距貼齊**，Hero 這張
+     圓角卡看起來就像被導覽列壓著。這一頁的 Hero 不是滿版出血（沒有
+     data-nav-bleed），所以導覽列不該貼在它上面。用既有級距的 --eh-gap-sm
+     把整張卡往下推，不新增級距。
+
+     ⚠️ Figma 為 8px，但 Figma 的導覽列是實心 116px 高的 bar，實作的導覽列
+     是透明且有 --nav-top-gap: 10，兩套系統不同。64px 是為了讓 Hero 不被
+     導覽列遮到而刻意偏離。（Figma 的 8px 換算到實作是 -2px，等於重疊。） */
+  margin-top: var(--eh-gap-sm);
+
+  /* ---------- Hero 文字的關係定位用的兩個錨點 ----------
+     兩個都是「佔 Hero 高度的百分比」，所以任何視窗寬度下都成立。
+
+     --eh-icon-bottom  拼貼裡 app icon 方塊的下緣。
+       Figma 量得方塊本體 y 280–431（x 50–201，151×151，與 frame 一致；
+       下方還有約 4.5px 是陰影外溢，不算在內）。
+       換算：Hero 只顯示拼貼的 92%、視差層基準上偏 4.348%，所以
+       (431 − 0.04348 × 677.12) / 677.12 = 59.303%
+
+     --eh-baseline-offset  tagline 的基線距「文字區塊頂端」的距離。
+       實測值（不是用字型 metrics 推的）：1440 時 114.68px / Hero 高 690.48
+       = 16.608%。標題行高、tagline 的負 margin、半行距與 ascent 都含在內，
+       所以改動標題或 tagline 的字級/行高之後要重新量這個值。 */
+  --eh-icon-bottom: 59.303%;
+  --eh-baseline-offset: 16.608%;
+
+  /* 標題與 tagline 的字級改用 cqw，基準就是這個容器的寬度——見下面
+     .eh-hero-title 的註解。 */
+  container-type: inline-size;
+}
+
+/* 視差層。比 .eh-hero 高 8.696%（= 100/92），上下各多 4.348%，
+   剛好等於 GSAP 那邊 ±4% 的行程，所以任何捲動位置都不會露出空白。
+   ⚠️ 這一層只被視差寫 transform；裡面的 <img> 由標準進場寫 transform。
+   兩者是不同節點，不會互相覆蓋。 */
+.eh-hero-parallax {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -4.348%;
+  height: 108.696%;
 }
 
 .eh-hero-collage {
@@ -80,36 +127,91 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 12px;
+}
+
+/* 文字的視差層。幅度只有 ±10px（拼貼是 ±30px），三倍差距造成景深——
+   跑得慢的在後面。同樣是獨立節點，寫 transform 不會碰到裡面的遮罩揭露。 */
+.eh-hero-text-parallax {
+  position: absolute;
+  inset: 0;
 }
 
 /* 標題與 tagline 疊在拼貼中央偏左的深綠色卡片上。
-   百分比由 Figma 絕對座標換算（Hero frame 左上角為原點）：
-     標題   912:371  x=406 y=423 → (406-179)/1064 = 21.33%, (423-124)/736 = 40.63%
-     tagline 912:370 x=406 y=518 → 同 x，(518-124)/736 = 53.53%
-   兩者靠左對齊同一條 21.33% 的線。 */
+   左緣照 Figma：912:371 / 912:370 的墨跡左緣都在 x=406（Hero 相對 227），
+   227/1064 = 21.33%，兩行齊平。
+
+   ⚠️⚠️ 垂直位置**刻意偏離 Figma 座標**，改用「tagline 基線對齊 icon 下緣」
+   的關係定位。Maida 2026-09-16 裁示。
+
+   背景：Figma 的絕對座標做出來，tagline 基線在 y=412、icon 下緣在 y=431，
+   基線比下緣「高」19px（逐像素量 Figma 自己的渲染，兩種算法一致）。
+   那組數值忠實照做出來的視覺關係不是要的，以口頭指定的關係為準。
+
+   算法：文字區塊的 top = icon 下緣 − 基線距區塊頂端的距離。
+   兩個錨點都定義在 .eh-hero 上（見該處註解），都是 Hero 高度的百分比。
+   ⚠️ 對齊定義在「視差中點」——拼貼與文字的視差幅度不同（±30 vs ±10），
+   本來就只能在一個捲動位置上精準重合，取中點（兩者 transform 都是 0）。
+   ⚠️ 標題與 tagline 之間的關係沒有動，仍是 Figma 的 −12px（見
+   .eh-hero-tagline 的 margin-top），整組一起往下移。 */
 .eh-hero-text {
   position: absolute;
   left: 21.33%;
-  top: 40.63%;
+  top: calc(var(--eh-icon-bottom) - var(--eh-baseline-offset));
   right: 8%;
 }
 
+/* ---------- 遮罩揭露 ----------
+   全站既有的 .reveal-mask / .reveal-inner（原型 prototypes/home.html 903–911）。
+   ⚠️ 跟頁腳與首頁 Gallery 一樣縮成區域規則，不提到全域：work-index.css 有一份
+   刻意不帶 translateY(100%) 的 .reveal-inner，全域規則會把作品分類頁的標題
+   整條推出畫面。數值一字不改。 */
+.eh-hero .reveal-mask {
+  display: block;
+  overflow: hidden;
+}
+
+.eh-hero .reveal-inner {
+  display: block;
+  transform: translateY(100%);
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eh-hero .reveal-inner {
+    transform: none;
+  }
+}
+
+/* 標題 — Figma node 912:371：74px / Regular / line-height 1.45 /
+   字距 −0.37px / 白色。
+   ⚠️ font-weight 是 400 不是 600。Figma 讀到的是
+   'Microsoft Sans Serif:**Regular**'（字體名稱是缺字型的代換結果，字重不是）。
+   先前用 600 是我看錯，實際比 Figma 粗很多。字體仍用全站的 Poppins。
+
+   ⚠️ 字級用 cqw 不用 vw。基準是 .eh-hero 的寬度（= 內容欄寬），不是視窗寬。
+   原因：內容欄有 max-width:1085，視窗超過 1440 之後欄寬就不再長大，但 vw
+   還會繼續長——字會相對拼貼越變越大，跟裡面烤死的 App icon 失去比例關係。
+   換算：Figma 74px 在 1064 寬的 Hero 裡 → 74/1064 = 6.9549cqw，
+   任何視窗寬度下「標題 : icon」都鎖在 74 : 151。 */
 .eh-hero-title {
   margin: 0;
-  /* Figma 74px。用 vw 讓字隨拼貼縮放，1440 時 = 74px。
-     字體：Figma 讀到 'Microsoft Sans Serif'，那是缺字型時的代換結果，
-     不是設計選擇——全站標題一律 Poppins，這裡照全站走。已回報。 */
-  font-size: clamp(38px, 5.139vw, 74px);
-  font-weight: 600;
+  font-size: max(24px, 6.9549cqw);
+  font-weight: 400;
   line-height: 1.45;
   letter-spacing: -0.005em;
   color: #ffffff;
 }
 
+/* tagline — Figma node 912:370：16px / Regular / line-height 1.5 /
+   字距 −0.08px / 白色 / 不換行。16/1064 = 1.5038cqw。
+   ⚠️ margin-top 是**負的**。Figma：標題文字框 y 423–530（74×1.45=107.3 高），
+   tagline 文字框 y 518——比標題框的底還高 12px。那 12px 是標題行高的下半個
+   行距（half-leading），tagline 要塞進去才會「緊接在標題下方」。
+   先前用 +0.4em 等於在已經有的行距上再加一段，實測位置低了 16.8px。
+   −12/16 = −0.75em（em 取 tagline 自己的字級，所以跟著一起縮放）。 */
 .eh-hero-tagline {
-  margin: 0.4em 0 0;
-  font-size: clamp(13px, 1.111vw, 16px);
+  margin: -0.75em 0 0;
+  font-size: max(11px, 1.5038cqw);
   font-weight: 400;
   line-height: 1.5;
   letter-spacing: -0.005em;
@@ -461,39 +563,68 @@
   height: auto;
 }
 
-/* Before/After 的角標膠囊 — node 912:383 / 912:384 */
+/* Before/After 的角標膠囊 — node 912:383/912:384（左）、4020:5187/4020:5188（右）。
+   ⚠️ 兩個膠囊左右相反是刻意的：分隔線左邊是 Before、右邊是 After，
+   標籤各自待在自己那一側。而且各自住在自己那一層裡，不拉出來共用——
+   上層被 clip 的時候，After 的標籤要跟著一起被切掉才對。
+   ⚠️ 單位用 cqw 而不是 px：外框是 aspect-ratio 等比縮放的，膠囊寫死 px
+   在 1155 會相對變大、跟旁邊的手機圖失去比例關係。基準是外框寬 1088.485。 */
 .eh-chip {
   position: absolute;
-  left: 2.39%; /* 26 / 1088.485 */
-  top: 5.95%; /* 38 / 639 */
+  top: 5.947%; /* 38 / 639 */
   display: inline-flex;
   align-items: center;
-  padding: 0 17px;
-  min-width: 97px;
-  height: 34px;
+  justify-content: center;
+  padding-inline: 1.562cqw; /* 17 / 1088.485 */
+  min-width: 8.912cqw; /* 97 / 1088.485 */
+  height: 3.124cqw; /* 34 / 1088.485 */
   background: #dce8ef;
-  border-radius: 50px;
-  font-size: 20px;
+  border-radius: 4.594cqw; /* 50 / 1088.485 */
+  font-size: 1.838cqw; /* 20 / 1088.485 */
   font-weight: 400;
   color: var(--eh-title);
+  pointer-events: none;
 }
 
-/* 04 Before 的兩張手機截圖 — node 912:385（579×563，x=255）
-   ⚠️ 尺寸用百分比而不是 px：外框 .eh-panel 是 aspect-ratio 等比縮放的，
-   截圖若寫死 271px，1155 時外框縮了、截圖沒縮，兩者的比例關係就跑掉
-   （實測 1440 佔外框 53%、1155 變成 66%）。換算基準是 Figma 外框寬
-   1088.485：271→24.9%、間距 37→3.4%。 */
-.eh-before-shots {
+.eh-chip--before {
+  left: 2.389%; /* 26 / 1088.485 */
+}
+
+.eh-chip--after {
+  right: 2.525%; /* (1088.485 - 964 - 97) / 1088.485 */
+}
+
+/* 04 的兩支手機截圖。Before（912:385）與 After（4020:5190）的座標完全相同：
+   手機組 579×563 在 x=255 / y=38，兩支各 271 寬、間距 37。
+   ⚠️ 全部用百分比而不是 px：外框是 aspect-ratio 等比縮放的，截圖若寫死
+   271px，1155 時外框縮了、截圖沒縮，兩者的比例關係就跑掉。
+   ⚠️ gap 的基準是「這個 flex 容器自己的寬度」（579），不是外框的 1088.485。
+   第一輪寫成 3.4%（用外框換算）算出來只有 19.7px，比 Figma 的 37 少 17px，
+   而且兩張圖 46.8×2 + 3.4 = 97% 會在右邊留 3% 的空隙。正確值是 37/579。 */
+.eh-ba-shots {
+  position: absolute;
+  left: 23.428%; /* 255 / 1088.485 */
+  top: 5.947%; /* 38 / 639 */
+  width: 53.192%; /* 579 / 1088.485 */
+  height: 88.106%; /* 563 / 639 */
   display: flex;
-  gap: 3.4%;
-  align-items: center;
-  width: 53.2%; /* 579 / 1088.485 */
+  gap: 6.39%; /* 37 / 579 */
 }
 
-.eh-before-shots img {
-  width: 46.8%; /* 271 / 579 */
-  height: auto;
+.eh-ba-shots img {
+  width: 46.805%; /* 271 / 579 —— 46.805*2 + 6.39 = 100% */
+  height: 100%;
   border-radius: 6px;
+  object-fit: cover;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* 推桿外框：.eh-panel 提供底色／框線／圓角／長寬比，.cs 提供機制。
+   ⚠️ .eh-panel 的 flex 置中對這裡沒有作用——兩層都是 position:absolute，
+   已經脫離流。留著是因為同一個 class 還給其餘三個大圖框用。 */
+.eh-ba {
+  cursor: ew-resize;
 }
 
 /* ====================================================================
@@ -552,34 +683,86 @@
   position: relative;
 }
 
-/* ⚠️ 這張表所有尺寸都用 cqw（相對卡片寬度），不用 px。
-   理由：卡片用 aspect-ratio 等比縮放，1155 時只有 870 寬 / 511 高，
-   但字級若是固定 px 就不會跟著縮——實測內容會超出面板 13px 以上，
-   卡片裡會長出一條巢狀捲軸。改用 cqw 之後整張表跟著卡片等比縮小，
-   1440 與 1155 是同一張表的兩個尺寸，永遠不會溢出。
-   換算基準：卡片寬 1085 = 100cqw，所以 Npx → (N / 1085 * 100)cqw。 */
-.eh-ds-card {
+/* ---------- 輪播外框 ----------
+   ⚠️ 長寬比鎖在這一層，八頁都是 position:absolute + inset:0 的 slide。
+   不管哪一頁的內容撐多高都不會影響外框，換頁時不會抽動。
+   ⚠️ container-type 掛在這裡：裡面所有 cqw 的基準都是這個框的寬度，
+   程式碼頁與圖片頁因此換算到同一組尺寸。
+   ⚠️ 這一層**不畫**底色與框線——那是每一頁自己的事：圖片頁的切圖本身
+   就含外框，程式碼頁用 .eh-ds-card 畫一份一模一樣的。兩邊都畫會疊成兩層框。 */
+.eh-ds-viewport {
   position: relative;
+  container-type: inline-size;
+  aspect-ratio: 1088.485 / 639;
+}
+
+/* 八個 slide 一直都在 DOM 裡，只切 opacity——交叉淡入時舊頁與新頁必須
+   同時存在，先卸載再掛載會閃一下。
+   ⚠️ visibility 的 transition-delay 是關鍵：opacity 走 600ms，visibility
+   延遲 600ms 才跳成 hidden，所以淡出的那一頁整段過場都還看得見；
+   淡完之後才真正移出焦點序（只用 opacity:0 的話它仍可被 Tab 聚焦）。 */
+.eh-ds-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 600ms var(--u-ease), visibility 0s 600ms;
+}
+
+.eh-ds-slide[data-active='true'] {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 600ms var(--u-ease), visibility 0s 0s;
+}
+
+/* reduced-motion：不自動播放（JS 端處理），換頁改成 200ms 單純淡入 */
+.eh-ds-viewport[data-reduce='true'] .eh-ds-slide {
+  transition: opacity 200ms linear, visibility 0s 200ms;
+}
+
+.eh-ds-viewport[data-reduce='true'] .eh-ds-slide[data-active='true'] {
+  transition: opacity 200ms linear, visibility 0s 0s;
+}
+
+/* 圖片頁：切圖本身就是整張卡（含外框與圓角，四角已去背） */
+.eh-ds-shot {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* 程式碼頁自己畫的外框。色值是從匯出的切圖上逐點取樣得到的：
+   外框 #FAFAFA、框線 #727272（≈ --eh-panel-border 的 #747474）、
+   內面板 #FFFFFF。兩種頁因此看起來是同一份文件。 */
+.eh-ds-card {
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  container-type: inline-size;
-  aspect-ratio: 1088.485 / 639;
   background: var(--eh-panel-bg);
   border: 0.5px solid var(--eh-panel-border);
   border-radius: 21px;
 }
 
-/* 內層白面板 — node 912:227，990×560 於 1088.485 寬的卡片內 */
+/* ⚠️ 兩個程式碼頁的所有尺寸都用 cqw（相對輪播框的寬度），不用 px。
+   理由：外框用 aspect-ratio 等比縮放，1155 時只有 870 寬 / 511 高，
+   字級若是固定 px 就不會跟著縮——實測內容會超出面板 13px 以上，
+   卡片裡會長出一條巢狀捲軸。換算基準：框寬 1088.485 = 100cqw。 */
 .eh-ds-panel {
   width: 90.95%; /* 990 / 1088.485 */
-  height: 87.63%; /* 560 / 639 */
-  padding: 2.12cqw 2.95cqw; /* 23px / 32px @1085 */
+  padding: 1.6cqw 2.94cqw; /* Figma 23 / 32，上下收斂見下方色票頁註解 */
   overflow: hidden;
   background: #ffffff;
   border: 1px solid #ececec;
   border-radius: 14px;
 }
+
+/* 兩頁的內面板高度不同，照各自的 Figma：
+   字級表 560/639（node 912:227）、色票 496/639（node 4052:5696）。 */
+.eh-ds-panel--type { height: 87.63%; }
+.eh-ds-panel--colour { height: 77.62%; }
 
 .eh-ds-kicker {
   margin: 0;
@@ -665,34 +848,122 @@
   color: #8a857c;
 }
 
-/* ---------- 輪播箭頭 — node 912:263 / 912:266 ----------
-   39×39，灰圓底 + 白 chevron。使用者指示用程式碼畫（需要 hover /
-   disabled / focus 狀態，而且要能鍵盤操作，切圖做不到）。
-   ⚠️ 第一輪只有一頁內容，兩顆一律 disabled；輪播行為（手動切換、
-   無互動時自動播放、滑鼠移入暫停）是第三輪的工作。 */
+/* ---------- 第 2 頁：色票（Figma 4052:5694 / 內層 4052:5696）----------
+   幾何全部照 metadata，換算基準同樣是框寬 1088.485：
+     內面板 990×496 於 (49,72)；內距 32
+     色票 213×64、水平間距 24、列距 138
+     hex 疊在色票上（距左 16、距頂 28）；色名在色票下方 9px
+     組標題 → 色票 11.5；色名 → 下一組標題 24.5 */
+.eh-ds-cgroup + .eh-ds-cgroup {
+  /* Figma 是 24.5。收到 20.7：1155 時實測內容超出面板 15px——外框等比縮小，
+     但面板那圈 1px 框線不會跟著縮，餘裕就被吃掉了（第 1 頁的字級表當初
+     是同一個問題、同一個解法）。三處各收一點，總共讓出約 2.2cqw。 */
+  margin-top: 1.9cqw;
+}
+
+.eh-ds-cgroup-label {
+  margin: 0 0 0.9cqw; /* Figma 11.5，同上收斂 */
+  font-size: 0.965cqw; /* 10.5 */
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #2fa96b;
+}
+
+.eh-ds-swatches {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2.205cqw; /* 24 */
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.eh-ds-swatch {
+  position: relative;
+  aspect-ratio: 213 / 64;
+  border-radius: 0.735cqw; /* 8 */
+}
+
+.eh-ds-swatch-hex {
+  position: absolute;
+  left: 1.470cqw; /* 16 */
+  top: 2.572cqw; /* 28 */
+  font-size: 1.102cqw; /* 12 */
+  font-weight: 400;
+  /* 深色票用白字、淺色票用深字。判斷在 JS 端用相對亮度算（見
+     DesignSystemPages.jsx 的 isLight），不逐個手填色。 */
+  color: #1f1f1f;
+}
+
+.eh-ds-swatch[data-dark='true'] .eh-ds-swatch-hex {
+  color: #ffffff;
+}
+
+.eh-ds-swatch-name {
+  display: block;
+  margin-top: 0.827cqw; /* 9 */
+  font-size: 1.194cqw; /* 13 */
+  font-weight: 600;
+  color: #1f1f1f;
+}
+
+/* ---------- 頁碼 ----------
+   aria-hidden：頁數由上面那個 aria-live 區宣告，這裡只是視覺。 */
+.eh-ds-counter {
+  position: absolute;
+  right: 3.2cqw;
+  bottom: 2.2cqw;
+  margin: 0;
+  font-size: 1.102cqw;
+  font-weight: 400;
+  color: #8a857c;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+/* ---------- 輪播箭頭 — Figma node 912:263 / 912:266 ----------
+   灰圓底 + 白 chevron。使用者指示用程式碼畫（需要 hover / focus 狀態，
+   而且要能鍵盤操作，切圖做不到）。
+
+   ⚠️⚠️ 第 3–9 頁的切圖裡**也有**這兩顆箭頭——Figma 的 DS frame 自己就把
+   輪播箭頭畫進去了（Group 37018 / 37019）。試過從圖上擦掉，兩種擦法都
+   會留下破壞（見 .shots/ds-pipeline.mjs 的註解），所以改成讓這兩顆真按鈕
+   **精準疊在烤進去的那顆上面**蓋掉它。因此：
+     位置必須用「實測」的值，不能用 metadata 的座標
+       實測（CSS，框寬 1088.485）：左心 35.75、右心 1047.5，直徑 38.5，垂直置中
+       metadata 寫右箭頭 x=1067.24 —— 那是**旋轉前的原點**（它是左箭頭
+       旋轉 180° 來的），不是視覺位置。用它會偏 16px，兩顆圓並排露出來。
+     底色必須不透明，否則底下那顆會透出來疊成更深的圓。
+       取 #C0C1BE —— 這是烤進去那顆在 #FAFAFA 上的實測色值，所以兩者
+       看起來完全一樣，程式碼頁（沒有烤進去的箭頭）也是同一個外觀。
+     直徑取 3.9cqw（42.5px）略大於 38.5，蓋掉反鋸齒的邊緣。 */
 .eh-ds-nav {
   position: absolute;
   top: 50%;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 39px;
-  height: 39px;
+  width: 3.9cqw;
+  height: 3.9cqw;
+  min-width: 34px;
+  min-height: 34px;
   padding: 0;
-  transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.25);
+  transform: translate(-50%, -50%);
+  background: #c0c1be;
   border: 0;
   border-radius: 50%;
   color: #ffffff;
   cursor: pointer;
-  transition: background 200ms var(--u-ease), opacity 200ms var(--u-ease);
+  transition: background 200ms var(--u-ease);
 }
 
-.eh-ds-nav--prev { left: 1.49%; } /* 16.24 / 1088.485 */
-.eh-ds-nav--next { right: 0.11%; } /* 1088.485 - 1067.24 - 39 = 1.25 */
+.eh-ds-nav--prev { left: 3.285%; }  /* 實測圓心 35.75 / 1088.485 */
+.eh-ds-nav--next { left: 96.235%; } /* 實測圓心 1047.5 / 1088.485 */
 
 .eh-ds-nav:hover:not(:disabled) {
-  background: rgba(0, 0, 0, 0.45);
+  background: #a8a9a6;
 }
 
 .eh-ds-nav:focus-visible {
@@ -706,8 +977,10 @@
 }
 
 .eh-ds-nav svg {
-  width: 18px;
-  height: 18px;
+  width: 1.654cqw; /* 18 / 1088.485 */
+  height: 1.654cqw;
+  min-width: 15px;
+  min-height: 15px;
 }
 
 /* ====================================================================
@@ -721,15 +994,27 @@
   margin: 20px 0 0;
 }
 
-/* Animation 佔位塊 — node 912:393 只有 218px 高（其餘三塊 639）。
-   照 Figma 做，不替還不存在的內容預留空間；第三輪放五個狀態動畫時
-   再一起調高度。 */
-.eh-anim-placeholder {
-  aspect-ratio: 1088.485 / 218;
+/* 床墊狀態動畫（第三輪）。取代原本 912:393 的空灰塊。
+   ⚠️ 長寬比用「那份 HTML 自己的」1088/218（它的 SVG viewBox），不是 Figma
+   的 912:392——後者只是佔位示意，兩者數值剛好相同。內容欄 1085 之下高度
+   是 217.4px，不需要更高的空間。
+   ⚠️ 不套 .eh-panel：那份 HTML 已經自帶排版與白色外框（SVG 裡第一個
+   <rect fill="#fff">），再加一層底色與框線會變成兩層框。圓角仍取 21px，
+   跟同一區另外三個大圖框對齊。 */
+.eh-states-frame {
+  position: relative;
+  aspect-ratio: 1088 / 218;
+  border-radius: 21px;
+  overflow: hidden;
 }
 
-.eh-anim-placeholder::after {
-  content: '';
+.eh-states-frame iframe {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
 }
 
 /* Thumb zone 的手機圖 — node 912:401，272.86×566.67 置中於 639 高的框。
@@ -788,9 +1073,9 @@
     gap: 32px 48px;
   }
 
-  .eh-before-shots {
+  .eh-ba-shots {
+    left: 10%;
     width: 80%;
-    gap: 4%;
   }
 }
 

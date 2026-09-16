@@ -1,6 +1,8 @@
 'use client';
 
 import { useStandardEntrance } from '@/lib/useStandardEntrance';
+import CompareSlider from '@/components/shared/CompareSlider';
+import StateAnimations from './StateAnimations';
 
 // 04 KEY DECISIONS。在 Figma 是四個平行的 frame，只有第一個帶區塊標頭：
 //   912:372 主區 + Before 對照圖   y=6951   1085×890
@@ -8,13 +10,14 @@ import { useStandardEntrance } from '@/lib/useStandardEntrance';
 //   912:394 ↳ Thumb zone           y=8287   1085×767
 //   912:405 ↳ 未採用的提案          y=9104   1085×910
 //
-// ⚠️ 兩件刻意「沒做」的事：
-// 1. Animation 的灰底塊（912:393）在 Figma 只有 218px 高，其餘三塊是 639。
-//    照 Figma 做，不替還不存在的內容預留空間——第三輪放五個狀態動畫
-//    （無人在床 4 幀／壓力重新分配 3／開始中 6／背部減壓 4／臀部減壓 6，
-//    姿態偵測那個不做）時再一起調高度。使用者裁示。
-// 2. Before 這裡只有「Before」一張。第二輪才接 AERO V 那個對照推桿，
-//    After 的兩張圖在另一個檔案 j4saimg2oJWL5tUkBh5Bww 的 node 4020:5191。
+// ⚠️ Animation 的灰底塊（912:393）在 Figma 只有 218px 高，其餘三塊是 639。
+// 照 Figma 做，不替還不存在的內容預留空間——第三輪放五個狀態動畫
+// （無人在床 4 幀／壓力重新分配 3／開始中 6／背部減壓 4／臀部減壓 6，
+// 姿態偵測那個不做）時再一起調高度。使用者裁示。
+//
+// 2026-09-15 第二輪：Before/After 換成對照推桿，用共用元件
+// components/shared/CompareSlider.jsx（機制逐字照抄 Goodmood 那份，
+// Goodmood 本身一行未動——兩邊都有互指的註解）。
 export default function KeyDecisions() {
   const ref = useStandardEntrance('.eh-in');
 
@@ -37,30 +40,61 @@ export default function KeyDecisions() {
             home screen stopped being a list of equipment and became a view of one person.
           </p>
         </div>
+        {/* 對照推桿。Before = node 912:372（本檔案）、After = 另一個檔案
+            j4saimg2oJWL5tUkBh5Bww 的 node 4020:5191。兩個外框都是
+            1088.485×639、手機組都在 x=255 y=38 / 579×563，完全對齊
+            （單張高度 562 vs 563 差 1px，是 Figma 的繪製誤差；兩層都由同一個
+            外框的 aspect-ratio 決定尺寸，那 1px 不會傳到畫面上）。
+            ⚠️ 膠囊左右相反是對的：分隔線左邊是 Before、右邊是 After，
+            標籤各自待在自己那一側，而且各自住在自己那一層裡——上層被 clip
+            的時候，After 的標籤要跟著一起被切掉才對。 */}
         <figure className="eh-kd-figure">
-          <div className="eh-panel">
-            <span className="eh-chip">Before</span>
-            <div className="eh-before-shots">
-              <img
-                src="/work/ehms/before-list.webp"
-                srcSet="/work/ehms/before-list.webp 1x, /work/ehms/before-list@2x.webp 2x"
-                width={271}
-                height={562}
-                loading="lazy"
-                decoding="async"
-                alt="改版前的首頁：AgiCare 標題列下方是一份床位清單，每一列顯示住民照片、床號與狀態文字，必須再點一層才會進到遙控畫面。"
-              />
-              <img
-                src="/work/ehms/before-remote.webp"
-                srcSet="/work/ehms/before-remote.webp 1x, /work/ehms/before-remote@2x.webp 2x"
-                width={271}
-                height={562}
-                loading="lazy"
-                decoding="async"
-                alt="改版前的遙控畫面：上方是住民姓名與調整完成時間，中間是人形臥姿圖與兩個壓力熱點，下方是大面積的停止按鈕與兩個次要控制鍵。"
-              />
-            </div>
-          </div>
+          <CompareSlider
+            className="eh-panel eh-ba"
+            ariaLabel="Before and after comparison slider for the eHMS home screen. Move left to see the redesigned patient-first home screen, move right to see the original bed-list version."
+            before={
+              <>
+                <div className="eh-ba-shots">
+                  <img
+                    src="/work/ehms/before-list.webp"
+                    srcSet="/work/ehms/before-list.webp 1x, /work/ehms/before-list@2x.webp 2x"
+                    loading="lazy"
+                    decoding="async"
+                    alt="改版前的首頁：AgiCare 標題列下方是一份床位清單，每一列顯示住民照片、床號與狀態文字，必須再點一層才會進到遙控畫面。"
+                  />
+                  <img
+                    src="/work/ehms/before-remote.webp"
+                    srcSet="/work/ehms/before-remote.webp 1x, /work/ehms/before-remote@2x.webp 2x"
+                    loading="lazy"
+                    decoding="async"
+                    alt="改版前的遙控畫面：上方是住民姓名與調整完成時間，中間是人形臥姿圖與兩個壓力熱點，下方是大面積的停止按鈕與兩個次要控制鍵。"
+                  />
+                </div>
+                <span className="eh-chip eh-chip--before">Before</span>
+              </>
+            }
+            after={
+              <>
+                <div className="eh-ba-shots">
+                  <img
+                    src="/work/ehms/after-ready.webp"
+                    srcSet="/work/ehms/after-ready.webp 1x, /work/ehms/after-ready@2x.webp 2x"
+                    loading="lazy"
+                    decoding="async"
+                    alt="改版後的待機首頁：直接進到單一位住民 Mary Hopkin 的畫面，顯示「Mattress is ready to use」與人形臥姿圖，下方是軟硬度調整與開始減壓的滑動按鈕。"
+                  />
+                  <img
+                    src="/work/ehms/after-active.webp"
+                    srcSet="/work/ehms/after-active.webp 1x, /work/ehms/after-active@2x.webp 2x"
+                    loading="lazy"
+                    decoding="async"
+                    alt="改版後的運作中首頁：同一位住民的畫面顯示目前姿勢已維持 175 分鐘、兩處壓力降低 14% 與 19%，並附兩張壓力分布熱區圖與停止減壓的滑動按鈕。"
+                  />
+                </div>
+                <span className="eh-chip eh-chip--after">After</span>
+              </>
+            }
+          />
         </figure>
       </div>
 
@@ -77,9 +111,12 @@ export default function KeyDecisions() {
             all pointed the same way. The state was easier to read.
           </p>
         </div>
-        {/* 第三輪才放五個狀態的幀序列動畫。現在是 Figma 原本就有的空灰塊。 */}
+        {/* 床墊狀態動畫。iframe 載入 Maida 做好的 HTML，見 StateAnimations.jsx。
+            ⚠️ 尺寸用那份檔案自己的 1088×218，不套 Figma 的 912:392（佔位示意）。
+            間距沿用這一區既有的節奏：.eh-kd-block 的 64px 接上一個子區塊、
+            .eh-kd-figure 的 20px 接上面那段文字，跟另外三塊完全一致。 */}
         <div className="eh-kd-figure">
-          <div className="eh-panel eh-anim-placeholder" aria-hidden="true" />
+          <StateAnimations />
         </div>
       </div>
 

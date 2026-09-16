@@ -138,6 +138,16 @@ public/web-assets/bg-correct.png
 public/work/aero-v/*.png
 public/work/aero-v/*.jpg
 
+# eHMS 五個狀態動畫的原始來源（2026-09-16）。
+# 站上載入的是 public/work/ehms/states/mattress-animations.html，那份是這支的
+# 複製 + 兩處經 Maida 批准的整合用修改（play/pause 接口、prefers-reduced-motion）。
+# 這裡這份是未改動的原稿，留在本機當備份、不進版控——同一條裁示先前已經套在
+# mvs / blossom-care 的原始 jpg、goodmood 的來源 png、aero-v 的 png/jpg 上。
+#
+# ⚠️ 原本的資料夾名稱結尾多一個冒號（`ehms-states:`），是建立時誤打的，
+# 2026-09-16 已改名為 ehms-states。
+ehms-states/
+
 # ---------- warmup 的原始影片（2026-09-03）----------
 # 上線的 warmup.mp4 是 743×1320 / 1.22MB 的壓縮版；這支是它的來源
 # （1080×1920 / 12.84MB）。畫面上只顯示 371×659，原尺寸是 2.9 倍過大。
