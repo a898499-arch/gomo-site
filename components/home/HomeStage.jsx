@@ -44,7 +44,39 @@ const T = {
 };
 
 const OVERSHOOT = 4; // §6.1：超過最終 Y 位置 4px 再回穩（有重量的物件，不是彈跳）
-const PART_X = 97; // §6.1：logo 出現時兩張板凳各向外滑開約 97px（Figma 實測）
+// §6.1：logo 出現時兩張板凳各向外滑開約 97px（Figma 實測，1440×900 稿）。
+// ⚠️ 這是「設計稿上的數字」，不是最終像素。實際位移要乘上 home-stage.css
+// 的 --loading-unit——桌面是 1px（等於不變），手機是 85vw/549。
+// 不要直接用這個常數 gsap.set，一律走下面的 partX()。
+const PART_X_BASE = 97;
+
+// Loading 構圖的橫向總寬（設計稿單位）：
+//   左插槽 120.96 + 97 + logo 123 + 97 + 右插槽 110.63 = 549
+// 只給 readLoadingUnit 的 fallback 用，見該處。
+const LOADING_SLOT_L_W = 120.96;
+
+/**
+ * 讀 CSS 的 --loading-unit，換算出這次要用的 PART_X 像素值。
+ *
+ * ⚠️ 為什麼要在執行期讀、不寫死：PART_X 與插槽尺寸必須用**同一個**縮放
+ * 單位。寫死就會發生「改了 CSS 忘了改 JS」，板凳間距與插槽對不上。
+ *
+ * ⚠️ 為什麼 getComputedStyle 讀得到：home-stage.css 用 @property 把
+ * --loading-unit 註冊成 <length>，所以回傳的是計算後的 px（例如
+ * "0.6047px"）。沒有 @property 的話自訂屬性回傳的是**未解析的字串**，
+ * 手機上會拿到字面的 "calc(85vw / 549)"，parseFloat 得到 NaN。
+ *
+ * fallback：真的解析不出來（舊瀏覽器不支援 @property）就改從左插槽的實際
+ * 寬度反推——那個寬度是 calc(120.96 * var(--loading-unit))，一定是 px。
+ * CSS 在那種瀏覽器上仍然正確，只有這裡的讀取需要繞路。
+ */
+const partX = (root, slotLeft) => {
+  const raw = getComputedStyle(root).getPropertyValue('--loading-unit').trim();
+  const n = parseFloat(raw);
+  if (Number.isFinite(n) && raw.endsWith('px')) return n * PART_X_BASE;
+  const w = slotLeft ? slotLeft.getBoundingClientRect().width : 0;
+  return w > 0 ? (w / LOADING_SLOT_L_W) * PART_X_BASE : PART_X_BASE;
+};
 const MIN_COUNT_MS = 2500; // §6.1：最短 2.5 秒，從 PHASE 2 起算
 const STALL_CEILING = 96; // §6.1：資產沒到齊就停在 95–97 附近，不再往上
 const DIGIT_SHIFT_DUR = 0.15; // 位數改變時重新置中的補間長度（你指定 150ms）
@@ -737,8 +769,9 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg, dialog
 
       // ── reduced motion：跳過組裝，直接顯示靜態 loading 狀態 ──────
       if (reduce) {
-        gsap.set(bl, { x: L.x - PART_X, y: L.y, scale: L.scale, opacity: 1 });
-        gsap.set(br, { x: R.x + PART_X, y: R.y, scale: R.scale, opacity: 1 });
+        const px = partX(root, slotLeftRef.current);
+        gsap.set(bl, { x: L.x - px, y: L.y, scale: L.scale, opacity: 1 });
+        gsap.set(br, { x: R.x + px, y: R.y, scale: R.scale, opacity: 1 });
         gsap.set(logo, { opacity: 1, scale: 1 });
         gsap.set(counter, { opacity: 1, y: 0 });
         startCounter();
@@ -778,8 +811,11 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg, dialog
         { opacity: 1, scale: 1, duration: T.logoDur, ease: mainEase },
         T.logoIn
       );
-      tl.to(bl, { x: L.x - PART_X, duration: T.logoDur, ease: mainEase }, T.logoIn);
-      tl.to(br, { x: R.x + PART_X, duration: T.logoDur, ease: mainEase }, T.logoIn);
+      // 位移量在建時間軸的當下讀一次。Loading 期間縮放視窗會走下面的
+      // onResize，那邊會重新量、重新讀，所以不需要在每一幀重算。
+      const partXNow = partX(root, slotLeftRef.current);
+      tl.to(bl, { x: L.x - partXNow, duration: T.logoDur, ease: mainEase }, T.logoIn);
+      tl.to(br, { x: R.x + partXNow, duration: T.logoDur, ease: mainEase }, T.logoIn);
 
       // 1.3 計數器出現（1400 → 1650ms），起始 0%，先不開始計數。
       tl.to(
@@ -849,8 +885,12 @@ export default function HomeStage({ benchLeftSvg, benchRightSvg, logoSvg, dialog
         const L = measure(bl, slotLeftRef.current);
         const R = measure(br, slotRightRef.current);
         loadingXform.current = { left: L, right: R };
-        gsap.set(bl, { x: L.x - PART_X, y: L.y, scale: L.scale, opacity: 1 });
-        gsap.set(br, { x: R.x + PART_X, y: R.y, scale: R.scale, opacity: 1 });
+        // ⚠️ 這裡必須**重新讀** --loading-unit，不能沿用掛載時算的值：
+        // 跨過 600px 斷點時 unit 會從 1px 變成 85vw/549，插槽已經跟著縮了，
+        // PART_X 若還用舊值，板凳的間距就會跟插槽對不上。
+        const px = partX(root, slotLeftRef.current);
+        gsap.set(bl, { x: L.x - px, y: L.y, scale: L.scale, opacity: 1 });
+        gsap.set(br, { x: R.x + px, y: R.y, scale: R.scale, opacity: 1 });
         gsap.set(logoRef.current, { opacity: 1, scale: 1 });
         gsap.set(counterRef.current, { opacity: 1, y: 0 });
       });

@@ -62,12 +62,55 @@
    / .hero-content(15) / .loading-ui(20) / .dialogue(25) 會直接參與根層級。
    之所以安全，是因為這一層的 overflow:hidden 會把它們裁在舞台盒子內，
    幾何上碰不到 §6.2 之後的內容。要拿掉 overflow:hidden 之前先想過這件事。 */
+/* ====================================================================
+   Loading 的等比縮放單位（2026-09-17）
+   ====================================================================
+   Loading 的構圖全是 1440×900 稿的絕對 px。橫向總寬由**兩張板凳的外緣**
+   決定，從 CSS 自己的定位推導（frame 中心 = 720）：
+     左板凳左緣 = 720 − 4.04 − 120.96 − 97 = 498.00
+     右板凳右緣 = 720 + 14 + 110.63 + 97   = 941.63
+     橫向總寬   = 443.63        （1440 下實測 443.64，吻合）
+
+   ⚠️⚠️ 不是 549。Maida 原本給的算式是
+     左插槽 120.96 + PART_X 97 + logo 123 + PART_X 97 + 右插槽 110.63 = 549
+   那把 logo 的 123 重複計算了——logo 只佔 658.5–781.5，整個落在兩張板凳
+   之間的空隙（619–831）裡，不決定外緣。用 549 當除數，整組只會是
+   443.63/549 × 85% = 68.69%（實測 68.68%），達不到 85% 的目標。
+
+   做法：所有 Loading 的絕對數值都寫成「數字 × var(--loading-unit)」。
+   桌面 unit = 1px（算出來與改動前逐項相同，零視覺變化）；
+   手機 unit = 85vw/443.63，整組因此**剛好**等於螢幕寬的 85%，
+   任何螢幕寬度都精準，不必為機型各寫一組數字。
+
+   ⚠️ 斷點沿用既有的 600px——HomeStage.jsx 的 P3.dollyMobile 已經在用
+   matchMedia('(max-width: 600px)')，不要另外發明一個斷點。
+
+   ⚠️ @property 是必要的，不是裝飾。沒有它，getComputedStyle 讀自訂屬性
+   會拿到**未解析的字串**（手機上是字面的 "calc(85vw / 549)"），
+   HomeStage.jsx 就算不出 PART_X。註冊成 <length> 之後才會回傳計算後的
+   px 值。JS 那邊仍有 fallback，見該處註解。 */
+@property --loading-unit {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 1px;
+}
+
 .home-stage {
   position: relative;
   min-height: 100vh;
   background: var(--bg);
   overflow: hidden;
   z-index: 1100;
+
+  --loading-unit: 1px;
+}
+
+@media (max-width: 600px) {
+  .home-stage {
+    /* 443.63 = Loading 的實際橫向總寬（設計稿單位），推導見上方。
+       要改整組佔比就只動這裡的 85vw。 */
+    --loading-unit: calc(85vw / 443.63);
+  }
 }
 
 /* ---------- 板凳 ---------- */
@@ -146,18 +189,18 @@
 }
 
 .loading-slot-left {
-  left: calc(50% - 4.04px);
-  top: calc(50% - 46px);
-  width: 120.96px;
-  height: 119.48px;
+  left: calc(50% - 4.04 * var(--loading-unit));
+  top: calc(50% - 46 * var(--loading-unit));
+  width: calc(120.96 * var(--loading-unit));
+  height: calc(119.48 * var(--loading-unit));
   transform: translateX(-100%);
 }
 
 .loading-slot-right {
-  left: calc(50% + 14px);
-  top: calc(50% - 38.63px);
-  width: 110.63px;
-  height: 112.84px;
+  left: calc(50% + 14 * var(--loading-unit));
+  top: calc(50% - 38.63 * var(--loading-unit));
+  width: calc(110.63 * var(--loading-unit));
+  height: calc(112.84 * var(--loading-unit));
 }
 
 /* ---------- Loading UI（logo + 計數器）----------
@@ -170,18 +213,22 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, calc(-50% + 21.52px));
+  transform: translate(-50%, calc(-50% + 21.52 * var(--loading-unit)));
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  /* ⚠️ gap 也要跟著縮。這一項不在 Maida 列的清單裡，但它是 logo 與計數器
+     之間的構圖間距（Figma 實測 10px），不縮的話手機上 logo 只有 27px 高、
+     間距卻還是 10px，比例就跑掉了。桌面 unit=1px，算出來仍是 10px，
+     零視覺變化。 */
+  gap: calc(10 * var(--loading-unit));
   z-index: 20;
   pointer-events: none;
 }
 
 .loading-logo {
-  width: 123px;
-  height: 124px;
+  width: calc(123 * var(--loading-unit));
+  height: calc(124 * var(--loading-unit));
   opacity: 0;
   transform-origin: 50% 50%;
 }
@@ -198,15 +245,19 @@
   align-items: baseline;
   justify-content: center;
   font-weight: 500;
-  font-size: 36px;
+  font-size: calc(36 * var(--loading-unit));
   color: #353535;
-  letter-spacing: -0.54px;
+  /* ⚠️ 字距改用 em，也不在 Maida 的清單裡。−0.54px 是相對 36px 字級量的
+     （−0.54/36 = −0.015em），桌面算出來完全相同；但手機字級縮到約 13px
+     時，固定的 −0.54px 會變成 2.7 倍過大的字距。用 em 就自動跟著縮。
+     line-height 本來就是無單位比值，不必動。 */
+  letter-spacing: -0.015em;
   line-height: 1.64;
   /* §6.1 排版要求：沒有這行，數字在 9→10→100 時會左右抖動。
      下在父層，數字與 % 都繼承。 */
   font-variant-numeric: tabular-nums;
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(calc(8 * var(--loading-unit)));
 }
 
 /* ⚠️⚠️ 讀這段再改：§6.1 要求「套 font-variant-numeric: tabular-nums，
