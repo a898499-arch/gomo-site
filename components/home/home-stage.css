@@ -162,7 +162,8 @@
        .home-stage），實測手機上 .home-stage 高度 === innerHeight，
        所以 11% 與 11vh 等值，但 % 會跟著舞台走，不會被行動瀏覽器的
        動態視窗高度（網址列收合）咬到。 */
-    --hero-ground: 11%;
+    /* --hero-bench-lift 見下面的垂直節奏段落，預設 0 = 維持桌面那條地平線 */
+    --hero-ground: calc(11% + var(--hero-bench-lift, 0px));
   }
 }
 
@@ -597,6 +598,19 @@
    用 bottom 不用 top：泡泡的高度是 SVG 自己的 auto 高，用 top 還要先算高度，
    用 bottom 則與高度無關，少一個出錯點。 */
 @media (max-width: 600px) {
+  /* ---------- 垂直節奏的兩個可調量（2026-09-18）----------
+     手機是又高又窄（844/390 = 2.16，桌面 900/1440 = 0.63）。板凳照「寬度」
+     縮之後縱向只剩 139px，垂直空間因此多出一大塊：
+       文字底 → 板凳頂  桌面 147px（視窗高 16.3%）／手機 337px（39.9%）
+     手機需要自己一套垂直節奏，不能只靠寬度縮放。
+
+     --hero-text-push   文字往下移多少（加在 .hero-content 的 padding-top）
+     --hero-bench-lift  板凳往上移多少（加在地平線 --hero-ground 上）
+     兩者預設 0 = 現況。桌面完全吃不到這一段（在 media query 內）。 */
+  .hero-content {
+    padding-top: calc(218px + var(--hero-text-push, 0px));
+  }
+
   .bench-left {
     left: calc(var(--hero-x0) + 128.88 * var(--hero-unit));
     top: auto;
@@ -609,16 +623,48 @@
     bottom: var(--hero-ground);
   }
 
+  /* ---------- 泡泡放大倍率 --bubble-boost（2026-09-18）----------
+     純比例縮之後泡泡字級只有 9.12px（390），真機上偏小。這裡讓泡泡的
+     width 與 font-size 同乘一個倍率，預設 1 = 現況。
+
+     ⚠️ 放大之後 left 必須補償，否則尾巴會離開板凳。
+     尾巴錨點是 transform-origin 的 x%：左泡泡 80%、右泡泡 20%。
+     要讓尾巴的 x 不動：
+       左 tailX = x0 + 0.80×170×u = x0 + 136u
+          新 left = tailX − 0.80×170×u×b = x0 + 136u(1 − b)
+       右 tailX = x0 + 782.064u + 0.20×202×u = x0 + 822.464u
+          新 left = tailX − 0.20×202×u×b = x0 + 822.464u − 40.4u·b
+     b=1 時兩式各自退回原值，所以預設不放大時行為完全不變。
+     ⚠️ 縱向不必補償：bottom 已經吊在地平線上，而尾巴就在 SVG 底緣，
+     高度是 auto，底邊不動尾巴的 y 就不動。
+     ⚠️ 泡泡內文字的 top 也要跟著乘——那是泡泡內部的比例位置。 */
   .dialogue-left {
-    left: var(--hero-x0);
+    left: calc(var(--hero-x0) + 136 * var(--hero-unit) * (1 - var(--bubble-boost, 1)));
     top: auto;
     bottom: calc(var(--hero-ground) + 238.9 * var(--hero-unit));
+    width: calc(170 * var(--hero-unit) * var(--bubble-boost, 1));
   }
 
   .dialogue-right {
-    left: calc(var(--hero-x0) + 782.064 * var(--hero-unit));
+    left: calc(
+      var(--hero-x0) + 822.464 * var(--hero-unit) - 40.4 * var(--hero-unit) *
+        var(--bubble-boost, 1)
+    );
     top: auto;
     bottom: calc(var(--hero-ground) + 218.9 * var(--hero-unit));
+    width: calc(202 * var(--hero-unit) * var(--bubble-boost, 1));
+  }
+
+  .dialogue-text {
+    font-size: calc(25 * var(--hero-unit) * var(--bubble-boost, 1));
+  }
+
+  .dialogue-right .dialogue-text-wrap {
+    top: calc(35 * var(--hero-unit) * var(--bubble-boost, 1));
+  }
+
+  .dialogue-left .dialogue-text-wrap {
+    top: calc(31 * var(--hero-unit) * var(--bubble-boost, 1));
   }
 }
 
