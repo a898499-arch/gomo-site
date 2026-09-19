@@ -1197,6 +1197,15 @@
     top: calc(-15.5px * var(--gm-a02-k, 1) * 2.75 + 12px);
     transform: translateX(-50%) scale(calc(0.8166 * var(--gm-a02-k, 1) * 2.75));
   }
+  /* 2026-09-19 Maida 指示：Design Process 流程圖在手機改成跟 eHMS 的
+     流程圖同一種呈現——整張等比縮小放進框裡，不再左右滑動。
+     灰框內距同步縮小。桌機維持原本的左右滑動（min-width:1150px）。 */
+  .gm-flow-inner {
+    min-width: 0;
+  }
+  .gm-process-band {
+    padding: 20px 12px;
+  }
   .gm-fig--onboarding,
   .gm-fig--warmup {
     margin-top: 0;

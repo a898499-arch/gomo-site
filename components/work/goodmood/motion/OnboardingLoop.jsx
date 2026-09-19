@@ -63,7 +63,6 @@ export default function OnboardingLoop() {
       iframe.style.top = '0px';
       const cropRect = crop.getBoundingClientRect();
       const ifRect = iframe.getBoundingClientRect();
-      const desiredTop = cropRect.top + (MARGIN_TOP - phoneNativeTop) * SCALE;
       // ⚠️ 副本改動（2026-09-02）：除以外層的累積縮放。
       // getBoundingClientRect() 回的是「已經套過所有祖先 transform」的畫面座標，
       // 但 iframe.style.top 寫進去的是**未縮放**的區域座標。原檔沒有這個問題，
@@ -71,7 +70,12 @@ export default function OnboardingLoop() {
       // （見 goodmood.css 的 .gm-frame-phone），1440 下 k=1 剛好看不出來，
       // 1155 下手機會整支往上跑、頂端被裁掉（實測過）。
       const k = crop.offsetWidth ? cropRect.width / crop.offsetWidth : 1;
-      iframe.style.top = `${(desiredTop - ifRect.top) / (k || 1)}px`;
+      // 2026-09-19 修正：只有「螢幕座標的距離」要除以 k 換回區域座標；
+      // (MARGIN_TOP − phoneNativeTop) × SCALE 本來就是區域座標，不能再除一次。
+      // 原本整包除以 k，在 k≈1 的桌機看不出來（1155 約差 4px），但手機的
+      // k≈0.58 會讓手機整支往上多跑約 18px，底部露出 demo 的說明列
+      // （Maida 回報 Fig 4 跑掉）。
+      iframe.style.top = `${(cropRect.top - ifRect.top) / (k || 1) + (MARGIN_TOP - phoneNativeTop) * SCALE}px`;
     }
 
     function measurePhoneNativeTop() {

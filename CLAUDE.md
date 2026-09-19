@@ -103,4 +103,4 @@ Figma 只有 1440 桌機稿，沒有手機稿。桌機版照上面「設計還�
 - 全站字級以 `app/globals.css` 的 `--fs-h2 / --fs-h3 / --fs-lead / --fs-body / --fs-eyebrow / --fs-caption` 為準，**這條優先於「設計還原」裡照 Figma 讀字級的規則**。Figma 的字級尚未同步，讀到的字級數值不要直接抄。
 - 新寫或修改文字樣式時，一律用這組變數，不要再寫死 px 或自己算 clamp()。
 - 例外（維持原值）：Hero 大標、Footer 的 Let's Talk、作品內的視覺展示字（字級表、色票、拼貼裡的字）。
-- 目前已套用：Sui-Sui、Goodmood。其他頁面逐頁套用，套用時一樣一次一到兩個區塊。
+- 目前已套用：Sui-Sui、Goodmood、eHMS。其他頁面逐頁套用，套用時一樣一次一到兩個區塊。

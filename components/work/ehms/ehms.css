@@ -275,7 +275,7 @@
      margin-inline:auto 定義在前面，這裡若寫 `margin: 23px 0 0` 會把它
      蓋成 0，整塊貼到視窗左緣（實測偏左 177.5px）。 */
   margin: 23px auto 0;
-  font-size: 24px;
+  font-size: var(--fs-h2);
   font-weight: 600;
   line-height: 1.45;
   letter-spacing: -0.005em;
@@ -297,7 +297,7 @@
 .eh-lo-intro {
   max-width: 1128px;
   margin: 5px auto 0;
-  font-size: 16px;
+  font-size: var(--fs-body);
   font-weight: 400;
   line-height: 1.5;
   letter-spacing: -0.005em;
@@ -364,7 +364,7 @@
 }
 
 .eh-sec-num {
-  font-size: 16px;
+  font-size: var(--fs-eyebrow);
   font-weight: 300;
   line-height: 40.4px;
   color: var(--eh-green);
@@ -372,7 +372,7 @@
 }
 
 .eh-sec-title {
-  font-size: 20px;
+  font-size: var(--fs-h3);
   font-weight: 600;
   line-height: 40.4px;
   color: var(--eh-ink);
@@ -382,7 +382,7 @@
 /* ---------- 內文 ---------- */
 .eh-body p {
   margin: 0 0 1em;
-  font-size: 16px;
+  font-size: var(--fs-body);
   font-weight: 400;
   line-height: 1.7;
   letter-spacing: 0.005em;
@@ -400,7 +400,7 @@
 /* 05 / 07 的內文是 18px（Figma 912:418、912:433），與其餘 16px 不同 */
 .eh-body--lg p,
 .eh-body--lg li {
-  font-size: 18px;
+  font-size: var(--fs-lead);
   letter-spacing: 0.015em;
 }
 
@@ -411,7 +411,7 @@
 
 .eh-list li {
   margin-bottom: 0;
-  font-size: 16px;
+  font-size: var(--fs-body);
   font-weight: 400;
   line-height: 1.7;
   color: var(--eh-ink);
@@ -419,7 +419,7 @@
 
 .eh-sub-label {
   margin: 0 0 0.2em;
-  font-size: 18px;
+  font-size: var(--fs-body);
   font-weight: 700;
   line-height: 1.7;
   letter-spacing: 0.015em;
@@ -442,7 +442,7 @@
 /* ---------- 小節標題（Step 1 — … / Putting the patient… / 卡片標題）---------- */
 .eh-sub-title {
   margin: 0 0 10px;
-  font-size: 18px;
+  font-size: var(--fs-h3);
   font-weight: 600;
   line-height: 1.5;
   letter-spacing: -0.005em;
@@ -478,7 +478,7 @@
 
 .eh-card h3 {
   margin: 0 0 5px;
-  font-size: 24px;
+  font-size: var(--fs-h3);
   font-weight: 400;
   line-height: 1.5;
   letter-spacing: -0.005em;
@@ -487,7 +487,7 @@
 
 .eh-card p {
   margin: 0;
-  font-size: 18px;
+  font-size: var(--fs-body);
   font-weight: 400;
   line-height: 1.5;
   letter-spacing: -0.005em;
@@ -505,7 +505,7 @@
 
 .eh-role-label {
   margin: 0;
-  font-size: 16px;
+  font-size: var(--fs-caption);
   font-weight: 300;
   line-height: 40.4px;
   color: var(--eh-muted);
@@ -514,7 +514,7 @@
 
 .eh-role p {
   margin: 0;
-  font-size: 18px;
+  font-size: var(--fs-body);
   font-weight: 400;
   line-height: 1.5;
   letter-spacing: -0.005em;
@@ -547,7 +547,7 @@
 
 .eh-dc-card h3 {
   margin: 0 0 25px;
-  font-size: 24px;
+  font-size: var(--fs-h3);
   font-weight: 600;
   line-height: 1.5;
   letter-spacing: -0.005em;
@@ -565,7 +565,7 @@
 
 .eh-dc-card li {
   margin-bottom: 0.72em;
-  font-size: 18px;
+  font-size: var(--fs-body);
   font-weight: 400;
   line-height: 1.5;
   color: var(--eh-ink);
@@ -685,7 +685,7 @@
 
 .eh-process-intro {
   margin: 0 0 25px; /* Figma：引言結束 109.42 → Step 1 開始 134.42 */
-  font-size: 16px;
+  font-size: var(--fs-body);
   font-weight: 400;
   line-height: 1.5;
   color: var(--eh-ink);
@@ -708,7 +708,7 @@
 /* Key Features / DESIGN SYSTEM 的綠色小標 — node 912:366 / 912:223 */
 .eh-green-label {
   margin: 0 0 10px;
-  font-size: 18px;
+  font-size: var(--fs-h3);
   font-weight: 700;
   line-height: 40.4px;
   color: var(--eh-green);
@@ -1126,6 +1126,37 @@
   }
 }
 
+/* 2026-09-19 手機版（Maida 指示）：
+   - 內容欄左右留白改成跟導覽列同一個 --page-gutter（20px），Hero、內文、
+     卡片、meta、圖框兩側全部對齊導覽列，全站一致。
+   - 區塊間距等比收小（桌機 32/64/96/160 → 手機 24/48/64/80）。
+   - Hero 裡的標題與說明拿掉 max() 下限，完全跟著 Hero 寬度等比縮小
+     （下限會讓說明字比框大、超出綠色卡片）。
+   - Hero 下方的 logo 跟著畫面縮小。
+   - 卡片內距統一 24px 20px。
+   - 圖放大：單手操作那張的框改直式 4:5、圖撐到框高 88%；
+     狀態動畫的 iframe 內容是依寬度縮放的，把 iframe 撐到 230% 寬再置中
+     裁切，圖案就放大到接近整個框寬。
+   桌機（900px 以上）完全不動。 */
+@media (max-width: 900px) {
+  .eh-case {
+    --eh-gutter: var(--page-gutter);
+    --eh-gap-xs: 24px;
+    --eh-gap-sm: 48px;
+    --eh-gap-md: 64px;
+    --eh-gap-lg: 80px;
+  }
+  .eh-hero-title { font-size: 6.9549cqw; }
+  .eh-hero-tagline { font-size: 1.5038cqw; }
+  .eh-logo { width: 140px; height: auto; margin-bottom: -26px; }
+  .eh-card,
+  .eh-dc-card { padding: 24px 20px; }
+  .eh-kd-figure .eh-panel:has(.eh-thumb-shot) { aspect-ratio: 4 / 5; }
+  .eh-thumb-shot { width: auto; height: 88%; }
+  .eh-states-frame { aspect-ratio: 1088 / 500; }
+  .eh-states-frame iframe { width: 230%; left: -65%; }
+}
+
 /* 2026-09-19 Maida 指示：全站 meta 手機維持一整排（這頁是四欄），
    只縮字級與間距。 */
 @media (max-width: 600px) {
@@ -1139,12 +1170,5 @@
   .eh-lo-meta dd { font-size: 14px; line-height: 1.4; }
 }
 
-@media (max-width: 640px) {
-  .eh-dc-card {
-    padding: 28px 24px;
-  }
-
-  .eh-card {
-    padding: 24px 20px;
-  }
-}
+/* 2026-09-19：原本這裡有 640px 以下的卡片內距（28/24、24/20），
+   已併入上面 900px 的手機版規則，統一成 24px 20px。 */
