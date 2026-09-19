@@ -73,7 +73,7 @@
   margin: 0 auto;
   font-style: italic;
   font-weight: 400;
-  font-size: clamp(17px, 1.6667vw, 24px);
+  font-size: var(--fs-lead);
   line-height: 1.45;
   color: #717171;
   max-width: 1077px;
@@ -85,7 +85,7 @@
 .ss-overview-body {
   margin: 11px auto 0;
   font-weight: 400;
-  font-size: clamp(14px, 1.25vw, 18px);
+  font-size: var(--fs-body);
   line-height: 1.5;
   color: #353535;
   max-width: 927px;
@@ -130,16 +130,31 @@
 
 .ss-overview-meta-label {
   font-weight: 400;
-  font-size: 16px;
+  font-size: var(--fs-caption);
   color: #747474;
 }
 
 .ss-overview-meta-value {
   font-weight: 600;
-  font-size: 20px;
+  font-size: var(--fs-body);
   color: #353535;
   text-align: center;
   line-height: 1.42;
+}
+
+/* 2026-09-19 手機版（桌機 1155/1440 不受影響）：
+   - quote/body 與 meta 在桌機是 padding-inline:0（見上面兩段註解），
+     窄螢幕會貼齊螢幕邊，900px 以下補回全站共用的左右留白。
+   - 928px 是 1440 稿的桌機值，900px 以下改成跟著容器寬。
+   - Maida 指定 meta 在手機維持三欄一整排，只縮字級與間距。 */
+@media (max-width: 900px) {
+  .ss-overview-inner--text,
+  .ss-overview-inner--meta { padding-inline: var(--page-gutter); }
+  .ss-overview-meta { width: 100%; column-gap: 16px; }
+}
+@media (max-width: 600px) {
+  .ss-overview-meta-item { gap: 8px; }
+  .ss-overview-meta-value { font-size: 14px; line-height: 1.4; }
 }
 
 /* ---------- 共用的區塊小標（紅色、大寫，Design Challenge / Background /
@@ -148,7 +163,7 @@
   margin: 0 0 24px;
   text-align: center;
   font-weight: 700;
-  font-size: 24px;
+  font-size: var(--fs-eyebrow);
   letter-spacing: 1px;
   text-transform: uppercase;
   color: #c90000;
@@ -165,14 +180,14 @@
   max-width: 1000px;
   font-style: italic;
   font-weight: 600;
-  font-size: clamp(24px, 2.5vw, 36px);
+  font-size: var(--fs-h2);
   color: #303030;
 }
 
 .ss-background-body {
   margin: 20px auto 0;
   max-width: 1102px;
-  font-size: clamp(16px, 1.3889vw, 20px);
+  font-size: var(--fs-body);
   line-height: 1.5;
   color: #5b5b5b;
 }
@@ -194,14 +209,14 @@
 .ss-background-card-title {
   margin: 0;
   font-weight: 600;
-  font-size: clamp(20px, 2.0833vw, 30px);
+  font-size: var(--fs-h3);
   color: #565656;
 }
 
 .ss-background-card-source {
   margin: 8px 0 0;
   font-weight: 300;
-  font-size: 14px;
+  font-size: var(--fs-caption);
   color: #565656;
 }
 
@@ -232,7 +247,7 @@
   text-align: center;
   font-style: italic;
   font-weight: 600;
-  font-size: clamp(24px, 2.5vw, 36px);
+  font-size: var(--fs-h2);
   color: #303030;
 }
 
@@ -240,7 +255,7 @@
   margin: 20px auto 0;
   max-width: 1102px;
   text-align: center;
-  font-size: clamp(16px, 1.3889vw, 20px);
+  font-size: var(--fs-body);
   line-height: 1.5;
   color: #5b5b5b;
 }
@@ -320,7 +335,7 @@
   text-align: center;
   font-style: italic;
   font-weight: 700;
-  font-size: clamp(24px, 2.5vw, 36px);
+  font-size: var(--fs-h2);
   text-transform: uppercase;
   color: #1e1e1e;
 }
@@ -329,7 +344,7 @@
   margin: 20px auto 0;
   max-width: 1112px;
   text-align: center;
-  font-size: clamp(16px, 1.6667vw, 24px);
+  font-size: var(--fs-lead);
   color: #5b5b5b;
 }
 
@@ -364,14 +379,14 @@
 .ss-dc-card-title {
   margin: 0;
   font-weight: 600;
-  font-size: clamp(20px, 1.875vw, 27px);
+  font-size: var(--fs-h3);
   line-height: 1.2;
   color: #16161a;
 }
 
 .ss-dc-card-text {
   margin: 0;
-  font-size: 17px;
+  font-size: var(--fs-body);
   line-height: 1.65;
   color: #666;
 }
@@ -407,7 +422,7 @@
 .ss-ba-title {
   margin: 0;
   font-weight: 800;
-  font-size: 24px;
+  font-size: var(--fs-h3);
   letter-spacing: 2px;
   text-align: center;
 }
@@ -437,7 +452,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   white-space: nowrap;
   font-weight: 500;
-  font-size: 20px;
+  font-size: var(--fs-body);
   color: #16161a;
 }
 
@@ -471,7 +486,7 @@
 .ss-ba-flow-label {
   margin: 0;
   font-weight: 600;
-  font-size: 20px;
+  font-size: var(--fs-body);
   color: #b8001f;
   text-align: center;
 }
@@ -479,6 +494,19 @@
 @media (max-width: 900px) {
   .ss-ba-grid { grid-template-columns: 1fr; }
   .ss-ba-body { min-height: 420px; }
+}
+/* 2026-09-19 手機版（Maida 已同意）：BEFORE 的散落標籤在 600px 以下
+   改成左右交錯直排，保留各自的旋轉角度與掉落進場；長標籤允許換行。
+   桌機的散落座標（BeforeAfter.jsx 的 x/y）完全不動。 */
+@media (max-width: 600px) {
+  .ss-ba-card { min-width: 0; min-height: 0; padding: 32px 20px; }
+  .ss-ba-body { min-height: 0; gap: 18px; padding-block: 8px; }
+  .ss-ba-card[data-card="before"] .ss-ba-body { justify-content: flex-start; }
+  .ss-ba-body > .ss-ba-pill { position: static; }
+  .ss-ba-body > .ss-ba-pill:nth-child(odd) { align-self: flex-start; }
+  .ss-ba-body > .ss-ba-pill:nth-child(even) { align-self: flex-end; }
+  .ss-ba-pill { white-space: normal; max-width: 100%; padding: 12px 18px 12px 16px; }
+  .ss-ba-flow { max-width: 100%; }
 }
 
 /* ---------- Color（node 545:288，1366×613）。2026-08-17：照 Figma 原稿的
@@ -509,7 +537,7 @@
 .ss-color-title {
   margin: 0 0 4px;
   font-weight: 700;
-  font-size: 24px;
+  font-size: var(--fs-eyebrow);
   letter-spacing: 1px;
   text-transform: uppercase;
   color: #c90000;
@@ -518,14 +546,14 @@
 .ss-color-text-muted {
   margin: 0;
   font-weight: 300;
-  font-size: clamp(14px, 1.4vw, 20px);
+  font-size: var(--fs-body);
   color: #000;
 }
 
 .ss-color-text-accent {
   margin: 0;
   font-weight: 600;
-  font-size: clamp(14px, 1.4vw, 20px);
+  font-size: var(--fs-body);
   color: #d42035;
 }
 
@@ -560,7 +588,7 @@
 .ss-type-desc {
   margin: 0;
   font-weight: 300;
-  font-size: 20px;
+  font-size: var(--fs-body);
   color: #000;
 }
 .ss-type-desc--accent {
@@ -655,7 +683,7 @@
 .ss-fn1-eyebrow {
   margin: 0 0 6px;
   font-weight: 600;
-  font-size: clamp(16px, 1.6667vw, 24px);
+  font-size: var(--fs-eyebrow);
   line-height: 1.6833;
   text-transform: uppercase;
   color: #b8001f;
@@ -672,7 +700,7 @@
 .ss-fn1-title {
   margin: 0;
   font-weight: 600;
-  font-size: clamp(24px, 2.5vw, 36px);
+  font-size: var(--fs-h2);
   line-height: 1.1222;
   color: #000;
 }
@@ -680,7 +708,7 @@
 .ss-fn1-desc {
   margin: 0;
   font-weight: 400;
-  font-size: clamp(16px, 1.3889vw, 20px);
+  font-size: var(--fs-body);
   color: #000;
 }
 
@@ -782,7 +810,7 @@
 .ss-fn2-eyebrow {
   margin: 0;
   font-weight: 600;
-  font-size: 24px;
+  font-size: var(--fs-eyebrow);
   line-height: 40.4px;
   text-transform: uppercase;
   color: #b8001f;
@@ -791,7 +819,7 @@
 .ss-fn2-title {
   margin: 6px 0 0;
   font-weight: 600;
-  font-size: 36px;
+  font-size: var(--fs-h2);
   line-height: 40.4px;
   color: #000;
 }
@@ -799,7 +827,7 @@
 .ss-fn2-desc {
   margin: 16px 0 0;
   width: 100%;
-  font-size: 20px;
+  font-size: var(--fs-body);
   line-height: 1.2;
   color: #000;
 }
@@ -882,7 +910,7 @@
 .ss-footage-tagline {
   margin: 24px 0 0;
   font-style: italic;
-  font-size: clamp(17px, 1.7vw, 24px);
+  font-size: var(--fs-lead);
   letter-spacing: -0.12px;
   color: #717171;
 }
@@ -943,6 +971,13 @@
   position: relative;
   margin-inline: auto;
   transform-origin: top center;
+}
+/* 2026-09-19：看板本身 1064px 寬，視窗比它窄時 margin-inline:auto
+   會失效（變成靠左），再以 top center 縮放，整塊就往右偏出畫面。
+   窄於 1155px 時改用 left:50% + translate 置中，任何寬度都對齊中線。
+   1155/1440 維持原寫法不動。 */
+@media (max-width: 1154px) {
+  .ss-hero-board { margin-inline: 0; left: 50%; translate: -50% 0; }
 }
 
 .ss-hero-cell {
