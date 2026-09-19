@@ -85,6 +85,10 @@ const DESIGN_REF_W = 1440; // Figma 整頁畫布參考寬度
 const COMPOSITE_W = 1244;
 const COMPOSITE_NATIVE_RATIO = 2607 / 4011; // 量最終版檔案量到的
 const COMPOSITE_H = COMPOSITE_W * COMPOSITE_NATIVE_RATIO; // ≈808.7
+// 手機版只顯示圖的範圍（見 measure()）。以 1440 設計座標計。
+const MOBILE_LEFT = 220;  // 左手機 x
+const MOBILE_RIGHT = 1407; // 合成圖 x 163 + 寬 1244
+const MOBILE_TOP = 103;   // 合成圖 y 137 + badge dy −34
 
 const PHONES = [
   {
@@ -119,10 +123,27 @@ export default function Function2() {
   // 手機版標題（900px 以下才顯示，見 sui-sui.css .ss-fn2-heading-mobile）
   const mobileHeadingRef = useStandardEntrance('.ss-entrance-item');
   const [scale, setScale] = useState(1);
+  // 2026-09-19 手機版（Maida 指示：圖放大、左右對齊導覽列）：
+  // 900px 以下文字改在縮放外面顯示，縮放裡只剩三張圖，所以改成只量
+  // 「圖的範圍」——左緣 = 左手機 x=220，右緣 = 合成圖右緣 163+1244=1407，
+  // 上緣 = 合成圖 badge 頂 137−34=103——讓這個範圍剛好撐滿 .page-container
+  // 的內容寬（= 導覽列的左右邊界）。900px 以上 offset 為 0，行為與原本相同。
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const contentRef = useRef(null);
 
   useLayoutEffect(() => {
+    const mq = window.matchMedia('(max-width: 900px)');
     function measure() {
+      const parent = contentRef.current?.parentElement;
+      if (mq.matches && parent) {
+        const cs = getComputedStyle(parent);
+        const innerW = parent.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+        setScale(innerW / (MOBILE_RIGHT - MOBILE_LEFT));
+        setOffset({ x: MOBILE_LEFT, y: MOBILE_TOP });
+        return;
+      }
       setScale(Math.min(window.innerWidth, DESIGN_REF_W) / DESIGN_REF_W);
+      setOffset({ x: 0, y: 0 });
     }
     measure();
     window.addEventListener('resize', measure);
@@ -196,8 +217,12 @@ export default function Function2() {
       </div>
       <div className="page-container">
         <div
+          ref={contentRef}
           className="ss-fn2-content"
-          style={{ height: `${contentH * scale}px`, transform: `scale(${scale})` }}
+          style={{
+            height: `${(contentH - offset.y) * scale}px`,
+            transform: `translate(${-offset.x * scale}px, ${-offset.y * scale}px) scale(${scale})`,
+          }}
         >
           {/* 合成圖必須最先出現在 DOM 裡，才會墊在最底層——見檔頭「圖層
               順序」說明，不然會蓋住左/中手機。 */}

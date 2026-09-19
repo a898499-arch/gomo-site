@@ -324,44 +324,10 @@
   pointer-events: none;
 }
 
-/* 2026-09-19 手機版（第二版，Maida 要求跟桌機拼貼同一個風格）：
-   桌機的 % 座標等比縮到手機，卡片字只剩 6px，所以手機另排一個直式
-   構圖——照片置中，六張卡片左右交錯疊在照片邊緣，小圖示跟著卡片走，
-   卡片保留原本的旋轉角度。所有位置都是「手機專用」的 % 座標，
-   用 !important 蓋掉 JSX 行內的桌機座標；桌機完全不動。
-   卡片順序（DOM）：1 brain、2 grip、3 independence、4 coordination、
-   5 confidence、6 burden。圖示順序：img 2 eye、3 hand、4 star-lg、
-   5 star-sm、6 arrow-up、7 arrow-down；svg 1/2 是兩個小雙箭頭。 */
-@media (max-width: 700px) {
-  .ss-cti-frame { aspect-ratio: 5 / 6 !important; container-type: normal; }
-  .ss-cti-photo { left: 10%; top: 11%; width: 80%; }
-  .ss-cti-chip-slot { width: auto !important; height: auto !important; }
-  .ss-cti-chip {
-    height: auto;
-    padding: 9px 14px !important;
-    border-radius: 8px;
-    font-size: 14px;
-    white-space: nowrap;
-  }
-  .ss-cti-chip-icon { width: 24px; height: 21px; margin-right: 6px; }
-
-  .ss-cti-frame > .ss-cti-chip-slot:nth-of-type(1) { left: 0 !important; top: 3% !important; }
-  .ss-cti-frame > .ss-cti-chip-slot:nth-of-type(4) { left: auto !important; right: 0; top: 20% !important; }
-  .ss-cti-frame > .ss-cti-chip-slot:nth-of-type(2) { left: 8% !important; top: 38% !important; }
-  .ss-cti-frame > .ss-cti-chip-slot:nth-of-type(5) { left: auto !important; right: 2%; top: 51% !important; }
-  .ss-cti-frame > .ss-cti-chip-slot:nth-of-type(3) { left: 9% !important; top: 62% !important; }
-  .ss-cti-frame > .ss-cti-chip-slot:nth-of-type(6) { left: auto !important; right: 0; top: 75% !important; }
-
-  .ss-cti-frame > img.ss-cti-icon { height: auto !important; }
-  .ss-cti-frame > img.ss-cti-icon:nth-of-type(2) { left: 16% !important; top: 21% !important; width: 34px !important; }
-  .ss-cti-frame > img.ss-cti-icon:nth-of-type(3) { left: 1% !important; top: 37% !important; width: 28px !important; }
-  .ss-cti-frame > img.ss-cti-icon:nth-of-type(4) { left: 41% !important; top: 47% !important; width: 32px !important; }
-  .ss-cti-frame > img.ss-cti-icon:nth-of-type(5) { left: 93% !important; top: 58% !important; width: 20px !important; }
-  .ss-cti-frame > img.ss-cti-icon:nth-of-type(6) { left: 1% !important; top: 58% !important; width: 28px !important; }
-  .ss-cti-frame > img.ss-cti-icon:nth-of-type(7) { left: 91% !important; top: 69% !important; width: 28px !important; }
-  .ss-cti-frame > svg.ss-cti-icon { width: 20px !important; height: 23px !important; }
-  .ss-cti-frame > svg.ss-cti-icon:nth-of-type(1) { left: 50% !important; top: 70% !important; }
-  .ss-cti-frame > svg.ss-cti-icon:nth-of-type(2) { left: 39% !important; top: 83% !important; }
+/* 2026-09-19 手機版（第三版，Maida 指示）：手機不另外排版，整塊照桌機的
+   Figma 構圖等比縮小（框維持 aspect-ratio，卡片字級用 cqw 跟著框寬縮）。
+   之前的兩版（直排清單、手機專用直式拼貼）都已撤掉。
+   ⚠️ 取捨：390px 寬時卡片字約 6～7px，是 Maida 選擇的「維持原排版」。 */
 }
 
 /* ---------- Design Challenge（node 545:86，1279×790） ---------- */
