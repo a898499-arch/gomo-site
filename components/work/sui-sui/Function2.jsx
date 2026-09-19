@@ -128,6 +128,7 @@ export default function Function2() {
   // 「圖的範圍」——左緣 = 左手機 x=220，右緣 = 合成圖右緣 163+1244=1407，
   // 上緣 = 合成圖 badge 頂 137−34=103——讓這個範圍剛好撐滿 .page-container
   // 的內容寬（= 導覽列的左右邊界）。900px 以上 offset 為 0，行為與原本相同。
+  // offset 的單位是「畫面上的 px」（已乘過 scale）。
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const contentRef = useRef(null);
 
@@ -136,10 +137,12 @@ export default function Function2() {
     function measure() {
       const parent = contentRef.current?.parentElement;
       if (mq.matches && parent) {
-        const cs = getComputedStyle(parent);
-        const innerW = parent.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-        setScale(innerW / (MOBILE_RIGHT - MOBILE_LEFT));
-        setOffset({ x: MOBILE_LEFT, y: MOBILE_TOP });
+        // 第二版（Maida 指示）：貼齊螢幕左右邊、不留空隙——用整個視窗寬，
+        // 再往左多移 .page-container 的左內距，抵銷導覽列那段留白。
+        const padL = parseFloat(getComputedStyle(parent).paddingLeft);
+        const s = document.documentElement.clientWidth / (MOBILE_RIGHT - MOBILE_LEFT);
+        setScale(s);
+        setOffset({ x: MOBILE_LEFT * s + padL, y: MOBILE_TOP * s });
         return;
       }
       setScale(Math.min(window.innerWidth, DESIGN_REF_W) / DESIGN_REF_W);
@@ -220,8 +223,8 @@ export default function Function2() {
           ref={contentRef}
           className="ss-fn2-content"
           style={{
-            height: `${(contentH - offset.y) * scale}px`,
-            transform: `translate(${-offset.x * scale}px, ${-offset.y * scale}px) scale(${scale})`,
+            height: `${contentH * scale - offset.y}px`,
+            transform: `translate(${-offset.x}px, ${-offset.y}px) scale(${scale})`,
           }}
         >
           {/* 合成圖必須最先出現在 DOM 裡，才會墊在最底層——見檔頭「圖層

@@ -144,7 +144,7 @@
 .gm-opening-tagline {
   margin: 0;
   text-align: center;
-  font-size: clamp(18px, 1.6667vw, 24px);
+  font-size: var(--fs-lead);
   font-weight: 400;
   font-style: italic;
   line-height: 1.45;
@@ -170,7 +170,7 @@
   margin-inline: auto;
   max-width: 1128px;
   text-align: center;
-  font-size: clamp(15px, 1.25vw, 18px);
+  font-size: var(--fs-body);
   font-weight: 400;
   line-height: 1.5;
   letter-spacing: -0.09px;
@@ -223,7 +223,7 @@
    同 .av-overview-meta-label 的處理。 */
 .gm-opening-meta-label {
   display: block;
-  font-size: 16px;
+  font-size: var(--fs-caption);
   font-weight: 400;
   line-height: 28.4px;
   letter-spacing: -0.08px;
@@ -235,7 +235,7 @@
    <dd> 預設有左邊界，清掉。 */
 .gm-opening-meta-value {
   margin: 33.6px 0 0;
-  font-size: clamp(17px, 1.3889vw, 20px);
+  font-size: var(--fs-body);
   font-weight: 600;
   line-height: 28.4px;
   color: #353535;
@@ -291,7 +291,7 @@
 .gm-overview-eyebrow {
   margin: 0;
   text-align: center;
-  font-size: 24px;
+  font-size: var(--fs-h3);
   font-weight: 700;
   line-height: 40.4px;
   text-transform: uppercase;
@@ -311,7 +311,7 @@
 .gm-overview-heading {
   margin: 0;
   text-align: center;
-  font-size: clamp(18px, 1.6667vw, 24px);
+  font-size: var(--fs-lead);
   font-weight: 600;
   line-height: 40.4px;
   text-transform: uppercase;
@@ -339,7 +339,7 @@
   margin-inline: auto;
   max-width: 1283px;
   text-align: center;
-  font-size: clamp(17px, 1.3889vw, 20px);
+  font-size: var(--fs-body);
   font-weight: 400;
   line-height: 1.5;
   color: #5b5b5b;
@@ -423,7 +423,7 @@
 .gm-kicker {
   margin: 0;
   text-align: center;
-  font-size: 24px;
+  font-size: var(--fs-h3);
   font-weight: 700;
   line-height: 40.4px;
   text-transform: uppercase;
@@ -435,7 +435,7 @@
 .gm-subhead {
   margin: 0;
   text-align: center;
-  font-size: clamp(18px, 1.6667vw, 24px);
+  font-size: var(--fs-lead);
   font-weight: 600;
   line-height: 40.4px;
   text-transform: uppercase;
@@ -451,7 +451,7 @@
   width: 100%;
   margin-inline: auto;
   text-align: center;
-  font-size: clamp(17px, 1.3889vw, 20px);
+  font-size: var(--fs-body);
   font-weight: 400;
   line-height: 1.5;
   color: #5b5b5b;
@@ -523,7 +523,7 @@
 .gm-figcaption {
   margin: 0;
   text-align: center;
-  font-size: 16px;
+  font-size: var(--fs-caption);
   font-weight: 400;
   line-height: 1.4;
   letter-spacing: -0.43px;
@@ -933,6 +933,12 @@
   border-radius: 0;
 }
 
+/* 2026-09-19：觸控裝置改由 JS 處理拖曳（見元件裡的「觸控拖曳」），
+   input 不接指標事件，避免 iOS 的 range 搶走手勢。鍵盤焦點不受影響。 */
+@media (hover: none), (pointer: coarse) {
+  .gm-slider-input { pointer-events: none; }
+}
+
 /* 焦點指示要畫在看得見的東西上——input 本身是透明的。 */
 .gm-slider:has(.gm-slider-input:focus-visible) {
   outline: 2px solid var(--accent);
@@ -1171,6 +1177,25 @@
   .gm-assets02-stage {
     grid-template-columns: 1fr;
     row-gap: 40px;
+  }
+  /* 2026-09-19 手機版修正（Maida 回報 Fig 4、Fig 5 跑掉）：
+     --gm-a02-k 是「整個舞台寬 ÷ 1234」。桌機兩欄時 ② 的框寬是 598，
+     但手機改成一欄後 ② 的框撐滿整個舞台，手機卻還用 1234 的係數縮，
+     所以小到只剩一半。這裡乘上 1234/598 = 2.0635 補回來。
+     ③ 原本的 translateX 把 −50% 也乘了係數，桌機 k≈1 看不出來，手機
+     k≈0.28 就整組偏到框外（Fig 5 空白的原因）。手機改成單純 −50% 置中，
+     並把整組放大 2.75 倍、框改成 1234/1005，兩支手機上下各留約 25px。
+     900px 以上完全不動。 */
+  .gm-frame-phone {
+    top: calc(51px * var(--gm-a02-k, 1) * 2.0635);
+    transform: translateX(-50%) scale(calc(var(--gm-a02-k, 1) * 2.0635));
+  }
+  .gm-frame--warmup {
+    aspect-ratio: 1234 / 1005;
+  }
+  .gm-frame-warmup-scale {
+    top: calc(-15.5px * var(--gm-a02-k, 1) * 2.75 + 12px);
+    transform: translateX(-50%) scale(calc(0.8166 * var(--gm-a02-k, 1) * 2.75));
   }
   .gm-fig--onboarding,
   .gm-fig--warmup {

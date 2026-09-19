@@ -114,6 +114,58 @@ export default function MakingAssets01() {
     };
   }, []);
 
+  /* 2026-09-19 觸控拖曳（Maida 回報：手機只能點、不能滑）。
+     原本觸控裝置交給底下那個透明的 <input type="range">，但 iOS 的 range
+     只有「手指剛好按在隱形的 thumb 上」才拖得動，實際上幾乎只能點。
+     這裡改成：觸控裝置上按下後左右拖曳都跟著走（rAF 節流，同上面那段）。
+     .gm-slider 已有 touch-action: pan-y，上下滑仍然是捲動頁面；
+     CSS 在觸控裝置上把 input 設成 pointer-events:none，避免它搶事件。
+     鍵盤與螢幕閱讀器仍由 input 提供，不受影響。 */
+  useEffect(() => {
+    const el = sliderRef.current;
+    if (!el) return undefined;
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) return undefined;
+
+    let dragging = false;
+    let rafId = 0;
+    let pendingX = null;
+
+    const apply = () => {
+      rafId = 0;
+      if (pendingX === null) return;
+      const r = el.getBoundingClientRect();
+      if (!r.width) return;
+      const pct = Math.round(((pendingX - r.left) / r.width) * 100);
+      setSliderPos(Math.min(100, Math.max(0, pct)));
+    };
+    const queue = (x) => {
+      pendingX = x;
+      if (!rafId) rafId = requestAnimationFrame(apply);
+    };
+    const onDown = (e) => {
+      dragging = true;
+      queue(e.clientX);
+    };
+    const onMove = (e) => {
+      if (dragging) queue(e.clientX);
+    };
+    const onUp = () => {
+      dragging = false;
+    };
+
+    el.addEventListener('pointerdown', onDown);
+    el.addEventListener('pointermove', onMove);
+    el.addEventListener('pointerup', onUp);
+    el.addEventListener('pointercancel', onUp);
+    return () => {
+      el.removeEventListener('pointerdown', onDown);
+      el.removeEventListener('pointermove', onMove);
+      el.removeEventListener('pointerup', onUp);
+      el.removeEventListener('pointercancel', onUp);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, []);
+
   return (
     <section className="gm-section gm-assets01">
       <div className="gm-assets01-inner">

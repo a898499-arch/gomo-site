@@ -106,6 +106,12 @@
   border-radius: 0;
 }
 
+/* 2026-09-19：觸控裝置改由 JS 處理拖曳（見元件裡的「觸控拖曳」），
+   input 不接指標事件，避免 iOS 的 range 搶走手勢。鍵盤焦點不受影響。 */
+@media (hover: none), (pointer: coarse) {
+  .cs-input { pointer-events: none; }
+}
+
 /* 焦點指示要畫在看得見的東西上——input 本身是透明的。 */
 .cs:has(.cs-input:focus-visible) {
   outline: 2px solid var(--accent);
