@@ -558,10 +558,28 @@
   color: #d42035;
 }
 
+/* 2026-09-19 手機版（Maida 同意）：原本手機把色票拆成一條條清單，磚牆拼貼
+   的設計不見了。改成：色票磚牆維持原排版等比縮小、撐滿內容寬；說明文字
+   移到磚牆下方。
+   - 色票只佔設計稿寬 1366 裡的左邊 981，把框放大成 1366/981 = 139.25% 寬，
+     色票那一塊就剛好等於內容寬（右邊多出來的是原本放文字的空位，
+     被 body 的 overflow-x:clip 裁掉，看不到）。框高仍由 aspect-ratio 決定，
+     色票比例不變。
+   - 框裡的文字隱藏，改顯示 ColorPalette.jsx 裡放在框外的
+     .ss-color-text-mobile。（不能讓框內文字改成一般文件流：框會長高，
+     色票的高度是框高的 %，會跟著被拉長——試過。）
+   桌機不動。 */
+.ss-color-text-mobile { display: none; }
 @media (max-width: 900px) {
-  .ss-color-frame { aspect-ratio: unset !important; display: flex; flex-direction: column; }
-  .ss-color-swatch { position: static; width: 100% !important; height: 64px !important; }
-  .ss-color-text { position: static; width: 100% !important; margin-top: 24px; }
+  .ss-color-frame { width: 139.25%; }
+  .ss-color-swatch { font-size: 10px; }
+  .ss-color-frame .ss-color-text { display: none; }
+  .ss-color-text-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 24px;
+  }
 }
 
 /* ---------- Typography（node 545:322，1386.2×313） ---------- */

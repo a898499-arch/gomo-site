@@ -82,6 +82,20 @@ export default function ColorPalette() {
             </p>
           </div>
         </div>
+        {/* 2026-09-19 手機版說明文字：900px 以下磚牆會撐滿內容寬，框裡右側
+            那份文字放不下，改顯示這份（放在磚牆下方），框裡那份隱藏。
+            兩份同一時間只有一份顯示，螢幕閱讀器不會唸兩次；內容要保持一致。 */}
+        <div className="ss-color-text-mobile">
+          <p className="ss-color-title">Color</p>
+          <p className="ss-color-text-muted">
+            Red, taken from Shiseido, the company that has run cosmetic therapy in some 400 care
+            facilities in Japan since 2013.
+          </p>
+          <p className="ss-color-text-accent">
+            Every text and background pairing clears WCAG AA (4.5:1), so it stays legible for
+            ageing eyes.
+          </p>
+        </div>
       </div>
     </section>
   );
