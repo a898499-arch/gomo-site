@@ -363,12 +363,18 @@
 }
 
 @media (max-width: 600px) {
+  /* 2026-09-19 Maida 指示：全站 meta 手機維持一整排，只縮字級與間距 */
   .gm-opening-meta {
-    grid-template-columns: 1fr;
-    gap: 28px;
+    column-gap: 16px;
+  }
+  .gm-opening-meta-label {
+    font-size: var(--fs-caption);
+    line-height: 1.4;
   }
   .gm-opening-meta-value {
     margin-top: 8px;
+    font-size: 14px;
+    line-height: 1.4;
   }
   .gm-overview-heading,
   .gm-overview-eyebrow {

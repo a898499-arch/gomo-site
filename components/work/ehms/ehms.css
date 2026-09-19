@@ -1126,6 +1126,19 @@
   }
 }
 
+/* 2026-09-19 Maida 指示：全站 meta 手機維持一整排（這頁是四欄），
+   只縮字級與間距。 */
+@media (max-width: 600px) {
+  .eh-lo-meta {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .eh-lo-meta > div { gap: 8px; }
+  .eh-lo-meta dt { font-size: var(--fs-caption); line-height: 1.4; }
+  .eh-lo-meta dd { font-size: 14px; line-height: 1.4; }
+}
+
 @media (max-width: 640px) {
   .eh-dc-card {
     padding: 28px 24px;

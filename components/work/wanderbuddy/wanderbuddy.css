@@ -143,6 +143,18 @@
   line-height: 1.42;
 }
 
+/* 2026-09-19 Maida 指示：全站 Overview 的 meta 在手機維持一整排
+   （同 Sui-Sui），只縮字級與間距，不改成直排。桌機不動。 */
+@media (max-width: 900px) {
+  .wb-overview-inner--meta { padding-inline: var(--page-gutter); }
+  .wb-overview-meta { width: 100%; column-gap: 16px; }
+}
+@media (max-width: 600px) {
+  .wb-overview-meta-item { gap: 8px; }
+  .wb-overview-meta-label { font-size: var(--fs-caption); }
+  .wb-overview-meta-value { font-size: 14px; line-height: 1.4; }
+}
+
 /* ---------- Design Challenge ---------- */
 .wb-dc-eyebrow {
   margin: 0;

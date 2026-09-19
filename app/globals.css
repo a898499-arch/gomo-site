@@ -302,6 +302,17 @@ body:has(.page-content > [data-nav-bleed]) .site-nav {
   .nav-links a { font-size: 18px; }
 }
 
+/* 2026-09-19 手機版：--case-hero-top 在桌機是 9.1667vw 等比縮，但手機的
+   導覽列不會跟著縮（96px／72px），Hero 會被導覽列蓋住。900px 以下改成
+   「導覽列高 + 16px」，跟桌機 132 = 116 + 16 同一個邏輯。
+   sui-sui 與 ehms 兩頁共用，一起生效。 */
+@media (max-width: 900px) {
+  :root { --case-hero-top: calc(96px + 16px); }
+}
+@media (max-width: 600px) {
+  :root { --case-hero-top: calc(72px + 16px); }
+}
+
 @media (max-width: 600px) {
   .site-nav { height: 72px; }
   .nav-logo { width: 47px; height: 48px; }

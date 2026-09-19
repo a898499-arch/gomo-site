@@ -324,8 +324,42 @@
   pointer-events: none;
 }
 
+/* 2026-09-19 手機版：原本只把框拉高到 640px，卡片仍用 % 座標散落，
+   整塊被拉得很空、卡片跟照片錯位。改成：照片在上，六張卡片在下
+   左右交錯直排（保留各自旋轉角度），跟 Before & After 的手機版同一套。
+   裝飾小圖示（眼睛、手、星星、箭頭）在手機隱藏；腦的圖示在卡片內，保留。
+   桌機的 Figma 座標完全不動。 */
 @media (max-width: 700px) {
-  .ss-cti-frame { aspect-ratio: unset !important; min-height: 640px; }
+  .ss-cti-frame {
+    aspect-ratio: unset !important;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    container-type: normal;
+  }
+  .ss-cti-photo {
+    position: static;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto 12px;
+  }
+  .ss-cti-chip-slot {
+    position: static;
+    width: auto !important;
+    height: auto !important;
+    max-width: 90%;
+  }
+  .ss-cti-chip-slot:nth-of-type(odd) { align-self: flex-start; }
+  .ss-cti-chip-slot:nth-of-type(even) { align-self: flex-end; }
+  .ss-cti-chip {
+    height: auto;
+    padding: 12px 18px !important;
+    white-space: normal;
+    border-radius: 10px;
+    font-size: var(--fs-body);
+  }
+  .ss-cti-chip-icon { width: 26px; height: 23px; margin-right: 8px; }
+  .ss-cti-icon { display: none; }
 }
 
 /* ---------- Design Challenge（node 545:86，1279×790） ---------- */
@@ -656,6 +690,12 @@
   max-width: var(--site-max);
   margin-inline: auto;
 }
+/* 2026-09-19 手機版：carousel.html 的手機高度是 max(300px, 框高×0.8)，
+   框太矮（390px 寬時只有 242px）會被下限 300px 撐破、上下被裁掉。
+   給框最低 420px，手機高 = 336px，上下各留 10%。carousel.html 不動。 */
+@media (max-width: 900px) {
+  .ss-pa-frame { min-height: 420px; }
+}
 
 /* ---------- Function 1（node 545:110，「Setup in three questions」）。
    2026-08-22 第四輪：拿掉 #f3f4f8 背景帶跟絕對定位的 Figma 框（你的
@@ -793,6 +833,15 @@
 .ss-fn2-content {
   position: relative;
   transform-origin: 0 0; /* 從左上角縮放，不要用預設的正中心 */
+}
+/* 2026-09-19 手機版：Function 2 的文字在整組 transform:scale() 裡面，
+   手機上會被縮到 6～10px。900px 以下改顯示 Function2.jsx 裡另一份
+   放在縮放外面的標題（沿用 Function 1／3 的 .ss-fn1-* 樣式、置中），
+   縮放裡那份隱藏。兩份同一時間只有一份顯示，螢幕閱讀器不會唸兩次。 */
+.ss-fn2-heading-mobile { display: none; }
+@media (max-width: 900px) {
+  .ss-fn2-heading-mobile { display: block; margin-bottom: 24px; }
+  .ss-fn2-text { display: none; }
 }
 
 /* 左對齊（Figma 原稿是靠左，不是置中）。eyebrow→標題 6px、標題→說明
@@ -978,6 +1027,14 @@
    1155/1440 維持原寫法不動。 */
 @media (max-width: 1154px) {
   .ss-hero-board { margin-inline: 0; left: 50%; translate: -50% 0; }
+}
+/* 2026-09-19：900px 以下看板改成跟導覽列同寬（縮放比例見 Hero.jsx 的
+   fit()），Hero 高度也改用同一個寬度算：上留白 + 看板高（寬 × 736/1064）
+   + 32px 到下一區。 */
+@media (max-width: 900px) {
+  .ss-hero {
+    height: calc(var(--case-hero-top) + (100vw - 2 * var(--page-gutter)) * 0.6917 + 32px);
+  }
 }
 
 .ss-hero-cell {

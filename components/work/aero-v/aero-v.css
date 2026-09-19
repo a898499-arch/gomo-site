@@ -275,13 +275,18 @@
 }
 
 @media (max-width: 600px) {
-  /* 三欄在手機上擠不下，改單欄堆疊 */
+  /* 2026-09-19 Maida 指示：全站 meta 手機維持一整排，只縮字級與間距 */
   .av-overview-meta {
-    grid-template-columns: 1fr;
-    gap: 28px;
+    column-gap: 16px;
+  }
+  .av-overview-meta-label {
+    font-size: var(--fs-caption);
+    line-height: 1.4;
   }
   .av-overview-meta-value {
     margin-top: 8px;
+    font-size: 14px;
+    line-height: 1.4;
   }
   .av-overview-title-mark {
     width: 82%;

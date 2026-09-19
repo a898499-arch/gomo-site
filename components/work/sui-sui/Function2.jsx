@@ -4,6 +4,7 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { mainEase } from '@/lib/ease';
+import { useStandardEntrance } from '@/lib/useStandardEntrance';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
@@ -115,6 +116,8 @@ export default function Function2() {
   const textRef = useRef(null);
   const groupRefs = useRef([]);
   const compositeRef = useRef(null);
+  // 手機版標題（900px 以下才顯示，見 sui-sui.css .ss-fn2-heading-mobile）
+  const mobileHeadingRef = useStandardEntrance('.ss-entrance-item');
   const [scale, setScale] = useState(1);
 
   useLayoutEffect(() => {
@@ -177,6 +180,20 @@ export default function Function2() {
 
   return (
     <section className="ss-section" ref={rootRef}>
+      {/* 2026-09-19 手機版標題：桌機那份在下面縮放的 .ss-fn2-content 裡，
+          手機會被縮到看不清楚；這份放在縮放外面，樣式沿用 Function 1／3。
+          兩份文字內容要保持一致。 */}
+      <div ref={mobileHeadingRef} className="ss-section-inner ss-fn1-heading ss-fn2-heading-mobile">
+        <p className="ss-fn1-eyebrow ss-entrance-item">Function 2</p>
+        <div className="ss-fn1-title-group ss-entrance-item">
+          <h2 className="ss-fn1-title">Product recognition</h2>
+          <p className="ss-fn1-desc">
+            Users photograph or scan the products already on their dressing table. The app
+            recognises and sorts them automatically, so every routine is built around what
+            someone owns, not what they&rsquo;re expected to buy.
+          </p>
+        </div>
+      </div>
       <div className="page-container">
         <div
           className="ss-fn2-content"

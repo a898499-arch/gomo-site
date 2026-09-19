@@ -65,8 +65,18 @@ export default function Hero() {
     // 起算並穿到它底下，所以看板上方留白要含 nav 那 116px。
     // ⚠️ 原本的佔位塊寫 height={970}，那是「116→1086」的區間長度，漏算了
     // nav 佔掉的 116px，會讓後面每一區都往上偏。這裡一併修正成 1086。
+    // 2026-09-19 手機版（Maida 指示）：900px 以下看板改成跟導覽列同寬，
+    // 也就是「視窗寬 − 左右 --page-gutter」。gutter 的算式照抄 globals.css
+    // 的 clamp(20px, 2.7778vw, 40px)；Hero 高度在 sui-sui.css 的同一斷點
+    // 用同一個算式計算，兩邊要一起改。900px 以上（含 1155/1440）完全不變。
+    const mq = window.matchMedia('(max-width: 900px)');
     const fit = () => {
-      const s = Math.min(window.innerWidth, 1440) / 1440;
+      let s = Math.min(window.innerWidth, 1440) / 1440;
+      if (mq.matches) {
+        const vw = window.innerWidth;
+        const gutter = Math.min(40, Math.max(20, vw * 0.027778));
+        s = (vw - gutter * 2) / BOARD_W;
+      }
       board.style.transform = `scale(${s})`;
     };
     fit();
