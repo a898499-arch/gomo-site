@@ -1154,6 +1154,9 @@
   .eh-kd-figure .eh-panel:has(.eh-thumb-shot) { aspect-ratio: 4 / 5; }
   .eh-thumb-shot { width: auto; height: 88%; }
   .eh-states-frame { aspect-ratio: 1088 / 500; }
+  /* 前後對比：900px 以下兩張截圖改成佔 80% 寬（下面舊規則），框高卻沒跟著
+     長，截圖被 object-fit:cover 上下裁掉。框改成 1088/960，讓截圖維持原比例。 */
+  .eh-ba { aspect-ratio: 1088 / 960; }
   .eh-states-frame iframe { width: 230%; left: -65%; }
 }
 

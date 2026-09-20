@@ -58,7 +58,7 @@
 .wb-overview-title {
   margin: 0;
   font-weight: 600;
-  font-size: clamp(32px, 3.8889vw, 56px);
+  font-size: var(--fs-h2);
   line-height: 1.45;
   letter-spacing: -0.32px;
   color: #353535;
@@ -69,7 +69,7 @@
   margin: 11px 0 0;
   font-style: italic;
   font-weight: 400;
-  font-size: clamp(17px, 1.6667vw, 24px);
+  font-size: var(--fs-lead);
   line-height: 1.45;
   letter-spacing: -0.12px;
   color: #717171;
@@ -80,7 +80,7 @@
 .wb-overview-body {
   margin: 11px 0 0;
   font-weight: 400;
-  font-size: clamp(15px, 1.25vw, 18px);
+  font-size: var(--fs-body);
   letter-spacing: -0.09px;
   line-height: 1.5;
   color: #353535;
@@ -131,13 +131,13 @@
 
 .wb-overview-meta-label {
   font-weight: 400;
-  font-size: 16px;
+  font-size: var(--fs-caption);
   color: #747474;
 }
 
 .wb-overview-meta-value {
   font-weight: 600;
-  font-size: 20px;
+  font-size: var(--fs-body);
   color: #353535;
   text-align: center;
   line-height: 1.42;
@@ -151,7 +151,6 @@
 }
 @media (max-width: 600px) {
   .wb-overview-meta-item { gap: 8px; }
-  .wb-overview-meta-label { font-size: var(--fs-caption); }
   .wb-overview-meta-value { font-size: 14px; line-height: 1.4; }
 }
 
@@ -160,7 +159,7 @@
   margin: 0;
   text-align: center;
   font-weight: 700;
-  font-size: 24px;
+  font-size: var(--fs-eyebrow);
   letter-spacing: 1px;
   text-transform: uppercase;
   color: #FF7BFF;
@@ -172,7 +171,7 @@
   text-align: center;
   font-style: italic;
   font-weight: 700;
-  font-size: clamp(24px, 3vw, 36px);
+  font-size: var(--fs-h2);
   text-transform: uppercase;
   color: #1E1E1E;
 }
@@ -182,7 +181,7 @@
   max-width: 1112px;
   text-align: center;
   font-weight: 400;
-  font-size: clamp(17px, 1.7vw, 24px);
+  font-size: var(--fs-lead);
   color: #5B5B5B;
 }
 
@@ -219,7 +218,7 @@
 .wb-dc-label {
   margin: 0;
   font-weight: 500;
-  font-size: 16px;
+  font-size: var(--fs-eyebrow);
   letter-spacing: 1.6px;
 }
 .wb-dc-card[data-tone="strategy"] .wb-dc-label { color: #003AFF; }
@@ -229,7 +228,7 @@
 .wb-dc-card-title {
   margin: 0;
   font-weight: 600;
-  font-size: 27px;
+  font-size: var(--fs-h3);
   line-height: 1.2;
   color: #16161A;
 }
@@ -237,7 +236,7 @@
 .wb-dc-card-body {
   margin: 0;
   font-weight: 400;
-  font-size: 17px;
+  font-size: var(--fs-body);
   line-height: 1.6;
   color: #4A4A52;
 }
@@ -340,7 +339,7 @@
 .wb-eyebrow {
   margin: 0 0 40px;
   font-weight: 700;
-  font-size: 24px;
+  font-size: var(--fs-eyebrow);
   text-transform: uppercase;
   color: #747474;
 }
@@ -364,7 +363,7 @@
 .wb-type-specimen-desc {
   margin: 16px 0 0;
   max-width: 574px;
-  font-size: 18px;
+  font-size: var(--fs-body);
   line-height: 1.5;
   color: #717171;
 }
@@ -424,7 +423,7 @@
 .wb-ba-title {
   margin: 0;
   font-weight: 700;
-  font-size: 24px;
+  font-size: var(--fs-h3);
   letter-spacing: 2px;
   text-align: center;
 }
@@ -434,7 +433,7 @@
 .wb-ba-subtitle {
   margin: 8px 0 0;
   font-weight: 600;
-  font-size: 20px;
+  font-size: var(--fs-lead);
   color: #8A8A90;
   text-align: center;
 }
@@ -466,7 +465,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   white-space: nowrap;
   font-weight: 500;
-  font-size: 20px;
+  font-size: var(--fs-body);
   color: #16161A;
 }
 
@@ -501,7 +500,7 @@
 .wb-ba-flow-label {
   margin: 0;
   font-weight: 400;
-  font-size: 20px;
+  font-size: var(--fs-body);
   color: #003AFF;
 }
 
@@ -531,7 +530,7 @@
 .wb-footage-title {
   margin: 24px 0 0;
   font-weight: 600;
-  font-size: clamp(24px, 3.6vw, 36px);
+  font-size: var(--fs-h2);
   letter-spacing: -0.18px;
   color: #353535;
   text-transform: capitalize;
@@ -540,7 +539,7 @@
 .wb-footage-tagline {
   margin: 12px 0 0;
   font-style: italic;
-  font-size: clamp(17px, 1.7vw, 24px);
+  font-size: var(--fs-lead);
   letter-spacing: -0.12px;
   color: #717171;
 }
@@ -736,6 +735,48 @@
   top: 0;
   height: 100%;
   object-fit: cover;
+}
+
+/* ====================================================================
+   2026-09-19 手機版（Maida 指示：字太大、沒有呼吸感、Before & After 跑掉、
+   Sign Up Flow 文字跑掉、手機圖太小、兩張 mockup 寬度不同）。
+   900px 以上完全不動。
+   ==================================================================== */
+@media (max-width: 900px) {
+  /* 卡片內距縮小、卡片間距收小，內文不再擠在窄欄裡 */
+  .wb-dc-cards { margin-top: 40px; gap: 20px; }
+  .wb-dc-card { padding: 28px 20px; gap: 12px; }
+  .wb-dc-badge { width: 44px; height: 44px; font-size: 16px; }
+  .wb-eyebrow { margin-bottom: 24px; }
+
+  /* Sign Up Flow：線稿放大到 820px 寬、左右滑動看全圖
+     （Maida：全體不維持在同一個畫面寬也沒關係）。
+     區塊本身可以橫向捲動；圖裡的字是依視窗寬算的 vw，放大後框變大、
+     字相對變小，就不會再超出框。 */
+  .wb-section:has(> .wb-signup-diagram) {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+  .wb-signup-diagram { width: 820px; max-width: none; }
+
+  /* 四支手機的主圖放大（左右透明留白出血，被 body 的 overflow-x:clip 裁掉） */
+  .wb-shot img { width: 125%; max-width: none; margin-left: -12.5%; }
+
+  /* 兩張 mockup 統一寬度：都撐滿畫面寬、不再各自偏移出血 */
+  .wb-mockup-bleed { aspect-ratio: 1220 / 812 !important; }
+  .wb-mockup-bleed-img { left: 0 !important; width: 100% !important; }
+}
+
+/* Before & After：比照 Sui-Sui（標籤左右交錯直排，保留旋轉角度） */
+@media (max-width: 600px) {
+  .wb-ba-card { min-width: 0; min-height: 0; padding: 32px 20px; }
+  .wb-ba-body { min-height: 0; gap: 18px; padding-block: 8px; }
+  .wb-ba-card[data-card="before"] .wb-ba-body { justify-content: flex-start; }
+  .wb-ba-body > .wb-ba-pill { position: static; }
+  .wb-ba-body > .wb-ba-pill:nth-child(odd) { align-self: flex-start; }
+  .wb-ba-body > .wb-ba-pill:nth-child(even) { align-self: flex-end; }
+  .wb-ba-pill { white-space: normal; max-width: 100%; padding: 12px 18px 12px 16px; }
+  .wb-ba-flow { max-width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
