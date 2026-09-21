@@ -836,13 +836,13 @@
    手機上會被縮到 6～10px。900px 以下改顯示 Function2.jsx 裡另一份
    放在縮放外面的標題（沿用 Function 1／3 的 .ss-fn1-* 樣式、置中），
    縮放裡那份隱藏。兩份同一時間只有一份顯示，螢幕閱讀器不會唸兩次。 */
-.ss-fn2-heading-mobile { display: none; }
-@media (max-width: 900px) {
-  .ss-fn2-heading-mobile { display: block; margin-bottom: 24px; }
-  /* 加上父層提高特異度：下面 .ss-fn2-text 的 display:flex 寫在後面，
-     同特異度會蓋掉這條（第一版就是這樣失效、文字出現兩次）。 */
-  .ss-fn2-content .ss-fn2-text { display: none; }
-}
+/* 2026-09-21：桌機也改用這份（桌機內容欄收窄後，縮放裡的文字會被縮到
+   約 21px、跟 Function 1／3／4 的置中標題不一致）。縮放裡那份在所有寬度
+   都隱藏，class 名稱保留 -mobile 是歷史原因。 */
+.ss-fn2-heading-mobile { display: block; margin-bottom: 24px; }
+/* 加上父層提高特異度：下面 .ss-fn2-text 的 display:flex 寫在後面，
+   同特異度會蓋掉這條（第一版就是這樣失效、文字出現兩次）。 */
+.ss-fn2-content .ss-fn2-text { display: none; }
 
 /* 左對齊（Figma 原稿是靠左，不是置中）。eyebrow→標題 6px、標題→說明
    16px，兩段不同間距，所以不用單一 flex gap，改用逐一 margin-top。
@@ -1229,4 +1229,50 @@
      Hero.jsx 裡用 matchMedia 分支處理（GSAP 設的是 inline style，
      CSS 蓋不掉），這裡只保險把 transform 歸零。 */
   .ss-hero-marquee { transform: none !important; }
+}
+
+/* ====================================================================
+   2026-09-21 桌機內容欄統一（Maida 指示，同 goodmood.css 同名段落）：
+   900px 以上左右留白 clamp(20px, 12.326vw, 177.5px)、內容欄 1085px，
+   跟 eHMS 一樣。先「全部收窄」，原本滿版出血的區塊（Function 4 四支
+   手機、三張 mockup）也先收進欄內，再由 Maida 逐一挑選要恢復滿版的
+   ——恢復時刪掉下面對應的那幾行即可。手機畫面輪播 Maida 指定不改。
+   Hero 看板 1440 時本來就是 1064（≈ 欄寬），不動。
+   ==================================================================== */
+@media (min-width: 901px) {
+  .ss-case {
+    --ss-gutter: clamp(20px, 12.326vw, 177.5px);
+  }
+  .ss-section-inner,
+  .ss-overview-inner,
+  .ss-overview-inner--text,
+  .ss-overview-inner--meta,
+  .ss-case .page-container {
+    max-width: calc(1085px + var(--ss-gutter) * 2);
+    padding-inline: var(--ss-gutter);
+  }
+  .ss-overview-meta { width: 100%; max-width: 928px; }
+
+  /* 手機畫面輪播（Process Animation）維持滿版，不收窄（Maida 2026-09-21）。 */
+  /* 滿版 → 收窄（候選恢復：三張 mockup）。收進欄內後，原本各自的
+     Figma 偏移（x=109／13／0）會讓圖在欄內左右錯位、被裁掉一點，
+     所以三張統一撐滿欄寬、同一個比例（同手機版，以第二張 1434×900 為準）。 */
+  .ss-mockup-clip {
+    width: calc(100% - var(--ss-gutter) * 2);
+    max-width: 1085px;
+  }
+  .ss-mockup {
+    margin-left: 0 !important;
+    width: 100% !important;
+    aspect-ratio: 1434 / 900 !important;
+  }
+  /* 滿版 → 收窄（候選恢復：Function 4 四支手機）。原本圖寬
+     min(90.1112vw, 1297.6px) 是配 1360 的欄，等比換成 1085 的欄：
+     × 1085/1360 = 0.7978。上下負 margin 同比例縮。 */
+  .ss-fn4-shot {
+    width: min(71.89vw, 1035.2px);
+    margin-inline: calc(50% - min(35.945vw, 517.6px)) 0;
+    margin-top: max(-8.634vw, -124.3px);
+    margin-bottom: max(-4.007vw, -57.7px);
+  }
 }

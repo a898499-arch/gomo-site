@@ -136,6 +136,17 @@ export default function Function2() {
     const mq = window.matchMedia('(max-width: 900px)');
     function measure() {
       const parent = contentRef.current?.parentElement;
+      // 2026-09-21 桌機：文字已移到縮放外（見 sui-sui.css），縮放裡只剩圖，
+      // 改成讓「圖的範圍」剛好撐滿 .page-container 的內容寬（桌機內容欄 1085）。
+      if (!mq.matches && parent) {
+        const cs = getComputedStyle(parent);
+        const padL = parseFloat(cs.paddingLeft);
+        const innerW = parent.clientWidth - padL - parseFloat(cs.paddingRight);
+        const s = innerW / (MOBILE_RIGHT - MOBILE_LEFT);
+        setScale(s);
+        setOffset({ x: MOBILE_LEFT * s, y: MOBILE_TOP * s });
+        return;
+      }
       if (mq.matches && parent) {
         // 第二版（Maida 指示）：貼齊螢幕左右邊、不留空隙——用整個視窗寬，
         // 再往左多移 .page-container 的左內距，抵銷導覽列那段留白。
