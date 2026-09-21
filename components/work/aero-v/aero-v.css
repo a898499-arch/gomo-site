@@ -163,7 +163,7 @@
    與上一項的 11px 間距由 .av-overview-head 的 flex gap 提供。 */
 .av-overview-subtitle {
   margin: 0;
-  font-size: clamp(18px, 1.6667vw, 24px);
+  font-size: var(--fs-lead);
   font-weight: 400;
   font-style: italic;
   line-height: 1.45;
@@ -177,7 +177,7 @@
    與上一項的 11px 間距由 .av-overview-head 的 flex gap 提供。 */
 .av-overview-body {
   margin: 0;
-  font-size: clamp(15px, 1.25vw, 18px);
+  font-size: var(--fs-body);
   font-weight: 400;
   line-height: 1.5;
   letter-spacing: -0.09px;
@@ -242,7 +242,7 @@
    24 高，值列就會整排上移 4.1px（實測過）。 */
 .av-overview-meta-label {
   display: block;
-  font-size: 16px;
+  font-size: var(--fs-caption);
   font-weight: 400;
   line-height: 28.4px;
   letter-spacing: -0.08px;
@@ -253,7 +253,7 @@
    間距：標籤底 y=417 → 值頂 y=444，相距 27px。<dd> 預設有左邊界，清掉。 */
 .av-overview-meta-value {
   margin: 27px 0 0;
-  font-size: clamp(17px, 1.3889vw, 20px);
+  font-size: var(--fs-body);
   font-weight: 600;
   line-height: 28.4px;
   color: #353535;
@@ -583,17 +583,18 @@
     max-width: 520px;
     margin-inline: auto;
   }
-  .av-bg-eyebrow { font-size: 16px; }
-  .av-bg-title { font-size: clamp(22px, 3.6vw, 30px); white-space: normal; text-align: center; }
-  .av-bg-body { font-size: clamp(14px, 2vw, 17px); }
+  .av-bg-eyebrow { font-size: var(--fs-eyebrow); }
+  .av-bg-title { font-size: var(--fs-h2); white-space: normal; text-align: center; }
+  .av-bg-body { font-size: var(--fs-body); }
   .av-bg-stat { padding: 18px 20px; gap: 14px; border-radius: 10px;
                 -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
   .av-bg-stat-num { font-size: clamp(30px, 5.4vw, 44px); line-height: 1; }
-  .av-bg-stat-label { width: auto; height: auto; font-size: clamp(13px, 2.2vw, 17px); }
+  /* 2026-09-21：原本 flex-shrink:0 沒解除，標籤不換行、跑出卡片右緣 */
+  .av-bg-stat-label { width: auto; height: auto; flex-shrink: 1; min-width: 0; font-size: var(--fs-body); }
 
   /* SOLUTION：兩排維持圖片比例，但文字改用可讀的固定級距 */
-  .av-sol-eyebrow { font-size: 14px; }
-  .av-sol-lede { font-size: clamp(11px, 2vw, 16px); }
+  .av-sol-eyebrow { font-size: var(--fs-eyebrow); }
+  .av-sol-lede { font-size: clamp(12px, 2vw, 16px); }
   .av-sol-goal-line { font-size: clamp(13px, 2.4vw, 20px); }
 }
 
@@ -763,8 +764,12 @@
     width: 100%;
     grid-column: 1 / -1;
   }
+  /* 2026-09-21：原本是 static，蓋掉 .av-cycler 的 relative，
+     輪播兩層圖（absolute）改以整個框定位，三格照片疊成一張蓋住整區 */
   .av-sketch-cell {
-    position: static;
+    position: relative;
+    left: auto;
+    top: auto;
     width: 100%;
     height: auto;
   }
@@ -783,8 +788,8 @@
     width: 100%;
     grid-column: 1 / -1;
   }
-  .av-sketch-title { font-size: clamp(17px, 2.6vw, 20px); }
-  .av-sketch-body { font-size: clamp(15px, 2.2vw, 18px); }
+  .av-sketch-title { font-size: var(--fs-h3); }
+  .av-sketch-body { font-size: var(--fs-body); }
   .av-senorio { width: 100%; }
 }
 
@@ -1046,7 +1051,7 @@
   }
   .av-feat-eyebrow {
     position: static;
-    font-size: 16px;
+    font-size: var(--fs-eyebrow);
     margin-bottom: 20px;
   }
   .av-feat-cards {
@@ -1059,8 +1064,8 @@
     border-radius: 14px;
     aspect-ratio: 333 / 639;
   }
-  .av-feat-title { font-size: clamp(17px, 2.6vw, 22px); }
-  .av-feat-body  { font-size: clamp(12px, 1.9vw, 16px); white-space: normal; }
+  .av-feat-title { font-size: var(--fs-h3); }
+  .av-feat-body  { font-size: var(--fs-body); white-space: normal; }
 
   .av-dim-frame {
     width: 100%;
@@ -1089,14 +1094,14 @@
   }
   .av-dim-title {
     position: static;
-    font-size: clamp(18px, 2.6vw, 22px);
+    font-size: var(--fs-h3);
     margin-top: 12px;
   }
   .av-dim-body {
     position: static;
     width: 100%;
     max-width: 60ch;
-    font-size: clamp(14px, 2vw, 18px);
+    font-size: var(--fs-body);
   }
 }
 
@@ -1464,8 +1469,8 @@
     grid-column: 2;
     width: auto;
   }
-  .av-air-title { font-size: clamp(17px, 2.4vw, 20px); }
-  .av-air-body { font-size: clamp(14px, 2vw, 18px); }
+  .av-air-title { font-size: var(--fs-h3); }
+  .av-air-body { font-size: var(--fs-body); }
 }
 
 /* ============ WORK FOOTAGE（node 796:738，1160×206）============
@@ -1494,4 +1499,24 @@
   width: min(314px, 58%);
   height: auto;
   margin-inline: auto;
+}
+
+/* ====================================================================
+   2026-09-21 桌機內容欄統一（Maida 指示，同 goodmood.css 同名段落）：
+   900px 以上左右留白 clamp(20px, 12.326vw, 177.5px)、內容欄 1085px，
+   跟 eHMS 一樣。先「全部收窄」，再由 Maida 逐一挑選要恢復滿版的。
+   Hero 不動（本來就是滿版，封頂 --site-max）。
+   這頁各區都是 Figma 構圖 + cqw 等比縮放，所以框變窄時文字也會跟著
+   等比變小（1360 → 1085，約 0.8 倍），版面不會跑掉。
+   ==================================================================== */
+@media (min-width: 901px) {
+  .av-case {
+    --av-gutter: clamp(20px, 12.326vw, 177.5px);
+  }
+  .av-case .page-container,
+  .av-overview-inner {
+    max-width: calc(1085px + var(--av-gutter) * 2);
+    padding-inline: var(--av-gutter);
+  }
+  .av-overview-meta { width: 100%; max-width: 928px; }
 }
