@@ -109,4 +109,4 @@ Figma 只有 1440 桌機稿，沒有手機稿。桌機版照上面「設計還�
 - 作品頁桌機版（900px 以上）的左右留白與欄寬統一跟 eHMS 一樣：1440 時左右各 177.5px、內容欄 1085px，窄視窗等比收縮（`clamp(20px, 12.326vw, 177.5px)`）。這條**優先於**各頁從 Figma 抄來的欄寬（1160 / 1283 / 1344 / 1360…）。
 - 文字、卡片、面板、圖片一律先收進這一欄；原本滿版出血的圖，由 Maida 逐一挑選要不要恢復滿版，不要自行決定。
 - 900px 以下維持導覽列同寬的 `--page-gutter`。
-- 目前已套用：eHMS（原本就是）、Goodmood、Sui-Sui（手機畫面輪播維持滿版，Maida 指定）、WanderBuddy（Hero、操作動畫 FlowAnimation、Sign Up Flow 維持滿版，Maida 指定）。
+- 目前已套用：eHMS（原本就是）、Goodmood、Sui-Sui（手機畫面輪播維持滿版，Maida 指定）、WanderBuddy（Hero、操作動畫 FlowAnimation、Sign Up Flow、角色漂移、8 Activity／8 Characters 參考圖、四支手機主圖維持滿版，Maida 指定）。

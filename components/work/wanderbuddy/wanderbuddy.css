@@ -802,22 +802,7 @@
   }
   .wb-overview-meta { width: 100%; max-width: 928px; }
 
-  /* 滿版 → 收窄（候選恢復：兩排角色漂移） */
-  .wb-characters-row {
-    width: calc(100% - var(--wb-gutter) * 2);
-    max-width: 1085px;
-    margin-inline: auto;
-  }
-  /* 滿版 → 收窄（候選恢復：8 Activity／8 Characters 參考圖） */
-  .wb-charref-frame {
-    width: calc(100% - var(--wb-gutter) * 2);
-    max-width: 1085px;
-  }
-  /* 滿版 → 收窄（候選恢復：四支手機主圖） */
-  .wb-shot {
-    width: calc(100% - var(--wb-gutter) * 2);
-    max-width: 1085px;
-  }
+  /* 角色漂移、8 Activity／8 Characters 參考圖、四支手機主圖：維持滿版（Maida 指定） */
   /* 滿版 → 收窄（候選恢復：兩張 mockup）。原本一左一右往外出血，收進欄內
      後改成兩張同寬、撐滿欄寬（同手機版）。 */
   .wb-mockup-bleed {
