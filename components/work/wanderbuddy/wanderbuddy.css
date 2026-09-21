@@ -779,6 +779,55 @@
   .wb-ba-flow { max-width: 100%; }
 }
 
+/* ====================================================================
+   2026-09-21 桌機內容欄統一（Maida 指示，同 goodmood.css／sui-sui.css
+   同名段落）：900px 以上左右留白 clamp(20px, 12.326vw, 177.5px)、內容欄
+   1085px，跟 eHMS 一樣。
+   ⚠️ Maida 指定「不要縮」、這裡完全不碰：Hero、操作動畫（FlowAnimation）、
+   Sign Up Flow（.wb-signup-diagram）。
+   其他原本滿版的（兩排角色漂移、8 Activity／8 Characters 參考圖、四支
+   手機主圖、兩張 mockup）先收進欄內，再由 Maida 逐一挑選要恢復的——
+   恢復時刪掉下面對應的那幾行即可。
+   ==================================================================== */
+@media (min-width: 901px) {
+  .wb-case {
+    --wb-gutter: clamp(20px, 12.326vw, 177.5px);
+  }
+  .wb-section-inner,
+  .wb-overview-inner,
+  .wb-overview-inner--meta,
+  .wb-case .page-container {
+    max-width: calc(1085px + var(--wb-gutter) * 2);
+    padding-inline: var(--wb-gutter);
+  }
+  .wb-overview-meta { width: 100%; max-width: 928px; }
+
+  /* 滿版 → 收窄（候選恢復：兩排角色漂移） */
+  .wb-characters-row {
+    width: calc(100% - var(--wb-gutter) * 2);
+    max-width: 1085px;
+    margin-inline: auto;
+  }
+  /* 滿版 → 收窄（候選恢復：8 Activity／8 Characters 參考圖） */
+  .wb-charref-frame {
+    width: calc(100% - var(--wb-gutter) * 2);
+    max-width: 1085px;
+  }
+  /* 滿版 → 收窄（候選恢復：四支手機主圖） */
+  .wb-shot {
+    width: calc(100% - var(--wb-gutter) * 2);
+    max-width: 1085px;
+  }
+  /* 滿版 → 收窄（候選恢復：兩張 mockup）。原本一左一右往外出血，收進欄內
+     後改成兩張同寬、撐滿欄寬（同手機版）。 */
+  .wb-mockup-bleed {
+    width: calc(100% - var(--wb-gutter) * 2);
+    max-width: 1085px;
+    aspect-ratio: 1220 / 812 !important;
+  }
+  .wb-mockup-bleed-img { left: 0 !important; width: 100% !important; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .wb-case * { animation: none !important; }
 }
