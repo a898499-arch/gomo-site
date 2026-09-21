@@ -1383,3 +1383,36 @@
   width: 100%;
   max-width: 1128px;
 }
+
+/* ====================================================================
+   2026-09-21 桌機版內容欄統一（Maida 指示）：全站作品頁的左右留白與欄寬
+   改成跟 eHMS 一樣——1440 時左右各留 177.5px、內容欄 1085px，窄視窗
+   等比收縮（同 ehms.css 的 --eh-gutter）。文字、卡片、灰色面板、圖片、
+   滑軌、拼貼全部收進同一欄（Maida 選「全部收窄」）。
+   ⚠️ 這取代了 GoodmoodPage.jsx 檔頭「各區寬度刻意不一致
+   （1160 / 1283 / 1366 / 1344 / 1234 / 1347 / 1048）」的舊決定。
+   各區裡原本的 max-width（1128、1283、1224…）都比 1085 寬，會被欄寬
+   自然壓住，不必逐一改；1048 的 What This Changed 與 928 的 meta 列
+   本來就比較窄，維持原樣。
+   900px 以下（手機、平板）不套用，維持導覽列同寬的 --page-gutter。
+   ==================================================================== */
+@media (min-width: 901px) {
+  .gm-case {
+    --gm-gutter: clamp(20px, 12.326vw, 177.5px);
+  }
+  .gm-opening-inner,
+  .gm-overview-inner,
+  .gm-section-inner,
+  .gm-closing-inner {
+    max-width: calc(1085px + var(--gm-gutter) * 2);
+    padding-inline: var(--gm-gutter);
+  }
+  .gm-band,
+  .gm-assets01-inner,
+  .gm-assets02-inner,
+  .gm-fellshort-inner,
+  .gm-changed-inner {
+    width: calc(100% - var(--gm-gutter) * 2);
+    max-width: 1085px;
+  }
+}
