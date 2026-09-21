@@ -828,6 +828,27 @@
   .wb-mockup-bleed-img { left: 0 !important; width: 100% !important; }
 }
 
+/* 2026-09-21 Before & After 散落標籤（Maida 回報桌機版跑出卡片）：
+   桌機內容欄收窄後卡片變窄，原本寫死的 px 座標與固定字級讓右側標籤超出卡片。
+   改成「整組照 Figma 等比縮放」：
+   - left 用 JSX 傳進來的 --x（佔 Figma .Body 寬 540 的百分比）；
+   - 標籤字級跟著 .Body 寬度縮放（cqw），上限為內文字級，內距、圓點用 em
+     跟著字一起縮——卡片多窄，整組就等比縮多少，版面永遠跟設計稿一致、
+     不換行、不跑出去。
+   - 卡片左右內距 40 → 28。
+   600px 以下（手機）維持原本的左右交錯直排，不受影響。 */
+@media (min-width: 601px) {
+  .wb-ba-card { padding-inline: 28px; min-width: 0; }
+  .wb-ba-body { container-type: inline-size; }
+  .wb-ba-body > .wb-ba-pill {
+    left: var(--x, 0);
+    font-size: min(var(--fs-body), 4.4cqw);
+    padding: 0.7em 1.3em 0.7em 1.1em;
+    gap: 0.5em;
+  }
+  .wb-ba-body > .wb-ba-pill .wb-ba-pill-dot { width: 0.5em; height: 0.5em; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .wb-case * { animation: none !important; }
 }

@@ -126,7 +126,9 @@ export default function BeforeAfter() {
                 className="wb-ba-pill"
                 key={step.label}
                 ref={(el) => { cardRefs.current[i] = el; }}
-                style={{ left: step.x, top: step.y }}
+                // 2026-09-21：x 改成佔 Figma .Body 寬 540 的百分比（--x），
+                // 桌機內容欄收窄後標籤跟著等比縮放、不會跑出卡片；見 CSS 的 .wb-ba-body > .wb-ba-pill。
+                style={{ '--x': `${((step.x / 540) * 100).toFixed(3)}%`, top: step.y }}
               >
                 <span className="wb-ba-pill-dot" style={{ background: step.color }} />
                 {step.label}

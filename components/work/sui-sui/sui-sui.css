@@ -1224,6 +1224,27 @@
   border-radius: 8px;
 }
 
+/* 2026-09-21 Before & After 散落標籤（Maida 回報桌機版跑出卡片）：
+   桌機內容欄收窄後卡片變窄，原本寫死的 px 座標與固定字級讓右側標籤超出卡片。
+   改成「整組照 Figma 等比縮放」：
+   - left 用 JSX 傳進來的 --x（佔 Figma .Body 寬 540 的百分比）；
+   - 標籤字級跟著 .Body 寬度縮放（cqw），上限為內文字級，內距、圓點用 em
+     跟著字一起縮——卡片多窄，整組就等比縮多少，版面永遠跟設計稿一致、
+     不換行、不跑出去。
+   - 卡片左右內距 40 → 28。
+   600px 以下（手機）維持原本的左右交錯直排，不受影響。 */
+@media (min-width: 601px) {
+  .ss-ba-card { padding-inline: 28px; min-width: 0; }
+  .ss-ba-body { container-type: inline-size; }
+  .ss-ba-body > .ss-ba-pill {
+    left: var(--x, 0);
+    font-size: min(var(--fs-body), 3.8cqw);
+    padding: 0.7em 1.3em 0.7em 1.1em;
+    gap: 0.5em;
+  }
+  .ss-ba-body > .ss-ba-pill .ss-ba-pill-dot { width: 0.5em; height: 0.5em; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   /* 進場直接顯示、marquee 停住、字體卡固定停在 DM Sans——三者都在
      Hero.jsx 裡用 matchMedia 分支處理（GSAP 設的是 inline style，
