@@ -588,7 +588,8 @@
   .av-bg-body { font-size: var(--fs-body); }
   .av-bg-stat { padding: 18px 20px; gap: 14px; border-radius: 10px;
                 -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
-  .av-bg-stat-num { font-size: clamp(30px, 5.4vw, 44px); line-height: 1; }
+  /* 2026-09-22 Maida：兩張卡的白字要左緣對齊 → 數字欄固定寬（87.3% 約 2.8em） */
+  .av-bg-stat-num { flex: none; width: 2.9em; font-size: clamp(30px, 5.4vw, 44px); line-height: 1; }
   /* 2026-09-21：原本 flex-shrink:0 沒解除，標籤不換行、跑出卡片右緣 */
   .av-bg-stat-label { width: auto; height: auto; flex-shrink: 1; min-width: 0; font-size: var(--fs-body); }
 
@@ -599,9 +600,29 @@
 }
 
 @media (max-width: 600px) {
-  /* SOLUTION 的文字在極窄時會蓋住彼此，兩段 lede 改為上下排 */
-  .av-sol-lede--left { left: 6%; width: 40%; }
-  .av-sol-lede--right { left: 52%; width: 42%; }
+  /* 2026-09-22 Maida：手機兩張圖要大一點（尤其 GOAL）。
+     上排原圖左半是清淨機、右半是吸塵器，直接裁中間會兩個都看不到，
+     所以拆成上下兩半：<img> 顯示左半，::after 用同一張圖顯示右半。
+     兩段 lede 各放在自己那一半的空白處。 */
+  .av-sol-row--top { aspect-ratio: 1357 / 1620; }
+  .av-sol-row--top .av-sol-photo { height: 50%; object-position: 0 50%; }
+  .av-sol-row--top::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 50%;
+    background: url(/work/aero-v/sol-top@2x.webp) 100% 50% / auto 100% no-repeat;
+  }
+  .av-sol-eyebrow { font-size: var(--fs-eyebrow); z-index: 1; }
+  .av-sol-eyebrow--solution { top: 4%; }
+  .av-sol-lede { font-size: 15px; line-height: 1.4; z-index: 1; }
+  .av-sol-lede--left { top: 18%; left: 50%; width: 44%; }
+  .av-sol-lede--right { top: 68%; left: 6%; width: 44%; }
+  .av-sol-row--goal { aspect-ratio: 350 / 300; }
+  .av-sol-eyebrow--goal { top: 12%; }
+  .av-sol-goal-line { top: 26%; width: 80%; font-size: var(--fs-h3); line-height: 1.35; }
 }
 
 /* ============ 照片輪播的疊圖層（PhotoCycler.jsx）============
@@ -1039,6 +1060,46 @@
   color: #353535;
 }
 
+/* ---------- 手機版編號結構圖（Dimensions.jsx 的 .av-dim-mobile）----------
+   桌機不顯示；≤900px 時取代渲染圖＋文字標籤。 */
+.av-dim-mobile { display: none; }
+.av-dim-mobile-diagram {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-family: inherit;
+}
+.av-dim-legend {
+  list-style: none;
+  counter-reset: dim;
+  margin: 24px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+  font-size: var(--fs-body);
+  line-height: 1.4;
+  color: #353535;
+}
+.av-dim-legend li {
+  counter-increment: dim;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.av-dim-legend li::before {
+  content: counter(dim);
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #353535;
+  color: #fcfbf8;
+  font-size: 10px;
+  font-weight: 600;
+  display: grid;
+  place-items: center;
+}
+
 /* ---------- RWD（Figma 只有 1440 一個 frame，以下是假設值）----------
    ≥901px：維持 Figma 的絕對版面等比縮放（1155 / 1440 / 1920 都走這條）。
    ≤900px：解除長寬比鎖定改流式 —— 理由同 SOLUTION，cqw 字級在窄視窗會把
@@ -1083,6 +1144,11 @@
   }
   /* 引線在堆疊版面沒有指向對象，隱藏 */
   .av-dim-leaders { display: none; }
+  /* 2026-09-22：手機改用 .av-dim-mobile（編號結構圖＋清單），
+     原本的渲染圖與十個文字標籤藏起來 */
+  .av-dim-render,
+  .av-dim-label { display: none; }
+  .av-dim-mobile { display: block; }
   .av-dim-label {
     position: static;
     right: auto;
@@ -1455,12 +1521,18 @@
     row-gap: 4px;
     align-items: start;
   }
+  /* 2026-09-22：原本 width:100% 讓細長的圖示（cyclonic 藍色箭頭 25×72）
+     放大成 56×161，比例跟其他圖示差很多。改成統一高度 48px、寬度自動，
+     太寬的（exhaust、intake）由 max-width 限制、object-fit 等比縮。 */
   .av-air-icon {
     position: static;
     grid-column: 1;
     grid-row: 1 / span 2;
-    width: 100%;
-    height: auto;
+    width: auto;
+    max-width: 100%;
+    height: 48px;
+    object-fit: contain;
+    justify-self: center;
     align-self: center;
   }
   .av-air-title,

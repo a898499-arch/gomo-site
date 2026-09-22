@@ -103,6 +103,51 @@ export default function Dimensions() {
             </span>
           ))}
 
+          {/* 手機版（≤900px）結構圖：2026-09-22 Maida 指示「拉線指各個機構標數字，
+              下面才解釋每個數字」。同一組 Figma 引線座標，標籤換成編號圓點，
+              說明改成下方的編號清單。桌機不顯示（見 .av-dim-mobile）。 */}
+          <div className="av-dim-mobile">
+            <svg
+              className="av-dim-mobile-diagram"
+              viewBox="360 0 696 691"
+              role="img"
+              aria-label="AERO V 座凳結構圖，編號 1 到 10 對應下方清單"
+            >
+              <image
+                href="/work/aero-v/stool-structure@2x.webp"
+                x="571"
+                y="0"
+                width="379"
+                height="681"
+              />
+              <g stroke="#5B5B5B" strokeWidth="1" vectorEffect="non-scaling-stroke" fill="none">
+                {LEADERS.map(([x1, y1, x2, y2, id]) => (
+                  <line key={id} x1={x1} y1={y1} x2={x2} y2={y2} vectorEffect="non-scaling-stroke" />
+                ))}
+                <path d="M780.17 128.18L810.72 156.18H1010.17" vectorEffect="non-scaling-stroke" />
+              </g>
+              {CALLOUTS.map((c, i) => (
+                <g key={c.key} transform={`translate(${c.x} ${c.y})`}>
+                  <circle r="16" fill="#353535" />
+                  <text
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                    fontSize="18"
+                    fontWeight="600"
+                    fill="#fcfbf8"
+                  >
+                    {i + 1}
+                  </text>
+                </g>
+              ))}
+            </svg>
+            <ol className="av-dim-legend">
+              {CALLOUTS.map((c) => (
+                <li key={c.key}>{c.text}</li>
+              ))}
+            </ol>
+          </div>
+
           {/* 796:935 — 22px Poppins Medium #353535，行高 40.4，x=0 y=540 */}
           <h2 className="av-dim-title">Dimensions</h2>
           {/* 796:936 — 18px Poppins Light #353535，行高 27.4，x=0 y=581 寬 494。
@@ -148,4 +193,20 @@ const LABELS_LEFT = [
   { key: 'fan', text: 'Aero-induction Fan' }, // 796:929 y=174，線 440
   { key: 'bracing', text: 'Flow-Stabilizing Bracing' }, // 796:931 y=284，線 406
   { key: 'base', text: 'Five-Star Base' }, // 796:932 y=386，線 411
+];
+
+// 手機版編號：由上到下排序。x/y 是引線「標籤那一端」再往外 20 個單位
+// （左側標籤在線的左端，右側在右端）。Height Adjustment Lever 是那條折線，
+// 端點 (1010, 156)。
+const CALLOUTS = [
+  { key: 'power-hub', text: 'Modular Power Hub', x: 1030, y: 105 },
+  { key: 'cushion', text: 'Seat Cushion', x: 379, y: 111 },
+  { key: 'lever', text: 'Height Adjustment Lever', x: 1030, y: 156 },
+  { key: 'fan', text: 'Aero-induction Fan', x: 420, y: 195 },
+  { key: 'column', text: 'Coaxial Structural Column', x: 1031, y: 267 },
+  { key: 'bracing', text: 'Flow-Stabilizing Bracing', x: 386, y: 305 },
+  { key: 'hepa', text: 'HEPA Purification Core', x: 1037, y: 341 },
+  { key: 'base', text: 'Five-Star Base', x: 391, y: 407 },
+  { key: 'canister', text: 'Hair Collection Canister', x: 1037, y: 448 },
+  { key: 'intake', text: 'Omni-Directional Intake', x: 1037, y: 634 },
 ];
